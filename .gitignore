@@ -1,0 +1,30 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Sessions are runtime output, not source
+sessions/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Node (Pi agents will eventually pull in node_modules)
+node_modules/
+
+# Build artifacts
+bin/
+dist/
