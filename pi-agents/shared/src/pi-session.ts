@@ -1,8 +1,8 @@
 // Pi SDK adapter placeholder. Implementation will create isolated decision sessions
 // while writing durable Pi session logs as observability artifacts.
 
-import type { ActionPayload, LegalActionOption } from "./protocol";
-import type { DecisionClient } from "./strategy";
+import type { ActionPayload, LegalActionOption } from "./protocol.js";
+import type { DecisionClient } from "./strategy.js";
 
 export interface PiDecisionClientOptions {
   cwd: string;

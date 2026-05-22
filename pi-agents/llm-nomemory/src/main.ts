@@ -1,4 +1,4 @@
-import { PiDecisionClient, runPokerAgent, type MemoryStrategy } from "../../shared/src";
+import { PiDecisionClient, runPokerAgent, type MemoryStrategy } from "@agent-poker/pi-agent-shared";
 
 const strategy: MemoryStrategy = {
   name: "llm-nomemory",

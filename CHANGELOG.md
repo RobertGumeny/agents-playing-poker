@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add a narrow npm workspace for pi-agents shared runtime and tests
 - test: add focused poker-demo orchestration coverage and promote the wrapper as the primary step-4 run path
 - feat: make poker-demo session guidance clearer and fix short-blind all-in demo instability
 - feat: add `poker-demo` as the supported one-command scripted demo wrapper around `poker-server`, with docs and integration coverage for the default random-vs-heuristic flow

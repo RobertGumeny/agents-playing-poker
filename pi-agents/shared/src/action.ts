@@ -1,6 +1,6 @@
 // Model response parsing and server-legal action validation.
 
-import type { ActionPayload, LegalActionOption } from "./protocol";
+import type { ActionPayload, LegalActionOption } from "./protocol.js";
 
 export function parseActionResponse(text: string): ActionPayload | undefined {
   const trimmed = text.trim();

@@ -1,6 +1,6 @@
 // Prompt construction shared across LLM poker agents.
 
-import type { DecisionContext, PromptAugmentation } from "./strategy";
+import type { DecisionContext, PromptAugmentation } from "./strategy.js";
 
 export function buildDecisionPrompt(context: DecisionContext, augmentation: PromptAugmentation): string {
   const hand = context.state.hand;

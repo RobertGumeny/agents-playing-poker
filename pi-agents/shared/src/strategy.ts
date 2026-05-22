@@ -1,8 +1,8 @@
 // Memory strategy seam. The outer runner stays shared; implementations decide
 // what, if any, prior-session information is exposed to the model.
 
-import type { ActionPayload, LegalActionOption } from "./protocol";
-import type { AgentState } from "./state";
+import type { ActionPayload, LegalActionOption } from "./protocol.js";
+import type { AgentState } from "./state.js";
 
 export interface DecisionContext {
   state: AgentState;

@@ -5,14 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@agent-poker/pi-agent-shared": "file:../shared",
     "@earendil-works/pi-coding-agent": "latest"
   },
   "devDependencies": {
-    "tsx": "latest",
-    "typescript": "latest",
-    "@types/node": "latest"
+    "tsx": "^4.20.6"
   }
 }
