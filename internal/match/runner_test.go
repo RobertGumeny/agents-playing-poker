@@ -119,6 +119,37 @@ func TestRunnerRunProducesDeterministicHandsJSONL(t *testing.T) {
 	}
 }
 
+func TestRunnerRunMarksIncompleteMatchAndPersistsCompletedHandsWhenAgentDies(t *testing.T) {
+	t.Parallel()
+
+	result, err := runTestMatch(t, "die-on-hand-2", "caller", 3, 50*time.Millisecond, 23)
+	if err == nil {
+		t.Fatal("Run() error = nil, want agent failure")
+	}
+	if result.Completed {
+		t.Fatalf("RunResult.Completed = true, want false")
+	}
+
+	manifestPath := filepath.Join(result.SessionDir, "manifest.json")
+	manifestData, readErr := os.ReadFile(manifestPath)
+	if readErr != nil {
+		t.Fatalf("ReadFile(manifest.json) error = %v", readErr)
+	}
+	var manifest sessionlog.Manifest
+	if unmarshalErr := json.Unmarshal(manifestData, &manifest); unmarshalErr != nil {
+		t.Fatalf("Unmarshal(manifest.json) error = %v", unmarshalErr)
+	}
+	if len(manifest.Matches) != 1 || manifest.Matches[0].Completed {
+		t.Fatalf("manifest.Matches = %+v, want one incomplete match", manifest.Matches)
+	}
+
+	handsPath := filepath.Join(result.SessionDir, "hands.jsonl")
+	lines := readLines(t, handsPath)
+	if len(lines) != 1 {
+		t.Fatalf("hands.jsonl line count = %d, want 1 completed hand before failure", len(lines))
+	}
+}
+
 func runTestMatch(t *testing.T, seat0Behavior string, seat1Behavior string, handCount int, deadline time.Duration, seed int64) (RunResult, error) {
 	t.Helper()
 
@@ -187,6 +218,10 @@ func TestHelperAgentProcess(t *testing.T) {
 			var payload wire.YourTurnPayload
 			if err := envelope.DecodePayload(&payload); err != nil {
 				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			if behavior == "die-on-hand-2" && payload.HandNumber == 2 {
+				fmt.Fprintln(os.Stderr, "helper agent exiting on hand 2")
 				os.Exit(1)
 			}
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeLog, fmt.Sprintf("helper-log-%d", responseID), "", wire.LogPayload{Level: "info", Message: "thinking"}))

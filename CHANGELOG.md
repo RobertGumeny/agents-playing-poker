@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- test: add integration coverage for deterministic session artifacts and incomplete matches
 - Verified EPIC-3 server orchestration is integrated with the rules engine and persists the required session bundle artifacts.
 - feat: add poker-server process lifecycle, stdio orchestration, and session artifact writing
 - feat: add `poker-server` match orchestration, child-process lifecycle management, and session artifact writing

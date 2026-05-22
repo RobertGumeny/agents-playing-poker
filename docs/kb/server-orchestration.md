@@ -75,6 +75,7 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 - full happy-path session execution against helper child processes
 - stderr capture into session logs
 - decision timeout conversion into persisted `auto_fold`
+- incomplete-match persistence when an agent exits during hand 2, including manifest `completed: false` and preservation of already-finished hands
 - byte-for-byte deterministic `hands.jsonl` output for repeated runs with the same seed and deterministic agents
 
 ## Current boundaries
