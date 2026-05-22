@@ -37,9 +37,29 @@ func run() error {
 		return err
 	}
 
+	binDir, err := os.MkdirTemp("", "poker-demo-*")
+	if err != nil {
+		return fmt.Errorf("create temp dir: %w", err)
+	}
+	defer os.RemoveAll(binDir)
+
+	serverBin := filepath.Join(binDir, binaryName("poker-server"))
+	randomBin := filepath.Join(binDir, binaryName("random-agent"))
+	heuristicBin := filepath.Join(binDir, binaryName("heuristic-agent"))
+	for _, target := range []struct {
+		pkg string
+		bin string
+	}{
+		{pkg: "./cmd/poker-server", bin: serverBin},
+		{pkg: "./cmd/random-agent", bin: randomBin},
+		{pkg: "./cmd/heuristic-agent", bin: heuristicBin},
+	} {
+		if err := buildDemoBinary(*goBinary, repoDir, target.pkg, target.bin); err != nil {
+			return err
+		}
+	}
+
 	args := []string{
-		"-C", repoDir,
-		"run", "./cmd/poker-server",
 		"-sessions-dir", *sessionsDir,
 		"-session-id", *sessionID,
 		"-match-id", *matchID,
@@ -50,20 +70,12 @@ func run() error {
 		"-big-blind", fmt.Sprintf("%d", *bigBlind),
 		"-decision-deadline", decisionDeadline.String(),
 		"-agent0-name", "random",
-		"-agent0-cmd", *goBinary,
-		"-agent0-arg", "-C",
-		"-agent0-arg", repoDir,
-		"-agent0-arg", "run",
-		"-agent0-arg", "./cmd/random-agent",
+		"-agent0-cmd", randomBin,
 		"-agent1-name", "heuristic",
-		"-agent1-cmd", *goBinary,
-		"-agent1-arg", "-C",
-		"-agent1-arg", repoDir,
-		"-agent1-arg", "run",
-		"-agent1-arg", "./cmd/heuristic-agent",
+		"-agent1-cmd", heuristicBin,
 	}
 
-	cmd := exec.Command(*goBinary, args...)
+	cmd := exec.Command(serverBin, args...)
 	cmd.Dir = repoDir
 
 	var stdout bytes.Buffer
@@ -80,8 +92,14 @@ func run() error {
 		sessionDir = filepath.Join(repoDir, sessionDir)
 	}
 
+	manifestPath := filepath.Join(sessionDir, "manifest.json")
+	handsPath := filepath.Join(sessionDir, "hands.jsonl")
+	agentsDir := filepath.Join(sessionDir, "agents")
+
 	fmt.Printf("demo=random-vs-heuristic session_dir=%s\n", sessionDir)
-	fmt.Printf("inspect: jq . %s\n", filepath.Join(sessionDir, "manifest.json"))
+	fmt.Printf("inspect_next: manifest=%s\n", manifestPath)
+	fmt.Printf("inspect_next: hands=%s\n", handsPath)
+	fmt.Printf("inspect_next: agent_logs=%s\n", agentsDir)
 	return nil
 }
 
@@ -95,4 +113,26 @@ func repoRoot() (string, error) {
 		return "", fmt.Errorf("runtime.Caller(0) failed")
 	}
 	return filepath.Clean(filepath.Join(filepath.Dir(filename), "..", "..")), nil
+}
+
+func buildDemoBinary(goBinary, repoDir, pkg, outputPath string) error {
+	cmd := exec.Command(goBinary, "build", "-o", outputPath, pkg)
+	cmd.Dir = repoDir
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build %s: %w\n%s%s", pkg, err, stdout.String(), stderr.String())
+	}
+	return nil
+}
+
+func binaryName(name string) string {
+	if runtime.GOOS == "windows" {
+		return name + ".exe"
+	}
+	return name
 }

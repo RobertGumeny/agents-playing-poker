@@ -119,6 +119,13 @@ func (m *MatchState) StartHand(handNumber int, deal deck.HoldemDeal) (*HandState
 	if err := h.postBlind(bigBlindSeat, m.Config.BigBlind); err != nil {
 		return nil, err
 	}
+	if h.noFurtherActionPossible() {
+		h.finishForShowdown()
+		return h, nil
+	}
+	if h.Players[h.ActingSeat].AllIn || !h.Players[h.ActingSeat].InHand {
+		h.ActingSeat = h.nextActor()
+	}
 
 	return h, nil
 }
@@ -372,7 +379,7 @@ func (h *HandState) noFurtherActionPossible() bool {
 		return false
 	}
 	seat := actingCandidates[0]
-	return h.ToCall(seat) == 0 && h.actedThisStreet[seat]
+	return h.ToCall(seat) == 0
 }
 
 func (h *HandState) bettingRoundClosed() bool {

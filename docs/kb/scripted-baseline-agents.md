@@ -24,7 +24,7 @@ It now provides:
 - two protocol-compliant long-lived Go agents that can complete full matches over stdio JSONL
 - one intentionally non-strategic baseline (`random`) and one simple deterministic scripted baseline (`heuristic`)
 - server-authoritative legality, where both agents trust `legal_actions` from the wire contract instead of recomputing betting legality
-- a documented top-level `go run ./cmd/poker-demo` flow for running a non-LLM `random` versus `heuristic` match and inspecting the resulting session bundle
+- a documented top-level `go run ./cmd/poker-demo` flow that builds the shipped Go binaries, runs a non-LLM `random` versus `heuristic` match, and prints the resulting session bundle plus the canonical artifacts to inspect next
 - retention of `poker-server` as the low-level primitive for explicit seat command wiring
 - CLI-level proof that timeout enforcement still produces `auto_fold` and does not hang the server process
 

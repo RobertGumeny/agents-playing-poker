@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: make poker-demo session guidance clearer and fix short-blind all-in demo instability
 - feat: add `poker-demo` as the supported one-command scripted demo wrapper around `poker-server`, with docs and integration coverage for the default random-vs-heuristic flow
 - Added CLI-level step-4 demo coverage for poker-server, including random-vs-heuristic session bundle verification and timeout auto-fold behavior, and documented how to run and inspect the non-LLM demo.
 - feat: add scripted heuristic Go agent baseline and support short blind all-in match completion

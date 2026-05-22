@@ -29,19 +29,29 @@ func TestPokerDemoRunsDefaultScriptedMatch(t *testing.T) {
 	if !strings.Contains(output, "demo=random-vs-heuristic") {
 		t.Fatalf("poker-demo output = %q, want demo banner", output)
 	}
-	if !strings.Contains(output, filepath.Join(sessionsDir, sessionID)) {
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	if !strings.Contains(output, sessionDir) {
 		t.Fatalf("poker-demo output = %q, want session dir", output)
 	}
+	if !strings.Contains(output, filepath.Join(sessionDir, "manifest.json")) {
+		t.Fatalf("poker-demo output = %q, want manifest path", output)
+	}
+	if !strings.Contains(output, filepath.Join(sessionDir, "hands.jsonl")) {
+		t.Fatalf("poker-demo output = %q, want hands path", output)
+	}
+	if !strings.Contains(output, filepath.Join(sessionDir, "agents")) {
+		t.Fatalf("poker-demo output = %q, want agent logs path", output)
+	}
 
-	manifest := readManifest(t, filepath.Join(sessionsDir, sessionID, "manifest.json"))
+	manifest := readManifest(t, filepath.Join(sessionDir, "manifest.json"))
 	if len(manifest.Matches) != 1 || !manifest.Matches[0].Completed {
 		t.Fatalf("manifest.Matches = %+v, want one completed match", manifest.Matches)
 	}
-	if got := len(readHands(t, filepath.Join(sessionsDir, sessionID, "hands.jsonl"))); got != 8 {
+	if got := len(readHands(t, filepath.Join(sessionDir, "hands.jsonl"))); got != 8 {
 		t.Fatalf("hands.jsonl line count = %d, want 8", got)
 	}
-	assertFileExists(t, filepath.Join(sessionsDir, sessionID, "agents", "random", "stdout.log"))
-	assertFileExists(t, filepath.Join(sessionsDir, sessionID, "agents", "heuristic", "stdout.log"))
+	assertFileExists(t, filepath.Join(sessionDir, "agents", "random", "stdout.log"))
+	assertFileExists(t, filepath.Join(sessionDir, "agents", "heuristic", "stdout.log"))
 }
 
 func buildBinary(t *testing.T, pkg string) string {

@@ -16,11 +16,13 @@ From the repo root, run the supported one-command scripted demo:
 go run ./cmd/poker-demo
 ```
 
-The wrapper launches the default `random` versus `heuristic` match through `poker-server` and prints the generated session bundle path, for example:
+The wrapper builds the shipped Go binaries, launches the default `random` versus `heuristic` match through `poker-server`, and prints the generated session bundle location plus the canonical artifacts to inspect next, for example:
 
 ```text
 demo=random-vs-heuristic session_dir=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z
-inspect: jq . /abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/manifest.json
+inspect_next: manifest=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/manifest.json
+inspect_next: hands=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/hands.jsonl
+inspect_next: agent_logs=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/agents
 ```
 
 Useful supported overrides:
