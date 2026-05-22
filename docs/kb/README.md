@@ -17,3 +17,6 @@ Do not duplicate the normative sources:
 - [`rules-engine-foundation.md`](rules-engine-foundation.md)
   - What EPIC-1 delivered in the Go rules engine.
   - Covers deck/dealer determinism, hand-state progression, showdown resolution, and current test coverage.
+- [`wire-protocol-contract.md`](wire-protocol-contract.md)
+  - What EPIC-2 delivered in the Go wire protocol contract.
+  - Covers typed message models, envelope validation, reply correlation, and protocol test coverage.
