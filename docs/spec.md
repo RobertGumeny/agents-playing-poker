@@ -32,14 +32,14 @@ v0 is single-machine, single-operator. Everything in this spec serves that compa
 - **Game server + match orchestrator** (Go): spawns agent processes, runs the message loop, writes session output
 - **Wire protocol**: JSON-lines over stdio — the contract between server and agents
 - **Go agents**: `random` and `heuristic` (scripted, no LLMs, no AKG)
-- **Pi agents**: `llm-nomemory`, `llm-fullhistory`, `llm-akg` (TypeScript, live inside Pi sessions)
+- **Pi agents**: `llm-stateless`, `llm-fullhistory`, `llm-akg` (TypeScript, backed by Pi SDK sessions)
 - **AKG-aware Pi compaction extension**: lives here for v0; hooks into Pi's `session_before_compact` to replace verbose hand observations with compact AKG references
 
 ## 4. Dependencies
 
 - **AKG Go SDK** — imported as a Go module from the `akg` repo; used by Go agents
 - **AKG TypeScript SDK** — consumed via npm; used by Pi agents. Location and packaging decided in the AKG repo.
-- **Pi harness** — Pi's RPC mode (stdin/stdout JSONL) drives the LLM agents; Pi session logs provide token-count metadata automatically
+- **Pi harness** — Pi's TypeScript SDK drives the LLM agents inside external agent processes; Pi session logs provide token-count metadata automatically
 - **AKG compaction extension** — likely its own Pi package; details TBD in the AKG repo. For v0 it lives here.
 
 ## 5. Game model
@@ -233,9 +233,14 @@ Free-form structured logging the agent wants captured server-side.
 
 ## 7. Agent lifecycle
 
-One Pi session per match per agent. The agent is spawned at match start, receives `session_init`, then drives through all N hands in a single long-lived process, and exits on `session_end`.
+One agent process per match per agent. The agent is spawned at match start, receives `session_init`, then drives through all N hands in a single long-lived process, and exits on `session_end`.
 
-Go agents (random, heuristic) follow the same lifecycle in a plain `for { read; respond }` loop.
+For Pi-backed strategies, the poker agent process may manage Pi SDK sessions internally according to the strategy definition:
+
+- **`llm-stateless`** creates a fresh Pi SDK session for each `your_turn` decision, uses a minimal Pi configuration so no prior project/session context leaks in by default, and disposes the session immediately after parsing the reply.
+- **`llm-fullhistory`** and **`llm-akg`** are expected to use a long-lived Pi session across the match so context management remains part of the strategy.
+
+Go agents (`random`, `heuristic`) follow the same outer process lifecycle in a plain `for { read; respond }` loop.
 
 ## 8. Strategy lineup
 
@@ -243,11 +248,11 @@ Go agents (random, heuristic) follow the same lifecycle in a plain `for { read; 
 |---|---|---|---|
 | `random` | Go | none | Sanity floor |
 | `heuristic` | Go | none | Scripted hand-strength + pot-odds baseline |
-| `llm-nomemory` | Pi/TS | none | LLM with only current hand state |
+| `llm-stateless` | Pi/TS | none; fresh Pi session per decision | LLM with only current decision state |
 | `llm-fullhistory` | Pi/TS | full hand history in context | Naive "stuff it in the prompt" comparison |
 | `llm-akg` | Pi/TS | AKG-backed structured memory + compaction | **The thesis** |
 
-All three LLM strategies use the same model, same temperature, same base system prompt. The only differences are what's in the context window and what tools the agent has.
+All three LLM strategies use the same model, same temperature, and the same base system prompt. The only differences are what prior information is exposed to the model, how Pi session state is managed, and what tools the agent has.
 
 ## 9. AKG-aware Pi compaction extension
 
@@ -329,12 +334,12 @@ Pi's native session log: messages, thinking, tool calls, tool results, compactio
 
 Round-robin tournament; each pairing plays K=3 matches with different seeds, N=200 hands each (600 hands per pairing).
 
-| | random | heuristic | llm-nomem | llm-fullhist | llm-akg |
+| | random | heuristic | llm-stateless | llm-fullhistory | llm-akg |
 |---|---|---|---|---|---|
 | **random** | — | • | • | • | • |
 | **heuristic** | • | — | • | • | • |
-| **llm-nomem** | • | • | — | • | • |
-| **llm-fullhist** | • | • | • | — | • |
+| **llm-stateless** | • | • | — | • | • |
+| **llm-fullhistory** | • | • | • | — | • |
 | **llm-akg** | • | • | • | • | — |
 
 Metric per pairing: mean chips-per-hand delta with 95% CI. Headline number: `llm-akg` vs `llm-fullhistory` chip delta and context-tokens-used comparison.
@@ -351,8 +356,8 @@ Matches run **sequentially** for v0.
 4. **`random` + `heuristic` agents**: proves wire protocol end-to-end. At this point you have a working "agents play poker" demo with no LLMs, no AKG.
 5. **Go AKG SDK**: thin helper surface in the `akg` repo, consumed by Go agents.
 6. **TS AKG SDK + conformance corpus**: the big one — also the AKG spec-hardening pass.
-7. **`llm-nomemory` Pi agent**: simplest LLM player; validates Pi + wire protocol.
-8. **`llm-fullhistory` Pi agent**: naive history-in-context strategy.
+7. **`llm-stateless` Pi agent**: simplest LLM player; one fresh Pi SDK session per decision; validates Pi + wire protocol.
+8. **`llm-fullhistory` Pi agent**: naive history-in-context strategy using a long-lived Pi session across the match.
 9. **AKG Pi compaction extension**.
 10. **`llm-akg` Pi agent**: the thesis, end-to-end.
 11. **First round-robin tournament + chart**.
