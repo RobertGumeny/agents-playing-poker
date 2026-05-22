@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add heads-up betting-round progression, legal-action generation, blind rotation, and pot accounting
 
 ### Changed
+- docs: add concise implementer contract for the stdio JSONL wire protocol
 
 ### Fixed
 
