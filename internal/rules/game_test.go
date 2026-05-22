@@ -1,152 +1,412 @@
 package rules
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/RobertGumeny/agent-poker/internal/deck"
 )
 
-func TestStartHandPostsBlindsAndRotatesDealer(t *testing.T) {
+func TestBlindRotationAndRebuy(t *testing.T) {
 	match := mustHeadsUpMatch(t, 100, 1, 2)
 
-	hand1 := mustStartHand(t, match, 1)
-	if hand1.DealerSeat != 0 || hand1.SmallBlindSeat != 0 || hand1.BigBlindSeat != 1 {
-		t.Fatalf("hand 1 blinds/dealer = dealer %d sb %d bb %d, want 0/0/1", hand1.DealerSeat, hand1.SmallBlindSeat, hand1.BigBlindSeat)
-	}
-	if hand1.ActingSeat != 0 {
-		t.Fatalf("hand 1 acting seat = %d, want 0", hand1.ActingSeat)
-	}
-	if hand1.Players[0].Stack != 99 || hand1.Players[1].Stack != 98 {
-		t.Fatalf("hand 1 stacks after blinds = [%d %d], want [99 98]", hand1.Players[0].Stack, hand1.Players[1].Stack)
+	testCases := []struct {
+		name              string
+		handNumber        int
+		preHandStacks     map[int]int
+		wantDealerSeat    int
+		wantSmallBlind    int
+		wantBigBlind      int
+		wantActingSeat    int
+		wantStartingStack [2]int
+		wantStacks        [2]int
+	}{
+		{
+			name:              "hand one posts blinds with seat zero on button",
+			handNumber:        1,
+			wantDealerSeat:    0,
+			wantSmallBlind:    0,
+			wantBigBlind:      1,
+			wantActingSeat:    0,
+			wantStartingStack: [2]int{100, 100},
+			wantStacks:        [2]int{99, 98},
+		},
+		{
+			name:              "busted player auto-rebuys on next hand and blinds rotate",
+			handNumber:        2,
+			preHandStacks:     map[int]int{0: 0},
+			wantDealerSeat:    1,
+			wantSmallBlind:    1,
+			wantBigBlind:      0,
+			wantActingSeat:    1,
+			wantStartingStack: [2]int{100, 100},
+			wantStacks:        [2]int{98, 99},
+		},
 	}
 
-	match.Players[0].Stack = 0
-	hand2 := mustStartHand(t, match, 2)
-	if hand2.DealerSeat != 1 || hand2.SmallBlindSeat != 1 || hand2.BigBlindSeat != 0 {
-		t.Fatalf("hand 2 blinds/dealer = dealer %d sb %d bb %d, want 1/1/0", hand2.DealerSeat, hand2.SmallBlindSeat, hand2.BigBlindSeat)
-	}
-	if hand2.Players[0].StartingStack != 100 {
-		t.Fatalf("rebuy stack = %d, want 100", hand2.Players[0].StartingStack)
-	}
-	if hand2.Players[0].Stack != 98 || hand2.Players[1].Stack != 99 {
-		t.Fatalf("hand 2 stacks after blinds = [%d %d], want [98 99]", hand2.Players[0].Stack, hand2.Players[1].Stack)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			for seat, stack := range tc.preHandStacks {
+				match.Players[seat].Stack = stack
+			}
+
+			hand := mustStartHand(t, match, tc.handNumber)
+			if hand.DealerSeat != tc.wantDealerSeat || hand.SmallBlindSeat != tc.wantSmallBlind || hand.BigBlindSeat != tc.wantBigBlind {
+				t.Fatalf("dealer/sb/bb = %d/%d/%d, want %d/%d/%d", hand.DealerSeat, hand.SmallBlindSeat, hand.BigBlindSeat, tc.wantDealerSeat, tc.wantSmallBlind, tc.wantBigBlind)
+			}
+			if hand.ActingSeat != tc.wantActingSeat {
+				t.Fatalf("acting seat = %d, want %d", hand.ActingSeat, tc.wantActingSeat)
+			}
+
+			gotStarting := [2]int{hand.Players[0].StartingStack, hand.Players[1].StartingStack}
+			if gotStarting != tc.wantStartingStack {
+				t.Fatalf("starting stacks = %v, want %v", gotStarting, tc.wantStartingStack)
+			}
+			gotStacks := [2]int{hand.Players[0].Stack, hand.Players[1].Stack}
+			if gotStacks != tc.wantStacks {
+				t.Fatalf("stacks after blinds = %v, want %v", gotStacks, tc.wantStacks)
+			}
+		})
 	}
 }
 
-func TestLegalActionsPreflopAndAfterCall(t *testing.T) {
-	match := mustHeadsUpMatch(t, 100, 1, 2)
-	hand := mustStartHand(t, match, 1)
-
-	assertLegalActions(t, hand.LegalActions(), []LegalAction{
-		{Type: ActionFold},
-		{Type: ActionCall, Amount: 1},
-		{Type: ActionRaise, Amount: 100, MinAmount: 4, MaxAmount: 100},
-	})
-
-	if err := hand.ApplyAction(Action{Seat: 0, Type: ActionCall, Amount: 1}); err != nil {
-		t.Fatalf("ApplyAction(call) error = %v", err)
+func TestLegalActions(t *testing.T) {
+	testCases := []struct {
+		name       string
+		setup      func(t *testing.T) *HandState
+		wantLegal  []LegalAction
+		wantToCall int
+	}{
+		{
+			name: "small blind opens preflop facing big blind",
+			setup: func(t *testing.T) *HandState {
+				return mustStartHand(t, mustHeadsUpMatch(t, 100, 1, 2), 1)
+			},
+			wantLegal: []LegalAction{
+				{Type: ActionFold},
+				{Type: ActionCall, Amount: 1},
+				{Type: ActionRaise, Amount: 100, MinAmount: 4, MaxAmount: 100},
+			},
+			wantToCall: 1,
+		},
+		{
+			name: "big blind may check or raise after small blind completes",
+			setup: func(t *testing.T) *HandState {
+				hand := mustStartHand(t, mustHeadsUpMatch(t, 100, 1, 2), 1)
+				mustApplyAction(t, hand, Action{Seat: 0, Type: ActionCall, Amount: 1})
+				return hand
+			},
+			wantLegal: []LegalAction{
+				{Type: ActionCheck},
+				{Type: ActionRaise, Amount: 100, MinAmount: 4, MaxAmount: 100},
+			},
+			wantToCall: 0,
+		},
+		{
+			name: "short all-in raise does not reopen betting",
+			setup: func(t *testing.T) *HandState {
+				hand := mustStartHand(t, mustHeadsUpMatch(t, 100, 1, 2), 1)
+				mustApplyAction(t, hand, Action{Seat: 0, Type: ActionCall, Amount: 1})
+				mustApplyAction(t, hand, Action{Seat: 1, Type: ActionCheck})
+				hand.Players[0].Stack = 3
+				mustApplyAction(t, hand, Action{Seat: 1, Type: ActionBet, Amount: 2})
+				mustApplyAction(t, hand, Action{Seat: 0, Type: ActionRaise, Amount: 3})
+				return hand
+			},
+			wantLegal: []LegalAction{
+				{Type: ActionFold},
+				{Type: ActionCall, Amount: 1},
+			},
+			wantToCall: 1,
+		},
 	}
 
-	if hand.ActingSeat != 1 {
-		t.Fatalf("acting seat after sb call = %d, want 1", hand.ActingSeat)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hand := tc.setup(t)
+			if got := hand.ToCall(hand.ActingSeat); got != tc.wantToCall {
+				t.Fatalf("ToCall(%d) = %d, want %d", hand.ActingSeat, got, tc.wantToCall)
+			}
+			assertLegalActions(t, hand.LegalActions(), tc.wantLegal)
+		})
 	}
-	assertLegalActions(t, hand.LegalActions(), []LegalAction{
-		{Type: ActionCheck},
-		{Type: ActionRaise, Amount: 100, MinAmount: 4, MaxAmount: 100},
-	})
 }
 
-func TestBettingRoundsAdvanceFromPreflopToShowdown(t *testing.T) {
-	match := mustHeadsUpMatch(t, 100, 1, 2)
-	hand := mustStartHand(t, match, 1)
+func TestBettingProgressionAndPotAccounting(t *testing.T) {
+	testCases := []struct {
+		name              string
+		deal              *deck.HoldemDeal
+		actions           []Action
+		wantStreet        Street
+		wantBoardCount    int
+		wantComplete      bool
+		wantShowdown      bool
+		wantPot           int
+		wantStacks        [2]int
+		wantDeltas        [2]int
+		wantMatchStacks   [2]int
+		wantWinningSeats  []int
+		wantShowdownHands int
+		resolveShowdown   bool
+	}{
+		{
+			name: "check down reaches showdown with full board exposed",
+			deal: ptrDeal(mustDeal(t,
+				[][]string{{"Ac", "Kd"}, {"Qh", "Js"}},
+				[]string{"As", "Ks", "Qs", "Js", "Ts"},
+			)),
+			actions: []Action{
+				{Seat: 0, Type: ActionCall, Amount: 1},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+			},
+			wantStreet:        StreetShowdown,
+			wantBoardCount:    5,
+			wantComplete:      true,
+			wantShowdown:      true,
+			wantPot:           4,
+			wantStacks:        [2]int{100, 100},
+			wantDeltas:        [2]int{0, 0},
+			wantMatchStacks:   [2]int{100, 100},
+			wantWinningSeats:  []int{0, 1},
+			wantShowdownHands: 2,
+			resolveShowdown:   true,
+		},
+		{
+			name: "fold returns uncalled chips and awards only contested pot",
+			actions: []Action{
+				{Seat: 0, Type: ActionRaise, Amount: 6},
+				{Seat: 1, Type: ActionFold},
+			},
+			wantStreet:        StreetPreflop,
+			wantBoardCount:    0,
+			wantComplete:      true,
+			wantShowdown:      false,
+			wantPot:           4,
+			wantStacks:        [2]int{102, 98},
+			wantDeltas:        [2]int{2, -2},
+			wantMatchStacks:   [2]int{102, 98},
+			wantWinningSeats:  []int{0},
+			wantShowdownHands: 0,
+		},
+	}
 
-	actions := []Action{
-		{Seat: 0, Type: ActionCall, Amount: 1},
-		{Seat: 1, Type: ActionCheck},
-		{Seat: 1, Type: ActionCheck},
-		{Seat: 0, Type: ActionCheck},
-		{Seat: 1, Type: ActionCheck},
-		{Seat: 0, Type: ActionCheck},
-		{Seat: 1, Type: ActionCheck},
-		{Seat: 0, Type: ActionCheck},
-	}
-	for _, action := range actions {
-		if err := hand.ApplyAction(action); err != nil {
-			t.Fatalf("ApplyAction(%+v) error = %v", action, err)
-		}
-	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			match := mustHeadsUpMatch(t, 100, 1, 2)
+			var hand *HandState
+			if tc.deal != nil {
+				var err error
+				hand, err = match.StartHand(1, *tc.deal)
+				if err != nil {
+					t.Fatalf("StartHand() error = %v", err)
+				}
+			} else {
+				hand = mustStartHand(t, match, 1)
+			}
+			for _, action := range tc.actions {
+				mustApplyAction(t, hand, action)
+			}
 
-	if !hand.Complete {
-		t.Fatalf("hand should be complete after river check/check")
-	}
-	if !hand.ShowdownPending {
-		t.Fatalf("hand should require showdown after river check/check")
-	}
-	if hand.Street != StreetShowdown {
-		t.Fatalf("street = %v, want showdown", hand.Street)
-	}
-	if len(hand.Board) != 5 {
-		t.Fatalf("board card count = %d, want 5", len(hand.Board))
+			if hand.Street != tc.wantStreet {
+				t.Fatalf("street = %v, want %v", hand.Street, tc.wantStreet)
+			}
+			if len(hand.Board) != tc.wantBoardCount {
+				t.Fatalf("board count = %d, want %d", len(hand.Board), tc.wantBoardCount)
+			}
+			if hand.Complete != tc.wantComplete {
+				t.Fatalf("complete = %v, want %v", hand.Complete, tc.wantComplete)
+			}
+			if hand.ShowdownPending != tc.wantShowdown {
+				t.Fatalf("showdown pending = %v, want %v", hand.ShowdownPending, tc.wantShowdown)
+			}
+
+			if tc.resolveShowdown {
+				if err := hand.ResolveShowdown(); err != nil {
+					t.Fatalf("ResolveShowdown() error = %v", err)
+				}
+			}
+
+			if hand.Result == nil {
+				t.Fatalf("hand result should be populated")
+			}
+			if hand.Result.Pot != tc.wantPot {
+				t.Fatalf("pot = %d, want %d", hand.Result.Pot, tc.wantPot)
+			}
+			gotStacks := [2]int{hand.Players[0].Stack, hand.Players[1].Stack}
+			if gotStacks != tc.wantStacks {
+				t.Fatalf("stacks = %v, want %v", gotStacks, tc.wantStacks)
+			}
+			gotDeltas := [2]int{hand.Result.Deltas[0].Delta, hand.Result.Deltas[1].Delta}
+			if gotDeltas != tc.wantDeltas {
+				t.Fatalf("deltas = %v, want %v", gotDeltas, tc.wantDeltas)
+			}
+			if !slices.Equal(hand.Result.WinningSeats, tc.wantWinningSeats) {
+				t.Fatalf("winning seats = %v, want %v", hand.Result.WinningSeats, tc.wantWinningSeats)
+			}
+			if len(hand.Result.ShowdownHands) != tc.wantShowdownHands {
+				t.Fatalf("showdown hands = %d, want %d", len(hand.Result.ShowdownHands), tc.wantShowdownHands)
+			}
+
+			if err := match.FinalizeHand(hand); err != nil {
+				t.Fatalf("FinalizeHand() error = %v", err)
+			}
+			gotMatchStacks := [2]int{match.Players[0].Stack, match.Players[1].Stack}
+			if gotMatchStacks != tc.wantMatchStacks {
+				t.Fatalf("match stacks = %v, want %v", gotMatchStacks, tc.wantMatchStacks)
+			}
+		})
 	}
 }
 
-func TestShortAllInRaiseDoesNotReopenAction(t *testing.T) {
-	match := mustHeadsUpMatch(t, 100, 1, 2)
-	hand := mustStartHand(t, match, 1)
+func TestEvaluateBestHand(t *testing.T) {
+	testCases := []struct {
+		name         string
+		holeCards    [2]string
+		board        []string
+		wantCategory int
+		wantRanks    []int
+	}{
+		{
+			name:         "ace low straight",
+			holeCards:    [2]string{"Ac", "2d"},
+			board:        []string{"3h", "4s", "5c", "Kd", "Qh"},
+			wantCategory: handCategoryStraight,
+			wantRanks:    []int{5},
+		},
+		{
+			name:         "flush chooses top five suited cards",
+			holeCards:    [2]string{"Ah", "2h"},
+			board:        []string{"Kh", "Th", "7h", "3h", "Qc"},
+			wantCategory: handCategoryFlush,
+			wantRanks:    []int{14, 13, 10, 7, 3},
+		},
+		{
+			name:         "full house prefers best trips then pair",
+			holeCards:    [2]string{"Ac", "Ad"},
+			board:        []string{"Ah", "Kc", "Kd", "2s", "3h"},
+			wantCategory: handCategoryFullHouse,
+			wantRanks:    []int{14, 13},
+		},
+		{
+			name:         "two pair keeps correct kicker",
+			holeCards:    [2]string{"Ac", "Qd"},
+			board:        []string{"Ah", "Qs", "9c", "4d", "2h"},
+			wantCategory: handCategoryTwoPair,
+			wantRanks:    []int{14, 12, 9},
+		},
+	}
 
-	if err := hand.ApplyAction(Action{Seat: 0, Type: ActionCall, Amount: 1}); err != nil {
-		t.Fatalf("ApplyAction(call) error = %v", err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hand := evaluateBestHand(mustCardPair(t, tc.holeCards), mustCards(t, tc.board))
+			if hand.category != tc.wantCategory {
+				t.Fatalf("category = %d, want %d", hand.category, tc.wantCategory)
+			}
+			if !slices.Equal(hand.ranks, tc.wantRanks) {
+				t.Fatalf("ranks = %v, want %v", hand.ranks, tc.wantRanks)
+			}
+		})
 	}
-	if err := hand.ApplyAction(Action{Seat: 1, Type: ActionCheck}); err != nil {
-		t.Fatalf("ApplyAction(check) error = %v", err)
-	}
-
-	hand.Players[0].Stack = 3
-	if err := hand.ApplyAction(Action{Seat: 1, Type: ActionBet, Amount: 2}); err != nil {
-		t.Fatalf("ApplyAction(bet) error = %v", err)
-	}
-	if err := hand.ApplyAction(Action{Seat: 0, Type: ActionRaise, Amount: 3}); err != nil {
-		t.Fatalf("ApplyAction(short raise) error = %v", err)
-	}
-
-	assertLegalActions(t, hand.LegalActions(), []LegalAction{
-		{Type: ActionFold},
-		{Type: ActionCall, Amount: 1},
-	})
 }
 
-func TestFoldReturnsUncalledChipsAndAwardsContestedPot(t *testing.T) {
-	match := mustHeadsUpMatch(t, 100, 1, 2)
-	hand := mustStartHand(t, match, 1)
+func TestResolveShowdown(t *testing.T) {
+	testCases := []struct {
+		name              string
+		preHandStacks     map[int]int
+		deal              deck.HoldemDeal
+		actions           []Action
+		wantWinningSeats  []int
+		wantOddChipSeat   int
+		wantStacks        [2]int
+		wantDeltas        [2]int
+		wantShowdownLabel []string
+	}{
+		{
+			name: "higher made hand wins entire pot",
+			deal: mustDeal(t,
+				[][]string{{"As", "Kd"}, {"9s", "9d"}},
+				[]string{"Td", "9h", "2c", "5s", "Kc"},
+			),
+			actions: []Action{
+				{Seat: 0, Type: ActionCall, Amount: 1},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+			},
+			wantWinningSeats:  []int{1},
+			wantOddChipSeat:   -1,
+			wantStacks:        [2]int{98, 102},
+			wantDeltas:        [2]int{-2, 2},
+			wantShowdownLabel: []string{"one pair", "three of a kind"},
+		},
+		{
+			name:          "tied board splits pot and odd chip goes to big blind",
+			preHandStacks: map[int]int{0: 2, 1: 5},
+			deal: mustDeal(t,
+				[][]string{{"Ac", "Kd"}, {"Qh", "Js"}},
+				[]string{"As", "Ks", "Qs", "Js", "Ts"},
+			),
+			actions: []Action{
+				{Seat: 0, Type: ActionCall, Amount: 1},
+				{Seat: 1, Type: ActionRaise, Amount: 5},
+			},
+			wantWinningSeats:  []int{0, 1},
+			wantOddChipSeat:   1,
+			wantStacks:        [2]int{3, 4},
+			wantDeltas:        [2]int{1, -1},
+			wantShowdownLabel: []string{"straight flush", "straight flush"},
+		},
+	}
 
-	if err := hand.ApplyAction(Action{Seat: 0, Type: ActionRaise, Amount: 6}); err != nil {
-		t.Fatalf("ApplyAction(raise) error = %v", err)
-	}
-	if err := hand.ApplyAction(Action{Seat: 1, Type: ActionFold}); err != nil {
-		t.Fatalf("ApplyAction(fold) error = %v", err)
-	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			match := mustHeadsUpMatch(t, 100, 1, 2)
+			for seat, stack := range tc.preHandStacks {
+				match.Players[seat].Stack = stack
+			}
+			hand, err := match.StartHand(1, tc.deal)
+			if err != nil {
+				t.Fatalf("StartHand() error = %v", err)
+			}
+			for _, action := range tc.actions {
+				mustApplyAction(t, hand, action)
+			}
+			if !hand.ShowdownPending {
+				t.Fatalf("hand should be awaiting showdown")
+			}
+			if err := hand.ResolveShowdown(); err != nil {
+				t.Fatalf("ResolveShowdown() error = %v", err)
+			}
 
-	if !hand.Complete || hand.ShowdownPending {
-		t.Fatalf("folded hand should be complete without showdown")
-	}
-	if hand.Result == nil {
-		t.Fatalf("folded hand should have a result")
-	}
-	if hand.Result.Pot != 4 {
-		t.Fatalf("contested pot = %d, want 4", hand.Result.Pot)
-	}
-	if hand.Players[0].Stack != 102 || hand.Players[1].Stack != 98 {
-		t.Fatalf("final stacks = [%d %d], want [102 98]", hand.Players[0].Stack, hand.Players[1].Stack)
-	}
-	if hand.Result.Deltas[0].Delta != 2 || hand.Result.Deltas[1].Delta != -2 {
-		t.Fatalf("deltas = %+v, want +2/-2", hand.Result.Deltas)
-	}
-
-	if err := match.FinalizeHand(hand); err != nil {
-		t.Fatalf("FinalizeHand() error = %v", err)
-	}
-	if match.Players[0].Stack != 102 || match.Players[1].Stack != 98 {
-		t.Fatalf("match stacks = [%d %d], want [102 98]", match.Players[0].Stack, match.Players[1].Stack)
+			if !slices.Equal(hand.Result.WinningSeats, tc.wantWinningSeats) {
+				t.Fatalf("winning seats = %v, want %v", hand.Result.WinningSeats, tc.wantWinningSeats)
+			}
+			if hand.Result.OddChipSeat != tc.wantOddChipSeat {
+				t.Fatalf("odd chip seat = %d, want %d", hand.Result.OddChipSeat, tc.wantOddChipSeat)
+			}
+			gotStacks := [2]int{hand.Players[0].Stack, hand.Players[1].Stack}
+			if gotStacks != tc.wantStacks {
+				t.Fatalf("stacks = %v, want %v", gotStacks, tc.wantStacks)
+			}
+			gotDeltas := [2]int{hand.Result.Deltas[0].Delta, hand.Result.Deltas[1].Delta}
+			if gotDeltas != tc.wantDeltas {
+				t.Fatalf("deltas = %v, want %v", gotDeltas, tc.wantDeltas)
+			}
+			labels := []string{hand.Result.ShowdownHands[0].Label, hand.Result.ShowdownHands[1].Label}
+			if !slices.Equal(labels, tc.wantShowdownLabel) {
+				t.Fatalf("showdown labels = %v, want %v", labels, tc.wantShowdownLabel)
+			}
+		})
 	}
 }
 
@@ -173,6 +433,13 @@ func mustStartHand(t *testing.T, match *MatchState, handNumber int) *HandState {
 	return hand
 }
 
+func mustApplyAction(t *testing.T, hand *HandState, action Action) {
+	t.Helper()
+	if err := hand.ApplyAction(action); err != nil {
+		t.Fatalf("ApplyAction(%+v) error = %v", action, err)
+	}
+}
+
 func assertLegalActions(t *testing.T, got []LegalAction, want []LegalAction) {
 	t.Helper()
 	if len(got) != len(want) {
@@ -183,4 +450,36 @@ func assertLegalActions(t *testing.T, got []LegalAction, want []LegalAction) {
 			t.Fatalf("legal action %d = %+v, want %+v", i, got[i], want[i])
 		}
 	}
+}
+
+func mustDeal(t *testing.T, playerCards [][]string, board []string) deck.HoldemDeal {
+	t.Helper()
+	deal := deck.HoldemDeal{PlayerCards: make([][]deck.Card, len(playerCards)), Board: mustCards(t, board)}
+	for seat := range playerCards {
+		deal.PlayerCards[seat] = mustCards(t, playerCards[seat])
+	}
+	return deal
+}
+
+func ptrDeal(deal deck.HoldemDeal) *deck.HoldemDeal {
+	return &deal
+}
+
+func mustCardPair(t *testing.T, raw [2]string) [2]deck.Card {
+	t.Helper()
+	cards := mustCards(t, []string{raw[0], raw[1]})
+	return [2]deck.Card{cards[0], cards[1]}
+}
+
+func mustCards(t *testing.T, raw []string) []deck.Card {
+	t.Helper()
+	cards := make([]deck.Card, len(raw))
+	for i, s := range raw {
+		card, err := deck.ParseCard(s)
+		if err != nil {
+			t.Fatalf("ParseCard(%q) error = %v", s, err)
+		}
+		cards[i] = card
+	}
+	return cards
 }
