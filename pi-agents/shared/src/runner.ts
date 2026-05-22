@@ -8,12 +8,11 @@ import { buildDecisionPrompt } from "./prompt.js";
 import {
   decodeEnvelope,
   encodeEnvelope,
-  type ActionPayload,
-  type Envelope,
-  type HandEndPayload,
-  type HandStartPayload,
-  type SessionInitPayload,
-  type YourTurnPayload,
+  type ActionMessage,
+  type HandStartMessage,
+  type SessionInitMessage,
+  type SessionReadyMessage,
+  type YourTurnMessage,
 } from "./protocol.js";
 import { applyHandStart, applySessionInit, createAgentState, resetHandState } from "./state.js";
 import type { DecisionClient, MemoryStrategy } from "./strategy.js";
@@ -43,67 +42,67 @@ export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void
 
       switch (envelope.type) {
         case "session_init": {
-          const payload = envelope.payload as SessionInitPayload;
-          applySessionInit(state, payload);
+          const message: SessionInitMessage = envelope;
+          applySessionInit(state, message.payload);
           await writeEnvelope(stdout, {
             v: 1,
             type: "session_ready",
             id: `agent-${nextMessageID++}`,
-            in_reply_to: envelope.id,
+            in_reply_to: message.id,
             payload: { version: options.strategy.version },
           });
           break;
         }
         case "hand_start": {
-          applyHandStart(state, envelope.payload as HandStartPayload);
+          const message: HandStartMessage = envelope;
+          applyHandStart(state, message.payload);
           break;
         }
         case "your_turn": {
-          const payload = envelope.payload as YourTurnPayload;
+          const message: YourTurnMessage = envelope;
           const augmentation = await options.strategy.beforeDecision({
             state,
-            handNumber: payload.hand_number,
-            street: payload.street,
-            board: payload.board,
-            pot: payload.pot,
-            toCall: payload.to_call,
-            stacks: payload.stacks,
-            actionHistory: payload.action_history,
-            legalActions: payload.legal_actions,
+            handNumber: message.payload.hand_number,
+            street: message.payload.street,
+            board: message.payload.board,
+            pot: message.payload.pot,
+            toCall: message.payload.to_call,
+            stacks: message.payload.stacks,
+            actionHistory: message.payload.action_history,
+            legalActions: message.payload.legal_actions,
           });
           const prompt = buildDecisionPrompt(
             {
               state,
-              handNumber: payload.hand_number,
-              street: payload.street,
-              board: payload.board,
-              pot: payload.pot,
-              toCall: payload.to_call,
-              stacks: payload.stacks,
-              actionHistory: payload.action_history,
-              legalActions: payload.legal_actions,
+              handNumber: message.payload.hand_number,
+              street: message.payload.street,
+              board: message.payload.board,
+              pot: message.payload.pot,
+              toCall: message.payload.to_call,
+              stacks: message.payload.stacks,
+              actionHistory: message.payload.action_history,
+              legalActions: message.payload.legal_actions,
             },
             augmentation,
           );
-          const proposedAction = await options.decisionClient.decide(prompt, payload.legal_actions);
-          const action = validateOrFallback(proposedAction, payload.legal_actions);
+          const proposedAction = await options.decisionClient.decide(prompt, message.payload.legal_actions);
+          const action = validateOrFallback(proposedAction, message.payload.legal_actions);
           await writeEnvelope(stdout, {
             v: 1,
             type: "action",
             id: `agent-${nextMessageID++}`,
-            in_reply_to: envelope.id,
+            in_reply_to: message.id,
             payload: action,
           });
           break;
         }
         case "hand_end": {
-          const payload = envelope.payload as HandEndPayload;
           await options.strategy.afterHandEnd({
             state,
-            handNumber: payload.hand_number,
-            board: payload.board,
-            showdown: payload.showdown,
-            result: payload.result,
+            handNumber: envelope.payload.hand_number,
+            board: envelope.payload.board,
+            showdown: envelope.payload.showdown,
+            result: envelope.payload.result,
           });
           resetHandState(state);
           break;
@@ -122,7 +121,7 @@ export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void
   }
 }
 
-async function writeEnvelope(stream: NodeJS.WritableStream, envelope: Envelope<ActionPayload | { version: string }>): Promise<void> {
+async function writeEnvelope(stream: NodeJS.WritableStream, envelope: SessionReadyMessage | ActionMessage): Promise<void> {
   const line = encodeEnvelope(envelope);
   await new Promise<void>((resolve, reject) => {
     stream.write(line, (error) => {
