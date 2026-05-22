@@ -191,6 +191,102 @@ func TestDecodeEnvelopeRejectsMalformedMessages(t *testing.T) {
 	}
 }
 
+func TestDecodePayloadRejectsMalformedPayloads(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		envelope Envelope
+		decode   func(Envelope) error
+		wantErr  string
+	}{
+		{
+			name:     "session_init payload",
+			envelope: testEnvelope(MessageTypeSessionInit, `{"session_id":123}`),
+			decode: func(e Envelope) error {
+				var payload SessionInitPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode session_init payload",
+		},
+		{
+			name:     "hand_start payload",
+			envelope: testEnvelope(MessageTypeHandStart, `{"hand_number":"47"}`),
+			decode: func(e Envelope) error {
+				var payload HandStartPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode hand_start payload",
+		},
+		{
+			name:     "your_turn payload",
+			envelope: testEnvelope(MessageTypeYourTurn, `{"hand_number":47,"street":[]}`),
+			decode: func(e Envelope) error {
+				var payload YourTurnPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode your_turn payload",
+		},
+		{
+			name:     "hand_end payload",
+			envelope: testEnvelope(MessageTypeHandEnd, `{"hand_number":47,"showdown":[]}`),
+			decode: func(e Envelope) error {
+				var payload HandEndPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode hand_end payload",
+		},
+		{
+			name:     "session_end payload",
+			envelope: testEnvelope(MessageTypeSessionEnd, `[]`),
+			decode: func(e Envelope) error {
+				var payload SessionEndPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode session_end payload",
+		},
+		{
+			name:     "session_ready payload",
+			envelope: testEnvelope(MessageTypeSessionReady, `{"version":1}`),
+			decode: func(e Envelope) error {
+				var payload SessionReadyPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode session_ready payload",
+		},
+		{
+			name:     "action payload",
+			envelope: testEnvelope(MessageTypeAction, `{"action":["call"]}`),
+			decode: func(e Envelope) error {
+				var payload ActionPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode action payload",
+		},
+		{
+			name:     "log payload",
+			envelope: testEnvelope(MessageTypeLog, `{"level":"info","message":"x","fields":"not-an-object"}`),
+			decode: func(e Envelope) error {
+				var payload LogPayload
+				return e.DecodePayload(&payload)
+			},
+			wantErr: "decode log payload",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.decode(tc.envelope)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("want error containing %q, got %q", tc.wantErr, err)
+			}
+		})
+	}
+}
+
 func decodeByType(envelope Envelope) (any, error) {
 	switch envelope.Type {
 	case MessageTypeSessionInit:
@@ -252,4 +348,21 @@ func mustMarshalEnvelope(envelope Envelope) []byte {
 		panic(err)
 	}
 	return data
+}
+
+func testEnvelope(messageType MessageType, payload string) Envelope {
+	return Envelope{
+		V:         ProtocolVersion,
+		Type:      messageType,
+		ID:        "msg-test",
+		InReplyTo: testInReplyTo(messageType),
+		Payload:   json.RawMessage(payload),
+	}
+}
+
+func testInReplyTo(messageType MessageType) string {
+	if requiresReplyCorrelation(messageType) {
+		return "msg-parent"
+	}
+	return ""
 }
