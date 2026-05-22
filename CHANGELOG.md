@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add core NLHE domain model and deterministic Hold'em dealer primitives
 
 ### Changed
 
