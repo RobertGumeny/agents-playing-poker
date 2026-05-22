@@ -29,3 +29,6 @@ Do not duplicate the normative sources:
 - [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md)
   - What EPIC-5 delivered in the operator-facing wrapper around the scripted step-4 demo.
   - Covers `cmd/poker-demo`, its narrow override surface, artifact inspection output, and the layering boundary with `poker-server`.
+- [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)
+  - What EPIC-7 delivered in the first runnable Pi-backed LLM baseline.
+  - Covers the shared TypeScript runtime, per-decision Pi session isolation, external-process command shape, canonical `pi-session.jsonl` artifacts, and test seams that avoid live-model requirements.
