@@ -20,17 +20,7 @@ func main() {
 }
 
 func run() error {
-	sessionID := flag.String("session-id", defaultSessionID(), "session id")
-	sessionsDir := flag.String("sessions-dir", "sessions", "session output root directory")
-	matchID := flag.String("match-id", "mat_demo", "match id")
-	seed := flag.Int64("seed", 17, "deterministic match seed")
-	handCount := flag.Int("hand-count", 200, "number of hands to play")
-	startingStack := flag.Int("starting-stack", 200, "starting stack in chips")
-	smallBlind := flag.Int("small-blind", 1, "small blind")
-	bigBlind := flag.Int("big-blind", 2, "big blind")
-	decisionDeadline := flag.Duration("decision-deadline", 30*time.Second, "decision deadline")
-	goBinary := flag.String("go-bin", "go", "Go binary used to launch the demo")
-	flag.Parse()
+	cfg := parseConfig()
 
 	repoDir, err := repoRoot()
 	if err != nil {
@@ -43,39 +33,14 @@ func run() error {
 	}
 	defer os.RemoveAll(binDir)
 
-	serverBin := filepath.Join(binDir, binaryName("poker-server"))
-	randomBin := filepath.Join(binDir, binaryName("random-agent"))
-	heuristicBin := filepath.Join(binDir, binaryName("heuristic-agent"))
-	for _, target := range []struct {
-		pkg string
-		bin string
-	}{
-		{pkg: "./cmd/poker-server", bin: serverBin},
-		{pkg: "./cmd/random-agent", bin: randomBin},
-		{pkg: "./cmd/heuristic-agent", bin: heuristicBin},
-	} {
-		if err := buildDemoBinary(*goBinary, repoDir, target.pkg, target.bin); err != nil {
+	binaries := cfg.binaryPaths(binDir)
+	for _, target := range cfg.buildTargets(binaries) {
+		if err := buildDemoBinary(cfg.goBinary, repoDir, target.pkg, target.bin); err != nil {
 			return err
 		}
 	}
 
-	args := []string{
-		"-sessions-dir", *sessionsDir,
-		"-session-id", *sessionID,
-		"-match-id", *matchID,
-		"-seed", fmt.Sprintf("%d", *seed),
-		"-hand-count", fmt.Sprintf("%d", *handCount),
-		"-starting-stack", fmt.Sprintf("%d", *startingStack),
-		"-small-blind", fmt.Sprintf("%d", *smallBlind),
-		"-big-blind", fmt.Sprintf("%d", *bigBlind),
-		"-decision-deadline", decisionDeadline.String(),
-		"-agent0-name", "random",
-		"-agent0-cmd", randomBin,
-		"-agent1-name", "heuristic",
-		"-agent1-cmd", heuristicBin,
-	}
-
-	cmd := exec.Command(serverBin, args...)
+	cmd := exec.Command(binaries.server, cfg.serverArgs(binaries)...)
 	cmd.Dir = repoDir
 
 	var stdout bytes.Buffer
@@ -87,20 +52,117 @@ func run() error {
 		return fmt.Errorf("run scripted demo: %w\n%s%s", err, stdout.String(), stderr.String())
 	}
 
-	sessionDir := filepath.Join(*sessionsDir, *sessionID)
+	inspect := cfg.inspectPaths(repoDir)
+	fmt.Printf("demo=random-vs-heuristic session_dir=%s\n", inspect.sessionDir)
+	fmt.Printf("inspect_next: manifest=%s\n", inspect.manifest)
+	fmt.Printf("inspect_next: hands=%s\n", inspect.hands)
+	fmt.Printf("inspect_next: agent_logs=%s\n", inspect.agentLogs)
+	return nil
+}
+
+type demoConfig struct {
+	sessionID        string
+	sessionsDir      string
+	matchID          string
+	seed             int64
+	handCount        int
+	startingStack    int
+	smallBlind       int
+	bigBlind         int
+	decisionDeadline time.Duration
+	goBinary         string
+}
+
+type demoBinaries struct {
+	server    string
+	random    string
+	heuristic string
+}
+
+type buildTarget struct {
+	pkg string
+	bin string
+}
+
+type inspectPaths struct {
+	sessionDir string
+	manifest   string
+	hands      string
+	agentLogs  string
+}
+
+func parseConfig() demoConfig {
+	sessionID := flag.String("session-id", defaultSessionID(), "session id")
+	sessionsDir := flag.String("sessions-dir", "sessions", "session output root directory")
+	matchID := flag.String("match-id", "mat_demo", "match id")
+	seed := flag.Int64("seed", 17, "deterministic match seed")
+	handCount := flag.Int("hand-count", 200, "number of hands to play")
+	startingStack := flag.Int("starting-stack", 200, "starting stack in chips")
+	smallBlind := flag.Int("small-blind", 1, "small blind")
+	bigBlind := flag.Int("big-blind", 2, "big blind")
+	decisionDeadline := flag.Duration("decision-deadline", 30*time.Second, "decision deadline")
+	goBinary := flag.String("go-bin", "go", "Go binary used to launch the demo")
+	flag.Parse()
+
+	return demoConfig{
+		sessionID:        *sessionID,
+		sessionsDir:      *sessionsDir,
+		matchID:          *matchID,
+		seed:             *seed,
+		handCount:        *handCount,
+		startingStack:    *startingStack,
+		smallBlind:       *smallBlind,
+		bigBlind:         *bigBlind,
+		decisionDeadline: *decisionDeadline,
+		goBinary:         *goBinary,
+	}
+}
+
+func (c demoConfig) binaryPaths(binDir string) demoBinaries {
+	return demoBinaries{
+		server:    filepath.Join(binDir, binaryName("poker-server")),
+		random:    filepath.Join(binDir, binaryName("random-agent")),
+		heuristic: filepath.Join(binDir, binaryName("heuristic-agent")),
+	}
+}
+
+func (c demoConfig) buildTargets(binaries demoBinaries) []buildTarget {
+	return []buildTarget{
+		{pkg: "./cmd/poker-server", bin: binaries.server},
+		{pkg: "./cmd/random-agent", bin: binaries.random},
+		{pkg: "./cmd/heuristic-agent", bin: binaries.heuristic},
+	}
+}
+
+func (c demoConfig) serverArgs(binaries demoBinaries) []string {
+	return []string{
+		"-sessions-dir", c.sessionsDir,
+		"-session-id", c.sessionID,
+		"-match-id", c.matchID,
+		"-seed", fmt.Sprintf("%d", c.seed),
+		"-hand-count", fmt.Sprintf("%d", c.handCount),
+		"-starting-stack", fmt.Sprintf("%d", c.startingStack),
+		"-small-blind", fmt.Sprintf("%d", c.smallBlind),
+		"-big-blind", fmt.Sprintf("%d", c.bigBlind),
+		"-decision-deadline", c.decisionDeadline.String(),
+		"-agent0-name", "random",
+		"-agent0-cmd", binaries.random,
+		"-agent1-name", "heuristic",
+		"-agent1-cmd", binaries.heuristic,
+	}
+}
+
+func (c demoConfig) inspectPaths(repoDir string) inspectPaths {
+	sessionDir := filepath.Join(c.sessionsDir, c.sessionID)
 	if !filepath.IsAbs(sessionDir) {
 		sessionDir = filepath.Join(repoDir, sessionDir)
 	}
-
-	manifestPath := filepath.Join(sessionDir, "manifest.json")
-	handsPath := filepath.Join(sessionDir, "hands.jsonl")
-	agentsDir := filepath.Join(sessionDir, "agents")
-
-	fmt.Printf("demo=random-vs-heuristic session_dir=%s\n", sessionDir)
-	fmt.Printf("inspect_next: manifest=%s\n", manifestPath)
-	fmt.Printf("inspect_next: hands=%s\n", handsPath)
-	fmt.Printf("inspect_next: agent_logs=%s\n", agentsDir)
-	return nil
+	return inspectPaths{
+		sessionDir: sessionDir,
+		manifest:   filepath.Join(sessionDir, "manifest.json"),
+		hands:      filepath.Join(sessionDir, "hands.jsonl"),
+		agentLogs:  filepath.Join(sessionDir, "agents"),
+	}
 }
 
 func defaultSessionID() string {

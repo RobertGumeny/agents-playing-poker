@@ -25,7 +25,8 @@ It now provides:
 - one intentionally non-strategic baseline (`random`) and one simple deterministic scripted baseline (`heuristic`)
 - server-authoritative legality, where both agents trust `legal_actions` from the wire contract instead of recomputing betting legality
 - a documented top-level `go run ./cmd/poker-demo` flow that builds the shipped Go binaries, runs a non-LLM `random` versus `heuristic` match, and prints the resulting session bundle plus the canonical artifacts to inspect next
-- retention of `poker-server` as the low-level primitive for explicit seat command wiring
+- `poker-demo` as the primary supported operator entrypoint for build-order step 4
+- retention of `poker-server` as the low-level primitive and debugging escape hatch for explicit seat command wiring
 - CLI-level proof that timeout enforcement still produces `auto_fold` and does not hang the server process
 
 ## Normative sources
@@ -82,6 +83,11 @@ The durable operator path for the non-LLM demo is:
 2. optionally override a small supported set of match knobs such as `-session-id`, `-sessions-dir`, `-match-id`, `-seed`, or `-hand-count`
 3. inspect `sessions/<id>/manifest.json`, `hands.jsonl`, and per-agent logs
 
+Execution-relevant constraints to preserve in future operator docs:
+- `poker-demo` shells out to `go build`, so a working Go toolchain is required at runtime
+- the wrapper compiles `poker-server`, `random-agent`, and `heuristic-agent` into a temporary directory before launching the match
+- the wrapper intentionally reuses `poker-server`, so artifact layout, timeout handling, and match semantics stay identical to the lower-level CLI
+
 For lower-level debugging or future wrappers, `poker-server` remains available with explicit `-agent0-cmd` and `-agent1-cmd` wiring.
 
 `cmd/poker-server/main_test.go` currently proves:
@@ -92,6 +98,7 @@ For lower-level debugging or future wrappers, `poker-server` remains available w
 `cmd/poker-demo/main_test.go` proves:
 - the wrapper command runs the default scripted match through `poker-server`
 - supported CLI overrides still produce a valid session bundle with the requested hand count
+- focused wrapper-level unit coverage still guards the argument wiring and session-bundle inspection paths without duplicating full-match integration coverage already exercised by `poker-server` and `internal/match`
 
 Related lower-level coverage remains in:
 - `internal/randomagent/agent_test.go`

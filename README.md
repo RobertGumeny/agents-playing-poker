@@ -10,13 +10,15 @@ v0 is in progress. Build-order steps 1–4 are implemented: the rules engine, wi
 
 ## Run the step-4 demo
 
+This wrapper is now the primary supported way to run build-order step 4.
+
 From the repo root, run the supported one-command scripted demo:
 
 ```bash
 go run ./cmd/poker-demo
 ```
 
-The wrapper builds the shipped Go binaries, launches the default `random` versus `heuristic` match through `poker-server`, and prints the generated session bundle location plus the canonical artifacts to inspect next, for example:
+The wrapper builds the shipped Go binaries into a temporary directory, launches the default `random` versus `heuristic` match through `poker-server`, and prints the generated session bundle location plus the canonical artifacts to inspect next, for example:
 
 ```text
 demo=random-vs-heuristic session_dir=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z
@@ -24,6 +26,12 @@ inspect_next: manifest=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/manif
 inspect_next: hands=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/hands.jsonl
 inspect_next: agent_logs=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/agents
 ```
+
+Execution constraints:
+
+- the wrapper requires a working Go toolchain because it compiles `poker-server`, `random-agent`, and `heuristic-agent` on demand
+- `go` is used by default; override it with `-go-bin` if you need a different Go executable
+- the wrapper keeps `poker-server` as the underlying primitive, so the session bundle and server behavior stay identical to a manual run
 
 Useful supported overrides:
 
@@ -36,7 +44,7 @@ go run ./cmd/poker-demo \
   -hand-count 200
 ```
 
-If you need the low-level primitive directly, `poker-server` still supports explicit seat command wiring.
+If you need lower-level debugging, custom seat wiring, or to run non-default agents directly, `poker-server` remains available as the escape hatch with explicit seat command wiring.
 
 ## Inspect the session bundle
 

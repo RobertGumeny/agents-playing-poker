@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
@@ -52,6 +53,73 @@ func TestPokerDemoRunsDefaultScriptedMatch(t *testing.T) {
 	}
 	assertFileExists(t, filepath.Join(sessionDir, "agents", "random", "stdout.log"))
 	assertFileExists(t, filepath.Join(sessionDir, "agents", "heuristic", "stdout.log"))
+}
+
+func TestDemoConfigServerArgs(t *testing.T) {
+	t.Parallel()
+
+	cfg := demoConfig{
+		sessionID:        "ses_test",
+		sessionsDir:      "custom-sessions",
+		matchID:          "mat_test",
+		seed:             99,
+		handCount:        12,
+		startingStack:    150,
+		smallBlind:       2,
+		bigBlind:         4,
+		decisionDeadline: 1500 * time.Millisecond,
+		goBinary:         "go1.24",
+	}
+	binaries := demoBinaries{
+		server:    "/tmp/poker-server",
+		random:    "/tmp/random-agent",
+		heuristic: "/tmp/heuristic-agent",
+	}
+
+	got := cfg.serverArgs(binaries)
+	want := []string{
+		"-sessions-dir", "custom-sessions",
+		"-session-id", "ses_test",
+		"-match-id", "mat_test",
+		"-seed", "99",
+		"-hand-count", "12",
+		"-starting-stack", "150",
+		"-small-blind", "2",
+		"-big-blind", "4",
+		"-decision-deadline", "1.5s",
+		"-agent0-name", "random",
+		"-agent0-cmd", "/tmp/random-agent",
+		"-agent1-name", "heuristic",
+		"-agent1-cmd", "/tmp/heuristic-agent",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Fatalf("serverArgs() = %q, want %q", got, want)
+	}
+}
+
+func TestDemoConfigInspectPaths(t *testing.T) {
+	t.Parallel()
+
+	repoDir := "/repo"
+	relative := demoConfig{sessionID: "ses_rel", sessionsDir: "sessions"}.inspectPaths(repoDir)
+	if relative.sessionDir != filepath.Join(repoDir, "sessions", "ses_rel") {
+		t.Fatalf("relative sessionDir = %q", relative.sessionDir)
+	}
+	if relative.manifest != filepath.Join(relative.sessionDir, "manifest.json") {
+		t.Fatalf("relative manifest = %q", relative.manifest)
+	}
+	if relative.hands != filepath.Join(relative.sessionDir, "hands.jsonl") {
+		t.Fatalf("relative hands = %q", relative.hands)
+	}
+	if relative.agentLogs != filepath.Join(relative.sessionDir, "agents") {
+		t.Fatalf("relative agentLogs = %q", relative.agentLogs)
+	}
+
+	absoluteRoot := filepath.Join(string(filepath.Separator), "tmp", "sessions")
+	absolute := demoConfig{sessionID: "ses_abs", sessionsDir: absoluteRoot}.inspectPaths(repoDir)
+	if absolute.sessionDir != filepath.Join(absoluteRoot, "ses_abs") {
+		t.Fatalf("absolute sessionDir = %q", absolute.sessionDir)
+	}
 }
 
 func buildBinary(t *testing.T, pkg string) string {
