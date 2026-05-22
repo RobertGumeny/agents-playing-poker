@@ -217,9 +217,13 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 			actionPayload, err := agent.AwaitAction(ctx, turnMsg.ID, r.config.DecisionDeadline)
 			if err != nil {
 				if errors.Is(err, errDecisionTimeout) {
-					handActions = append(handActions, sessionlog.HandAction{Seat: actingSeat, Action: "auto_fold", Street: hand.Street.String(), ForcedReason: "decision_timeout"})
-					if applyErr := hand.ApplyAction(rules.Action{Seat: actingSeat, Type: rules.ActionFold}); applyErr != nil {
-						return result, fmt.Errorf("run hand %d: apply timeout auto-fold: %w", handNumber, applyErr)
+					timeoutRulesAction, timeoutArtifactAction, timeoutErr := timeoutFallbackAction(hand, actingSeat)
+					if timeoutErr != nil {
+						return result, fmt.Errorf("run hand %d: choose timeout fallback action: %w", handNumber, timeoutErr)
+					}
+					handActions = append(handActions, timeoutArtifactAction)
+					if applyErr := hand.ApplyAction(timeoutRulesAction); applyErr != nil {
+						return result, fmt.Errorf("run hand %d: apply timeout fallback action: %w", handNumber, applyErr)
 					}
 					continue
 				}
@@ -395,6 +399,21 @@ func initialHandActions(hand *rules.HandState) []sessionlog.HandAction {
 		actions = append(actions, rulesActionToSessionLog(action))
 	}
 	return actions
+}
+
+func timeoutFallbackAction(hand *rules.HandState, seat int) (rules.Action, sessionlog.HandAction, error) {
+	legalActions := hand.LegalActions()
+	for _, legalAction := range legalActions {
+		if legalAction.Type == rules.ActionCheck {
+			return rules.Action{Seat: seat, Street: hand.Street, Type: rules.ActionCheck}, sessionlog.HandAction{Seat: seat, Action: "auto_check", Street: hand.Street.String(), ForcedReason: "decision_timeout"}, nil
+		}
+	}
+	for _, legalAction := range legalActions {
+		if legalAction.Type == rules.ActionFold {
+			return rules.Action{Seat: seat, Street: hand.Street, Type: rules.ActionFold}, sessionlog.HandAction{Seat: seat, Action: "auto_fold", Street: hand.Street.String(), ForcedReason: "decision_timeout"}, nil
+		}
+	}
+	return rules.Action{}, sessionlog.HandAction{}, fmt.Errorf("no legal timeout fallback action for seat %d", seat)
 }
 
 func translateActionPayload(hand *rules.HandState, seat int, payload wire.ActionPayload) (rules.Action, sessionlog.HandAction, error) {

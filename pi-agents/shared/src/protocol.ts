@@ -16,7 +16,7 @@ export const MESSAGE_TYPES = [
 
 export type MessageType = (typeof MESSAGE_TYPES)[number];
 export type Street = "preflop" | "flop" | "turn" | "river";
-export type PlayerAction = "post_blind" | "fold" | "check" | "call" | "bet" | "raise" | "auto_fold";
+export type PlayerAction = "post_blind" | "fold" | "check" | "call" | "bet" | "raise" | "auto_check" | "auto_fold";
 export type DecisionAction = "fold" | "check" | "call" | "bet" | "raise";
 
 export interface Envelope<TType extends MessageType = MessageType, TPayload = unknown> {
@@ -457,6 +457,7 @@ function expectPlayerAction(value: unknown, path: string): PlayerAction {
     value !== "call" &&
     value !== "bet" &&
     value !== "raise" &&
+    value !== "auto_check" &&
     value !== "auto_fold"
   ) {
     throw new Error(`decode ${path}: expected player action`);

@@ -96,6 +96,41 @@ func TestRunnerRunRecordsDecisionTimeoutAsAutoFold(t *testing.T) {
 	}
 }
 
+func TestRunnerRunRecordsDecisionTimeoutAsAutoCheckWhenCheckIsLegal(t *testing.T) {
+	t.Parallel()
+
+	result, err := runTestMatch(t, "caller", "slow-when-check-legal", 1, 25*time.Millisecond, 11)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if !result.Completed {
+		t.Fatalf("RunResult.Completed = false, want true")
+	}
+
+	handsPath := filepath.Join(result.SessionDir, "hands.jsonl")
+	lines := readLines(t, handsPath)
+	if len(lines) != 1 {
+		t.Fatalf("hands.jsonl line count = %d, want 1", len(lines))
+	}
+
+	var hand sessionlog.HandRecord
+	if err := json.Unmarshal([]byte(lines[0]), &hand); err != nil {
+		t.Fatalf("Unmarshal hand record error = %v", err)
+	}
+	found := false
+	for _, action := range hand.Actions {
+		if action.Action == "auto_check" {
+			found = true
+			if action.ForcedReason != "decision_timeout" {
+				t.Fatalf("auto_check forced_reason = %q, want decision_timeout", action.ForcedReason)
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("hand actions = %+v, want auto_check", hand.Actions)
+	}
+}
+
 func TestRunnerRunProducesDeterministicHandsJSONL(t *testing.T) {
 	t.Parallel()
 
@@ -264,13 +299,13 @@ func TestHelperAgentProcess(t *testing.T) {
 		case wire.MessageTypeSessionInit:
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeSessionReady, fmt.Sprintf("helper-%d", responseID), envelope.ID, wire.SessionReadyPayload{Version: "helper/0.1.0"}))
 		case wire.MessageTypeYourTurn:
-			if behavior == "slow" {
-				time.Sleep(200 * time.Millisecond)
-			}
 			var payload wire.YourTurnPayload
 			if err := envelope.DecodePayload(&payload); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
+			}
+			if behavior == "slow" || (behavior == "slow-when-check-legal" && hasLegalAction(payload.LegalActions, "check")) {
+				time.Sleep(200 * time.Millisecond)
 			}
 			if behavior == "die-on-hand-2" && payload.HandNumber == 2 {
 				fmt.Fprintln(os.Stderr, "helper agent exiting on hand 2")
@@ -284,6 +319,15 @@ func TestHelperAgentProcess(t *testing.T) {
 		}
 	}
 	os.Exit(0)
+}
+
+func hasLegalAction(actions []wire.LegalActionOption, want string) bool {
+	for _, action := range actions {
+		if action.Action == want {
+			return true
+		}
+	}
+	return false
 }
 
 func chooseAction(actions []wire.LegalActionOption) wire.ActionPayload {

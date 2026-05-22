@@ -27,7 +27,7 @@ It now provides:
 - a documented top-level `go run ./cmd/poker-demo` flow that builds the shipped Go binaries, runs a non-LLM `random` versus `heuristic` match, and prints the resulting session bundle plus the canonical artifacts to inspect next
 - `poker-demo` as the primary supported operator entrypoint for build-order step 4
 - retention of `poker-server` as the low-level primitive and debugging escape hatch for explicit seat command wiring
-- CLI-level proof that timeout enforcement still produces `auto_fold` and does not hang the server process
+- CLI-level proof that timeout enforcement still produces a forced timeout action (`auto_check` when possible, otherwise `auto_fold`) and does not hang the server process
 
 ## Normative sources
 
@@ -94,7 +94,7 @@ For lower-level debugging or future wrappers, `poker-server` remains available w
 
 `cmd/poker-server/main_test.go` currently proves:
 - the shipped server binary can run a real `random` versus `heuristic` match and write a valid session bundle
-- a sleeping helper agent that exceeds `-decision-deadline` is recorded as `action: "auto_fold"` with `forced_reason: "decision_timeout"`
+- a sleeping helper agent that exceeds `-decision-deadline` is recorded as a forced timeout action with `forced_reason: "decision_timeout"` (`auto_check` when legal, otherwise `auto_fold`)
 - the server still exits cleanly after timeout enforcement
 
 `cmd/poker-demo/main_test.go` proves:

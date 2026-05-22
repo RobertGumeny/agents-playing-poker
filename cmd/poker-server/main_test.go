@@ -114,6 +114,59 @@ func TestPokerServerRecordsTimeoutAutoFoldAndExitsCleanly(t *testing.T) {
 	}
 }
 
+func TestPokerServerRecordsTimeoutAutoCheckWhenCheckIsLegal(t *testing.T) {
+	t.Parallel()
+
+	serverBin := buildCommandBinary(t, "./cmd/poker-server")
+	sessionsDir := filepath.Join(t.TempDir(), "sessions")
+	sessionID := "ses_cli_timeout_autocheck"
+	helperBin := os.Args[0]
+	output := runPokerServerCommand(t, 5*time.Second, serverBin,
+		"-sessions-dir", sessionsDir,
+		"-session-id", sessionID,
+		"-match-id", "mat_cli_timeout_autocheck",
+		"-seed", "11",
+		"-hand-count", "1",
+		"-decision-deadline", "25ms",
+		"-agent0-name", "caller",
+		"-agent0-cmd", helperBin,
+		"-agent0-arg", "-test.run=TestPokerServerHelperAgentProcess",
+		"-agent0-arg", "--",
+		"-agent0-arg", "caller",
+		"-agent1-name", "slow-when-check-legal",
+		"-agent1-cmd", helperBin,
+		"-agent1-arg", "-test.run=TestPokerServerHelperAgentProcess",
+		"-agent1-arg", "--",
+		"-agent1-arg", "slow-when-check-legal",
+	)
+	if !strings.Contains(output, "completed=true") {
+		t.Fatalf("poker-server output = %q, want completed=true", output)
+	}
+
+	sessionDir := filepath.Join(sessionsDir, sessionID)
+	hands := readHands(t, filepath.Join(sessionDir, "hands.jsonl"))
+	if len(hands) != 1 {
+		t.Fatalf("hands.jsonl line count = %d, want 1", len(hands))
+	}
+	var hand sessionlog.HandRecord
+	if err := json.Unmarshal([]byte(hands[0]), &hand); err != nil {
+		t.Fatalf("Unmarshal hand record error = %v", err)
+	}
+	found := false
+	for _, action := range hand.Actions {
+		if action.Action != "auto_check" {
+			continue
+		}
+		found = true
+		if action.ForcedReason != "decision_timeout" {
+			t.Fatalf("auto_check forced_reason = %q, want decision_timeout", action.ForcedReason)
+		}
+	}
+	if !found {
+		t.Fatalf("hand actions = %+v, want auto_check", hand.Actions)
+	}
+}
+
 func TestPokerServerHelperAgentProcess(t *testing.T) {
 	behavior := helperBehavior(os.Args)
 	if behavior == "" {
@@ -134,13 +187,13 @@ func TestPokerServerHelperAgentProcess(t *testing.T) {
 		case wire.MessageTypeSessionInit:
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeSessionReady, fmt.Sprintf("helper-%d", responseID), envelope.ID, wire.SessionReadyPayload{Version: "helper/0.1.0"}))
 		case wire.MessageTypeYourTurn:
-			if behavior == "slow" {
-				time.Sleep(200 * time.Millisecond)
-			}
 			var payload wire.YourTurnPayload
 			if err := envelope.DecodePayload(&payload); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
+			}
+			if behavior == "slow" || (behavior == "slow-when-check-legal" && hasLegalAction(payload.LegalActions, "check")) {
+				time.Sleep(200 * time.Millisecond)
 			}
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeAction, fmt.Sprintf("helper-action-%d", responseID), envelope.ID, chooseHelperAction(payload.LegalActions)))
 		case wire.MessageTypeSessionEnd:
@@ -213,6 +266,15 @@ func assertFileExists(t *testing.T, path string) {
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("Stat(%s) error = %v", path, err)
 	}
+}
+
+func hasLegalAction(actions []wire.LegalActionOption, want string) bool {
+	for _, action := range actions {
+		if action.Action == want {
+			return true
+		}
+	}
+	return false
 }
 
 func chooseHelperAction(actions []wire.LegalActionOption) wire.ActionPayload {

@@ -5,7 +5,7 @@ EPIC-3 implemented build-order step 3 from [`../spec.md`](../spec.md): the Go `p
 ## Epic delivery summary
 
 The archived EPIC-3 task log shows the server/orchestration work landed in three slices:
-- `EPIC-3-001`: built `poker-server`, long-lived agent process management, stdio JSONL exchange, timeout-enforced `auto_fold`, and session artifact writing
+- `EPIC-3-001`: built `poker-server`, long-lived agent process management, stdio JSONL exchange, timeout-enforced forced actions (`auto_check` when legal, otherwise `auto_fold`), and session artifact writing
 - `EPIC-3-002`: verified the server loop was correctly integrated with the deterministic rules engine and persisted the required complete and incomplete session bundles
 - `EPIC-3-003`: added integration coverage for deterministic replay and incomplete-match persistence when an agent dies mid-match
 
@@ -21,7 +21,7 @@ It now provides:
 - JSONL stdin/stdout message exchange using the typed `internal/wire` contract
 - per-agent `stdout.log` and `stderr.log` capture under the session bundle
 - server-owned hand progression driven by `internal/rules`
-- decision-deadline enforcement with server-recorded `auto_fold` on timeout
+- decision-deadline enforcement with a server-recorded forced timeout action (`auto_check` when legal, otherwise `auto_fold`)
 - `manifest.json` and `hands.jsonl` session artifact writing
 - deterministic `hands.jsonl` output for a fixed seed and deterministic agents
 
@@ -48,8 +48,8 @@ Key responsibilities:
 
 Timeout policy:
 - each `your_turn` wait uses the configured decision deadline
-- on timeout, the server applies a fold itself via the rules engine
-- the persisted hand artifact records `action: "auto_fold"` with `forced_reason: "decision_timeout"`
+- on timeout, the server applies the safest legal action itself via the rules engine, preferring `check` when legal and otherwise using `fold`
+- the persisted hand artifact records `action: "auto_check"` or `action: "auto_fold"` with `forced_reason: "decision_timeout"`
 - timeout handling stays server-side; agents do not self-report timeout outcomes
 - if an agent exits or protocol handling fails mid-match, the runner still writes `manifest.json` with `completed: false` and keeps any already-finished `hands.jsonl` records
 
@@ -82,7 +82,7 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 `internal/match/runner_test.go` currently covers:
 - full happy-path session execution against helper child processes
 - stderr capture into session logs
-- decision timeout conversion into persisted `auto_fold`
+- decision timeout conversion into a persisted forced timeout action (`auto_check` when legal, otherwise `auto_fold`)
 - incomplete-match persistence when an agent exits during hand 2, including manifest `completed: false` and preservation of already-finished hands
 - byte-for-byte deterministic `hands.jsonl` output for repeated runs with the same seed and deterministic agents
 
@@ -94,7 +94,7 @@ The EPIC-3 verification recipe recorded in the archived task logs was:
 
 EPIC-4 extended that coverage with CLI-level tests in `cmd/poker-server/main_test.go` to prove:
 - the shipped `poker-server` binary can run a real `random` versus `heuristic` demo match and write a valid `sessions/<id>/` bundle
-- a slow or sleeping agent is auto-folded on `decision_deadline` and the server process still exits cleanly
+- a slow or sleeping agent is forced into the safest legal timeout action on `decision_deadline` and the server process still exits cleanly
 
 ## Current boundaries
 
