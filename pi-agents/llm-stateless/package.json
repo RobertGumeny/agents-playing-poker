@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "poker-agent-llm-stateless": "./dist/main.js"
+  },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "start": "tsx src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -55,6 +55,8 @@ describe("state helpers", () => {
     });
 
     expect(state.session?.matchId).toBe("mat-1");
+    expect(state.session?.match.seed).toBe(1);
+    expect(state.session?.memoryDir).toBe("/tmp/memory");
     expect(state.hand?.yourHoleCards).toEqual(["As", "Kh"]);
     expect(state.hand?.currentTurn).toMatchObject({
       street: "flop",
@@ -66,6 +68,38 @@ describe("state helpers", () => {
     resetHandState(state);
 
     expect(state.hand).toBeUndefined();
+  });
+
+  it("accepts session metadata without memory_dir", () => {
+    const state = createAgentState();
+
+    applySessionInit(state, {
+      session_id: "ses-2",
+      agent_name: "llm-stateless",
+      match: {
+        match_id: "mat-2",
+        seed: 17,
+        hand_count: 50,
+        variant: "heads-up-nlhe",
+        info_realism: "perfect-info",
+        starting_stack: 100,
+        blinds: { sb: 1, bb: 2 },
+        decision_deadline_ms: 15000,
+      },
+      seats: [{ seat: 0, name: "hero" }],
+      your_seat: 0,
+    });
+
+    expect(state.session).toMatchObject({
+      sessionId: "ses-2",
+      matchId: "mat-2",
+      memoryDir: undefined,
+      match: {
+        seed: 17,
+        hand_count: 50,
+        info_realism: "perfect-info",
+      },
+    });
   });
 
   it("clears stale hand state on session reset", () => {

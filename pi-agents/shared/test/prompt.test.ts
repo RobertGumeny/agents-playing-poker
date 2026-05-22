@@ -9,6 +9,16 @@ describe("buildDecisionPrompt", () => {
     state.session = {
       sessionId: "ses-1",
       matchId: "mat-1",
+      match: {
+        match_id: "mat-1",
+        seed: 1,
+        hand_count: 200,
+        variant: "heads-up-nlhe",
+        info_realism: "showdown-only",
+        starting_stack: 200,
+        blinds: { sb: 1, bb: 2 },
+        decision_deadline_ms: 30000,
+      },
       agentName: "llm-stateless",
       yourSeat: 0,
       seats: [

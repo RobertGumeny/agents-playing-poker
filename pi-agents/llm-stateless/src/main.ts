@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { PiDecisionClient, parsePiThinkingLevel, runPokerAgent, type MemoryStrategy } from "@agent-poker/pi-agent-shared";
 
 const strategy: MemoryStrategy = {

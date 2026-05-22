@@ -83,7 +83,7 @@ Sent once at startup.
 
 Notes:
 - `variant` is a project-level identifier, not a full rules description.
-- `memory_dir` is the agent-owned durable working directory for match-local state.
+- `memory_dir` is optional; when present it is the agent-owned durable working directory for match-local state.
 
 ### `hand_start`
 Sent once per hand after blinds are posted.

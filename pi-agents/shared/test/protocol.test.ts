@@ -46,6 +46,30 @@ describe("protocol helpers", () => {
       },
     },
     {
+      name: "session_init without memory_dir",
+      message: {
+        v: 1,
+        type: "session_init",
+        id: "msg-1b",
+        payload: {
+          session_id: "ses-2",
+          agent_name: "llm-stateless",
+          match: {
+            match_id: "mat-2",
+            seed: 99,
+            hand_count: 50,
+            variant: "heads-up-nlhe",
+            info_realism: "perfect-info",
+            starting_stack: 100,
+            blinds: { sb: 1, bb: 2 },
+            decision_deadline_ms: 15000,
+          },
+          seats: [{ seat: 0, name: "hero" }],
+          your_seat: 0,
+        },
+      },
+    },
+    {
       name: "hand_start",
       message: {
         v: 1,

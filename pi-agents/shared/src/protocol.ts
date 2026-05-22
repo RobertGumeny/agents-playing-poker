@@ -57,7 +57,7 @@ export interface SessionInitPayload {
   match: MatchConfig;
   seats: SeatDescriptor[];
   your_seat: number;
-  memory_dir: string;
+  memory_dir?: string;
 }
 
 export interface HandStartPayload {
@@ -247,7 +247,9 @@ function validateSessionInitPayload(value: unknown): asserts value is SessionIni
   validateMatchConfig(payload.match);
   validateSeatDescriptors(payload.seats, "session_init payload.seats");
   expectNumber(payload.your_seat, "session_init payload.your_seat");
-  expectString(payload.memory_dir, "session_init payload.memory_dir");
+  if (payload.memory_dir !== undefined) {
+    expectString(payload.memory_dir, "session_init payload.memory_dir");
+  }
 }
 
 function validateMatchConfig(value: unknown): asserts value is MatchConfig {

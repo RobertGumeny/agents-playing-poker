@@ -1,10 +1,11 @@
 // Current session/hand state tracking shared by Pi poker agents.
 
-import type { HandStartPayload, SessionInitPayload, YourTurnPayload } from "./protocol.js";
+import type { HandStartPayload, MatchConfig, SessionInitPayload, YourTurnPayload } from "./protocol.js";
 
 export interface SessionState {
   sessionId: string;
   matchId: string;
+  match: MatchConfig;
   agentName: string;
   yourSeat: number;
   seats: Array<{ seat: number; name: string }>;
@@ -44,6 +45,10 @@ export function applySessionInit(state: AgentState, payload: SessionInitPayload)
   state.session = {
     sessionId: payload.session_id,
     matchId: payload.match.match_id,
+    match: {
+      ...payload.match,
+      blinds: { ...payload.match.blinds },
+    },
     agentName: payload.agent_name,
     yourSeat: payload.your_seat,
     seats: payload.seats.map((seat) => ({ ...seat })),

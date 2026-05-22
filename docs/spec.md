@@ -117,6 +117,7 @@ Sent once at agent startup.
   }
 }
 ```
+`memory_dir` is optional in v0; when present it points at the agent-owned durable working directory for match-local state.
 Agent acknowledges with `session_ready`.
 
 #### `hand_start`
