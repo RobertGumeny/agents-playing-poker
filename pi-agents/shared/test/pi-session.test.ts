@@ -1,30 +1,38 @@
+import { writeFileSync } from "node:fs";
+import { mkdtemp, readdir, readFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { PiDecisionClient, parsePiThinkingLevel } from "../src/pi-session.js";
 
 describe("PiDecisionClient", () => {
-  it("creates a fresh Pi session per decision and parses assistant JSON", async () => {
+  it("creates a fresh Pi session per decision and appends to the canonical pi-session artifact", async () => {
+    const sessionDir = await mkdtemp(path.join(os.tmpdir(), "pi-session-test-"));
     const exportedPaths: string[] = [];
-    const sessionFactory = vi
-      .fn()
-      .mockImplementation(async () => ({
-        async prompt() {},
-        subscribe() {
-          return () => {};
-        },
-        getLastAssistantText() {
-          return '{"action":"call","amount":2}';
-        },
-        exportToJsonl(outputPath?: string) {
-          exportedPaths.push(outputPath ?? "");
-          return outputPath ?? "";
-        },
-        dispose() {},
-      }));
+    let exportCount = 0;
+    const sessionFactory = vi.fn().mockImplementation(async () => ({
+      async prompt() {},
+      subscribe() {
+        return () => {};
+      },
+      getLastAssistantText() {
+        return '{"action":"call","amount":2}';
+      },
+      exportToJsonl(outputPath?: string) {
+        exportedPaths.push(outputPath ?? "");
+        const content = `{"decision":${++exportCount}}\n`;
+        if (!outputPath) return "";
+        writeFileSync(outputPath, content, "utf8");
+        return outputPath;
+      },
+      dispose() {},
+    }));
 
     const client = new PiDecisionClient({
       cwd: process.cwd(),
-      sessionDir: "/tmp/pi-audit",
+      sessionDir,
       sessionFactory,
     });
 
@@ -32,7 +40,12 @@ describe("PiDecisionClient", () => {
     await expect(client.decide("second", [{ action: "check" }])).resolves.toEqual({ action: "call", amount: 2 });
 
     expect(sessionFactory).toHaveBeenCalledTimes(2);
-    expect(exportedPaths).toEqual(["/tmp/pi-audit/pi-session-0001.jsonl", "/tmp/pi-audit/pi-session-0002.jsonl"]);
+    expect(exportedPaths).toEqual([
+      path.join(sessionDir, "pi-session-export-0001.jsonl"),
+      path.join(sessionDir, "pi-session-export-0002.jsonl"),
+    ]);
+    await expect(readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8")).resolves.toBe('{"decision":1}\n{"decision":2}\n');
+    await expect(readdir(sessionDir)).resolves.toEqual(["pi-session.jsonl"]);
   });
 
   it("falls back to streamed assistant text when needed and surfaces malformed JSON", async () => {

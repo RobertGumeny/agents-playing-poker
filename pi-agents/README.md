@@ -29,7 +29,7 @@ Target only the shared runtime package when needed:
 
 The shared runtime tests cover protocol helpers, state updates, prompt construction, action validation/fallback, and the stdio runner loop with fake decision clients.
 
-Pi session logs are observability artifacts and should be stored durably, but they are separate from strategic memory. A stateless agent may persist Pi logs while still ensuring previous hands are not visible to future decisions.
+Pi session logs are observability artifacts and should be stored durably, but they are separate from strategic memory. A stateless agent may persist Pi logs while still ensuring previous hands are not visible to future decisions. When the server provides `session_init.memory_dir`, `llm-stateless` uses that session bundle agent directory as the default home for the canonical `pi-session.jsonl` artifact.
 
 ## `llm-stateless` install/run
 
@@ -51,4 +51,4 @@ The current stateless baseline reads these optional environment variables:
 - `PI_POKER_MODEL`: Pi model selector (`provider:model-id` or `provider/model-id`)
 - `PI_POKER_THINKING_LEVEL`: Pi thinking level (`off`, `minimal`, `low`, `medium`, `high`, `xhigh`)
 - `PI_POKER_MAX_DECISION_ATTEMPTS`: shared runner retry budget before safe fallback
-- `PI_POKER_PI_SESSION_DIR`: directory for per-decision Pi JSONL audit logs
+- `PI_POKER_PI_SESSION_DIR`: override directory for the canonical `pi-session.jsonl` audit log (defaults to `session_init.memory_dir` when the server provides one)

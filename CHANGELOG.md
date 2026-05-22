@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- test: verify llm-stateless external-process wiring and canonical pi-session artifact compatibility
 - test: add stateless fake-client protocol integration coverage
 - feat: make llm-stateless a buildable external agent command and keep session_init metadata in the shared TS runtime
 - feat: replace the llm-stateless Pi decision placeholder with a real SDK-backed per-decision client

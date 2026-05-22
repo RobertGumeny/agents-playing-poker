@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -50,6 +50,7 @@ export interface PiDecisionClientOptions {
   cwd: string;
   agentDir?: string;
   sessionDir?: string;
+  sessionDirProvider?: () => string | undefined;
   model?: string;
   thinkingLevel?: PiThinkingLevel;
   sessionFactory?: PiSessionFactory;
@@ -69,10 +70,11 @@ export class PiDecisionClient implements DecisionClient {
     let streamedAssistantText = "";
 
     try {
+      const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
       session = await this.sessionFactory({
         cwd: this.options.cwd,
         agentDir: this.options.agentDir ?? getAgentDir(),
-        sessionDir: this.options.sessionDir,
+        sessionDir,
         model: this.options.model,
         thinkingLevel: this.options.thinkingLevel,
       });
@@ -97,7 +99,8 @@ export class PiDecisionClient implements DecisionClient {
     } finally {
       unsubscribe();
       if (session) {
-        await persistSessionLog(session, this.options.sessionDir, ++this.decisionCount);
+        const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
+        await persistSessionLog(session, sessionDir, ++this.decisionCount);
         session.dispose();
       }
     }
@@ -174,8 +177,14 @@ async function persistSessionLog(session: PiSession, sessionDir: string | undefi
   if (!sessionDir) return;
 
   await mkdir(sessionDir, { recursive: true });
-  const outputPath = path.join(sessionDir, `pi-session-${String(decisionCount).padStart(4, "0")}.jsonl`);
-  session.exportToJsonl(outputPath);
+  const exportPath = path.join(sessionDir, `pi-session-export-${String(decisionCount).padStart(4, "0")}.jsonl`);
+  const canonicalPath = path.join(sessionDir, "pi-session.jsonl");
+  session.exportToJsonl(exportPath);
+  const exported = await readFile(exportPath, "utf8");
+  if (exported.length > 0) {
+    await appendFile(canonicalPath, exported);
+  }
+  await rm(exportPath, { force: true });
 }
 
 export function parsePiThinkingLevel(value: string | undefined): PiThinkingLevel | undefined {
