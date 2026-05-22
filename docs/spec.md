@@ -61,6 +61,17 @@ Configurable per match, default `showdown-only`:
 - **`showdown-only`** (default): agent learns opponent's hole cards only at showdown. Mirrors real poker.
 - **`perfect-info`**: agent sees opponent's hole cards every hand. For debugging memory strategies in isolation.
 
+### Odd-chip policy
+
+This repo uses integer chip units. If a pot must be split and cannot be divided evenly, the single odd chip is awarded to the first tied seat clockwise from the button.
+
+For heads-up play, that means the odd chip goes to:
+
+- the **big blind** when both players tie,
+- because the big blind is the first seat clockwise from the button.
+
+This is a project policy for deterministic settlement. It overrides the generic domain docs' intentional omission of house-rule-dependent odd-chip behavior.
+
 ### Extension points
 
 The rules engine and wire protocol must not hard-assume two players. `your_turn` includes a list of all seated players; the data model leaves room for side pots. This costs little now and avoids a rewrite for 6-max later.

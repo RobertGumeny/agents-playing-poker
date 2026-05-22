@@ -10,7 +10,14 @@ v0 is single-machine, single-operator, no public-facing tournament. Future versi
 
 ## Read this first
 
-The authoritative specification for v0 is **[`docs/spec.md`](docs/spec.md)**. Before doing any implementation work, read it end-to-end. It defines:
+Before doing any implementation work, read these two sources in order:
+
+1. **[`docs/spec.md`](docs/spec.md)** — the authoritative v0 technical specification
+2. **[`docs/domain/README.md`](docs/domain/README.md)** — the domain-doc index and rules split
+
+`docs/spec.md` is the technical contract for this repository. `docs/domain/` is the canonical source for poker-domain semantics and terminology used by the implementation.
+
+The authoritative specification for v0 is **[`docs/spec.md`](docs/spec.md)**. It defines:
 
 - The thesis the project must prove
 - System architecture (Go game server, Pi/TS LLM agents, Go scripted agents)
@@ -23,6 +30,20 @@ The authoritative specification for v0 is **[`docs/spec.md`](docs/spec.md)**. Be
 - Build phasing (§17) — **start here for sequencing**
 
 The spec is a contract. If you find ambiguity or omissions, surface them and propose a spec amendment in the same change — do not silently make a judgment call that quietly drifts from the spec.
+
+### Spec vs. domain docs
+
+Use this split consistently:
+
+- **`docs/spec.md`**: project-specific technical decisions — architecture, wire protocol, session outputs, build sequencing, scope boundaries, and any implementation policy unique to this repo.
+- **`docs/domain/`**: Texas Hold'em game rules and terminology — flop/turn/river, blinds, hole cards, betting order, hand rankings, showdown concepts, and similar poker-domain truth that agents should not reinvent.
+
+Rule of thumb:
+
+- If it is true because of this repository's design, it belongs in `docs/spec.md`.
+- If it is true because it is part of Texas Hold'em itself, it belongs in `docs/domain/`.
+
+When the code needs actual Hold'em rules, agents should consult `docs/domain/` rather than improvising from memory. If a project-specific behavior intentionally constrains or overrides the generic domain rules, `docs/spec.md` wins for that case.
 
 ## Adjacent code you'll need to know about
 
@@ -83,8 +104,9 @@ Steps 1–4 are end-to-end demoable with no LLMs and no AKG — at the end you s
 ## When you're unsure
 
 - About the format / AKG behavior → read `~/source/akg/docs/spec/`.
+- About Texas Hold'em rules or terminology → read `docs/domain/` first.
 - About the wire protocol → it's spec §7. If it doesn't answer your question, propose an amendment.
-- About scope → assume it's out of scope unless the spec explicitly includes it. Ask the user.
+- About scope or project behavior → assume it's out of scope unless the spec explicitly includes it. Ask the user.
 - About a third-party library → keep it minimal. The Go stdlib goes very far for this project; reach for `card` / poker libraries only if hand evaluation actually becomes the bottleneck (it won't for v0).
 
 
