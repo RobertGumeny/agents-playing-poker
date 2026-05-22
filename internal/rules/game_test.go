@@ -119,6 +119,21 @@ func TestLegalActions(t *testing.T) {
 			},
 			wantToCall: 1,
 		},
+		{
+			name: "small blind can call full blind when big blind is all-in short",
+			setup: func(t *testing.T) *HandState {
+				match := mustHeadsUpMatch(t, 100, 1, 2)
+				match.Players[0].Stack = 1
+				hand := mustStartHand(t, match, 2)
+				return hand
+			},
+			wantLegal: []LegalAction{
+				{Type: ActionFold},
+				{Type: ActionCall, Amount: 1},
+				{Type: ActionRaise, Amount: 100, MinAmount: 4, MaxAmount: 100},
+			},
+			wantToCall: 1,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -135,6 +150,7 @@ func TestLegalActions(t *testing.T) {
 func TestBettingProgressionAndPotAccounting(t *testing.T) {
 	testCases := []struct {
 		name              string
+		preHandStacks     map[int]int
 		deal              *deck.HoldemDeal
 		actions           []Action
 		wantStreet        Street
@@ -194,11 +210,36 @@ func TestBettingProgressionAndPotAccounting(t *testing.T) {
 			wantWinningSeats:  []int{0},
 			wantShowdownHands: 0,
 		},
+		{
+			name:          "short all-in blind closes action after full call and refunds excess",
+			preHandStacks: map[int]int{1: 1},
+			deal: ptrDeal(mustDeal(t,
+				[][]string{{"Kc", "Qd"}, {"As", "Ad"}},
+				[]string{"2c", "3d", "4h", "5s", "7c"},
+			)),
+			actions: []Action{
+				{Seat: 0, Type: ActionCall, Amount: 1},
+			},
+			wantStreet:        StreetShowdown,
+			wantBoardCount:    5,
+			wantComplete:      true,
+			wantShowdown:      true,
+			wantPot:           2,
+			wantStacks:        [2]int{99, 2},
+			wantDeltas:        [2]int{-1, 1},
+			wantMatchStacks:   [2]int{99, 2},
+			wantWinningSeats:  []int{1},
+			wantShowdownHands: 2,
+			resolveShowdown:   true,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			match := mustHeadsUpMatch(t, 100, 1, 2)
+			for seat, stack := range tc.preHandStacks {
+				match.Players[seat].Stack = stack
+			}
 			var hand *HandState
 			if tc.deal != nil {
 				var err error
@@ -350,20 +391,25 @@ func TestResolveShowdown(t *testing.T) {
 			wantShowdownLabel: []string{"one pair", "three of a kind"},
 		},
 		{
-			name:          "tied board splits pot and odd chip goes to big blind",
-			preHandStacks: map[int]int{0: 2, 1: 5},
+			name: "tied board splits even contested pot",
 			deal: mustDeal(t,
 				[][]string{{"Ac", "Kd"}, {"Qh", "Js"}},
 				[]string{"As", "Ks", "Qs", "Js", "Ts"},
 			),
 			actions: []Action{
 				{Seat: 0, Type: ActionCall, Amount: 1},
-				{Seat: 1, Type: ActionRaise, Amount: 5},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
+				{Seat: 1, Type: ActionCheck},
+				{Seat: 0, Type: ActionCheck},
 			},
 			wantWinningSeats:  []int{0, 1},
-			wantOddChipSeat:   1,
-			wantStacks:        [2]int{3, 4},
-			wantDeltas:        [2]int{1, -1},
+			wantOddChipSeat:   -1,
+			wantStacks:        [2]int{100, 100},
+			wantDeltas:        [2]int{0, 0},
 			wantShowdownLabel: []string{"straight flush", "straight flush"},
 		},
 	}
@@ -407,6 +453,12 @@ func TestResolveShowdown(t *testing.T) {
 				t.Fatalf("showdown labels = %v, want %v", labels, tc.wantShowdownLabel)
 			}
 		})
+	}
+}
+
+func TestFirstWinnerClockwiseFromButton(t *testing.T) {
+	if got := firstWinnerClockwiseFromButton(0, []int{0, 1}, 2); got != 1 {
+		t.Fatalf("firstWinnerClockwiseFromButton() = %d, want 1", got)
 	}
 }
 

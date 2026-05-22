@@ -77,6 +77,7 @@ func (h *HandState) ResolveShowdown() error {
 		}
 	}
 
+	refundUnmatchedCommitment(h, contenders)
 	pot := h.Pot()
 	share := pot / len(winners)
 	oddChipSeat := -1
@@ -109,6 +110,30 @@ func (h *HandState) ResolveShowdown() error {
 	}
 
 	return nil
+}
+
+func refundUnmatchedCommitment(h *HandState, contenders []int) {
+	if len(contenders) < 2 {
+		return
+	}
+	matched := h.Players[contenders[0]].Committed
+	for _, seat := range contenders[1:] {
+		if h.Players[seat].Committed < matched {
+			matched = h.Players[seat].Committed
+		}
+	}
+	for _, seat := range contenders {
+		player := &h.Players[seat]
+		if player.Committed <= matched {
+			continue
+		}
+		refund := player.Committed - matched
+		player.Committed -= refund
+		player.Stack += refund
+		if player.StreetCommitted >= refund {
+			player.StreetCommitted -= refund
+		}
+	}
 }
 
 func firstWinnerClockwiseFromButton(buttonSeat int, winners []int, playerCount int) int {

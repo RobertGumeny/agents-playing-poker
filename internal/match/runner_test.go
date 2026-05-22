@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/RobertGumeny/agent-poker/internal/heuristicagent"
 	"github.com/RobertGumeny/agent-poker/internal/randomagent"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 	"github.com/RobertGumeny/agent-poker/internal/wire"
@@ -138,6 +139,24 @@ func TestRunnerRunWithRandomAgentsCompletes(t *testing.T) {
 	}
 }
 
+func TestRunnerRunWithHeuristicAgentCompletes(t *testing.T) {
+	t.Parallel()
+
+	result, err := runTestMatch(t, "heuristic", "random", 8, 50*time.Millisecond, 52)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if !result.Completed {
+		t.Fatalf("RunResult.Completed = false, want true")
+	}
+
+	handsPath := filepath.Join(result.SessionDir, "hands.jsonl")
+	lines := readLines(t, handsPath)
+	if len(lines) != 8 {
+		t.Fatalf("hands.jsonl line count = %d, want 8", len(lines))
+	}
+}
+
 func TestRunnerRunMarksIncompleteMatchAndPersistsCompletedHandsWhenAgentDies(t *testing.T) {
 	t.Parallel()
 
@@ -218,6 +237,13 @@ func TestHelperAgentProcess(t *testing.T) {
 	fmt.Fprintf(os.Stderr, "helper agent %s stderr\n", behavior)
 	if behavior == "random" {
 		if err := randomagent.Run(os.Stdin, os.Stdout, nil); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
+	if behavior == "heuristic" {
+		if err := heuristicagent.Run(os.Stdin, os.Stdout); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

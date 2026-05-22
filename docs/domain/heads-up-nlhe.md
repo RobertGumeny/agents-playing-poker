@@ -37,6 +37,8 @@ After blinds are posted but before any voluntary preflop action:
 
 The amount **to call** for the button / small blind is the difference between the big blind and small blind.
 
+If a player does not have enough chips to post a blind, that player posts their remaining stack all-in. The opponent may still complete the full blind amount if required by the blind level, and if only one player has chips remaining after that action the rest of the board is dealt with no further betting.
+
 ## Preflop action order
 
 After the blinds are posted and hole cards are dealt:

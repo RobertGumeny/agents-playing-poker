@@ -314,13 +314,14 @@ func (h *HandState) commitChips(player *PlayerState, amount int) {
 
 func (h *HandState) postBlind(seat int, amount int) error {
 	player := &h.Players[seat]
-	if player.Stack < amount {
-		return fmt.Errorf("post blind: seat %d has stack %d, needs %d", seat, player.Stack, amount)
+	posted := amount
+	if player.Stack < posted {
+		posted = player.Stack
 	}
-	player.Stack -= amount
-	player.Committed += amount
-	player.StreetCommitted += amount
-	blind := Action{Seat: seat, Type: ActionPostBlind, Street: StreetPreflop, Amount: amount, AllIn: player.Stack == 0}
+	player.Stack -= posted
+	player.Committed += posted
+	player.StreetCommitted += posted
+	blind := Action{Seat: seat, Type: ActionPostBlind, Street: StreetPreflop, Amount: posted, AllIn: player.Stack == 0}
 	if player.Stack == 0 {
 		player.AllIn = true
 	}
@@ -358,12 +359,20 @@ func (h *HandState) activePlayers() int {
 }
 
 func (h *HandState) noFurtherActionPossible() bool {
-	for _, player := range h.Players {
+	actingCandidates := make([]int, 0, len(h.Players))
+	for seat, player := range h.Players {
 		if player.InHand && !player.AllIn {
-			return false
+			actingCandidates = append(actingCandidates, seat)
 		}
 	}
-	return true
+	if len(actingCandidates) == 0 {
+		return true
+	}
+	if len(actingCandidates) > 1 {
+		return false
+	}
+	seat := actingCandidates[0]
+	return h.ToCall(seat) == 0 && h.actedThisStreet[seat]
 }
 
 func (h *HandState) bettingRoundClosed() bool {
