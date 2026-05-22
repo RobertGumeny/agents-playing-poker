@@ -10,34 +10,31 @@ v0 is in progress. Build-order steps 1–4 are implemented: the rules engine, wi
 
 ## Run the step-4 demo
 
-Build the three Go binaries:
+From the repo root, run the supported one-command scripted demo:
 
 ```bash
-go build -o bin/poker-server ./cmd/poker-server
-go build -o bin/random-agent ./cmd/random-agent
-go build -o bin/heuristic-agent ./cmd/heuristic-agent
+go run ./cmd/poker-demo
 ```
 
-Run a non-LLM demo match:
-
-```bash
-./bin/poker-server \
-  -sessions-dir sessions \
-  -session-id ses_demo_random_vs_heuristic \
-  -match-id mat_demo \
-  -seed 17 \
-  -hand-count 200 \
-  -agent0-name random \
-  -agent0-cmd "$(pwd)/bin/random-agent" \
-  -agent1-name heuristic \
-  -agent1-cmd "$(pwd)/bin/heuristic-agent"
-```
-
-The server prints the session directory on success, for example:
+The wrapper launches the default `random` versus `heuristic` match through `poker-server` and prints the generated session bundle path, for example:
 
 ```text
-session_dir=sessions/ses_demo_random_vs_heuristic completed=true
+demo=random-vs-heuristic session_dir=/abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z
+inspect: jq . /abs/path/to/repo/sessions/ses_2026-05-22T12-00-00Z/manifest.json
 ```
+
+Useful supported overrides:
+
+```bash
+go run ./cmd/poker-demo \
+  -session-id ses_demo_random_vs_heuristic \
+  -sessions-dir sessions \
+  -match-id mat_demo \
+  -seed 17 \
+  -hand-count 200
+```
+
+If you need the low-level primitive directly, `poker-server` still supports explicit seat command wiring.
 
 ## Inspect the session bundle
 

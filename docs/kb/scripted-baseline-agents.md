@@ -12,17 +12,20 @@ The archived EPIC-4 task log shows the step-4 work landed in three slices:
 ## Scope delivered
 
 The current scripted baseline surface lives primarily in:
+- `cmd/poker-demo`
 - `cmd/random-agent`
 - `cmd/heuristic-agent`
 - `internal/randomagent`
 - `internal/heuristicagent`
 - `cmd/poker-server/main_test.go`
+- `cmd/poker-demo/main_test.go`
 
 It now provides:
 - two protocol-compliant long-lived Go agents that can complete full matches over stdio JSONL
 - one intentionally non-strategic baseline (`random`) and one simple deterministic scripted baseline (`heuristic`)
 - server-authoritative legality, where both agents trust `legal_actions` from the wire contract instead of recomputing betting legality
-- a documented local command path for running a non-LLM `random` versus `heuristic` match and inspecting the resulting session bundle
+- a documented top-level `go run ./cmd/poker-demo` flow for running a non-LLM `random` versus `heuristic` match and inspecting the resulting session bundle
+- retention of `poker-server` as the low-level primitive for explicit seat command wiring
 - CLI-level proof that timeout enforcement still produces `auto_fold` and does not hang the server process
 
 ## Normative sources
@@ -75,14 +78,20 @@ EPIC-4 also exposed one important rules detail that later work should preserve: 
 ## Demo and verification surface
 
 The durable operator path for the non-LLM demo is:
-1. build `poker-server`, `random-agent`, and `heuristic-agent`
-2. run `poker-server` with explicit `-agent0-cmd` and `-agent1-cmd`
+1. run `go run ./cmd/poker-demo` from the repo root
+2. optionally override a small supported set of match knobs such as `-session-id`, `-sessions-dir`, `-match-id`, `-seed`, or `-hand-count`
 3. inspect `sessions/<id>/manifest.json`, `hands.jsonl`, and per-agent logs
+
+For lower-level debugging or future wrappers, `poker-server` remains available with explicit `-agent0-cmd` and `-agent1-cmd` wiring.
 
 `cmd/poker-server/main_test.go` currently proves:
 - the shipped server binary can run a real `random` versus `heuristic` match and write a valid session bundle
 - a sleeping helper agent that exceeds `-decision-deadline` is recorded as `action: "auto_fold"` with `forced_reason: "decision_timeout"`
 - the server still exits cleanly after timeout enforcement
+
+`cmd/poker-demo/main_test.go` proves:
+- the wrapper command runs the default scripted match through `poker-server`
+- supported CLI overrides still produce a valid session bundle with the requested hand count
 
 Related lower-level coverage remains in:
 - `internal/randomagent/agent_test.go`
