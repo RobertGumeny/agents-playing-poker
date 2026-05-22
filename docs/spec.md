@@ -144,6 +144,10 @@ Agent acknowledges with `session_ready`.
     "pot": 6,
     "to_call": 2,
     "stacks": {"0": 197, "1": 197},
+    "seats": [
+      {"seat": 0, "name": "llm-akg"},
+      {"seat": 1, "name": "llm-fullhistory"}
+    ],
     "action_history": [
       {"seat": 1, "action": "call", "amount": 1, "street": "preflop"},
       {"seat": 0, "action": "check", "street": "preflop"},
@@ -157,6 +161,7 @@ Agent acknowledges with `session_ready`.
   }
 }
 ```
+`seats` is included even in heads-up play so the v0 protocol does not hard-code two players.
 
 #### `hand_end`
 ```json
@@ -177,11 +182,25 @@ If no showdown, `showdown` contains only the winner's cards. For `perfect-info`,
 
 #### `session_end`
 Final message; gives the agent a chance to flush memory writes and exit cleanly.
+```json
+{
+  "type": "session_end",
+  "payload": {}
+}
+```
+No additional payload fields are required in v0.
 
 ### Agent → server
 
 #### `session_ready`
-Acknowledges `session_init`. Includes agent version metadata for the manifest.
+Acknowledges `session_init`. Includes agent version metadata for the manifest and references the `session_init` message ID.
+```json
+{
+  "type": "session_ready",
+  "in_reply_to": "<session_init id>",
+  "payload": {"version": "heuristic/0.1.0"}
+}
+```
 
 #### `action`
 Response to `your_turn`. Must reference the originating message `id`.
@@ -195,6 +214,16 @@ Response to `your_turn`. Must reference the originating message `id`.
 
 #### `log` (optional)
 Free-form structured logging the agent wants captured server-side.
+```json
+{
+  "type": "log",
+  "payload": {
+    "level": "info",
+    "message": "raised turn blocker candidate",
+    "fields": {"hand_number": 47, "street": "turn"}
+  }
+}
+```
 
 ### Timeouts and misbehavior
 

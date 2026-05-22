@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add Go wire protocol envelope and payload types
 - test: add table-driven rules-engine coverage for blinds, legal actions, pot accounting, hand evaluation, and showdown
 - feat: add core NLHE domain model and deterministic Hold'em dealer primitives
 - feat: add heads-up betting-round progression, legal-action generation, blind rotation, and pot accounting
