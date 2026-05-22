@@ -42,7 +42,7 @@ describe("protocol helpers", () => {
         type: "session_ready",
         id: "msg-2",
         in_reply_to: "msg-1",
-        payload: { version: "llm-nomemory/0.1.0" },
+        payload: { version: "llm-stateless/0.1.0" },
       },
     },
     {

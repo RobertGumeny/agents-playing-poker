@@ -9,7 +9,7 @@ describe("buildDecisionPrompt", () => {
     state.session = {
       sessionId: "ses-1",
       matchId: "mat-1",
-      agentName: "llm-nomemory",
+      agentName: "llm-stateless",
       yourSeat: 0,
       seats: [
         { seat: 0, name: "hero" },
@@ -48,7 +48,7 @@ describe("buildDecisionPrompt", () => {
 
     expect(prompt).toContain("Session: ses-1");
     expect(prompt).toContain("Match: mat-1");
-    expect(prompt).toContain("Agent: llm-nomemory");
+    expect(prompt).toContain("Agent: llm-stateless");
     expect(prompt).toContain("Your seat: 0");
     expect(prompt).toContain("Hand: 7");
     expect(prompt).toContain('Hole cards: ["As","Kh"]');

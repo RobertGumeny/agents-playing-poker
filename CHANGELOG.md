@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: replace the llm-stateless Pi decision placeholder with a real SDK-backed per-decision client
 - Hardened shared Pi-agent prompt construction, strict action parsing, legal-action validation, and safe fallback coverage.
 - feat: implement shared Pi agent state transitions and resilient JSONL runner loop
 - feat: complete TypeScript wire protocol payload types and validated JSONL helpers

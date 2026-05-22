@@ -1,5 +1,5 @@
 {
-  "name": "@agent-poker/llm-nomemory",
+  "name": "@agent-poker/llm-stateless",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": [
     "shared",
-    "llm-nomemory"
+    "llm-stateless"
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",

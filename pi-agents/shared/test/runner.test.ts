@@ -55,7 +55,7 @@ describe("runPokerAgent", () => {
           id: "msg-1",
           payload: {
             session_id: "ses-1",
-            agent_name: "llm-nomemory",
+            agent_name: "llm-stateless",
             match: {
               match_id: "mat-1",
               seed: 1,
@@ -186,7 +186,7 @@ describe("runPokerAgent", () => {
           id: "msg-1",
           payload: {
             session_id: "ses-1",
-            agent_name: "llm-nomemory",
+            agent_name: "llm-stateless",
             match: {
               match_id: "mat-1",
               seed: 1,
@@ -304,7 +304,7 @@ describe("runPokerAgent", () => {
           id: "msg-1",
           payload: {
             session_id: "ses-1",
-            agent_name: "llm-nomemory",
+            agent_name: "llm-stateless",
             match: {
               match_id: "mat-1",
               seed: 1,
