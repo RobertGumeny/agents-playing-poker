@@ -83,6 +83,8 @@ The durable operator path for the non-LLM demo is:
 2. optionally override a small supported set of match knobs such as `-session-id`, `-sessions-dir`, `-match-id`, `-seed`, or `-hand-count`
 3. inspect `sessions/<id>/manifest.json`, `hands.jsonl`, and per-agent logs
 
+For the wrapper-specific UX contract and layering decisions added in EPIC-5, see [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md).
+
 Execution-relevant constraints to preserve in future operator docs:
 - `poker-demo` shells out to `go build`, so a working Go toolchain is required at runtime
 - the wrapper compiles `poker-server`, `random-agent`, and `heuristic-agent` into a temporary directory before launching the match

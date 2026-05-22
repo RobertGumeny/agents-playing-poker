@@ -26,3 +26,6 @@ Do not duplicate the normative sources:
 - [`scripted-baseline-agents.md`](scripted-baseline-agents.md)
   - What EPIC-4 delivered in the scripted non-LLM agent layer and step-4 demo path.
   - Covers `random` and `heuristic` agent behavior, baseline constraints, demo verification, and the timeout-tested local run surface.
+- [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md)
+  - What EPIC-5 delivered in the operator-facing wrapper around the scripted step-4 demo.
+  - Covers `cmd/poker-demo`, its narrow override surface, artifact inspection output, and the layering boundary with `poker-server`.
