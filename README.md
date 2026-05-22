@@ -46,6 +46,37 @@ go run ./cmd/poker-demo \
 
 If you need lower-level debugging, custom seat wiring, or to run non-default agents directly, `poker-server` remains available as the escape hatch with explicit seat command wiring.
 
+## Run convenient real sessions
+
+For operator convenience, use the higher-level `poker-run` wrapper when you want real matches without remembering long `poker-server` invocations.
+
+Examples:
+
+```bash
+go run ./cmd/poker-run -agent0 llm-stateless -agent1 heuristic -hands 50
+```
+
+```bash
+go run ./cmd/poker-run -agent0 llm-stateless -agent1 random -hands 100 -model anthropic:claude-sonnet-4
+```
+
+```bash
+go run ./cmd/poker-run \
+  -agent0 heuristic \
+  -agent1 random \
+  -hands 200 \
+  -seed 17 \
+  -session-id ses_scripted_match \
+  -sessions-dir sessions
+```
+
+Notes:
+
+- supported aliases are `llm-stateless`, `heuristic`, and `random`
+- `poker-run` resolves agent entrypoints to absolute paths before launch so agent subprocesses still work when `poker-server` sets each child `cmd.Dir` to its session directory
+- for `llm-stateless`, the wrapper clears `PI_POKER_FAKE_DECISIONS_JSON`, defaults `PI_POKER_THINKING_LEVEL=low`, and forwards `-model` / `-thinking-level` into Pi agent env
+- Go agents are built into `.tmp/bin/` on demand for wrapper runs
+
 ## Inspect the session bundle
 
 The demo writes artifacts under `sessions/<id>/`:
