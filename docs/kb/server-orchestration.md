@@ -2,6 +2,13 @@
 
 EPIC-3 implemented build-order step 3 from [`../spec.md`](../spec.md): the Go `poker-server` process lifecycle and stdio match orchestration for v0 agent sessions.
 
+## Epic delivery summary
+
+The archived EPIC-3 task log shows the server/orchestration work landed in three slices:
+- `EPIC-3-001`: built `poker-server`, long-lived agent process management, stdio JSONL exchange, timeout-enforced `auto_fold`, and session artifact writing
+- `EPIC-3-002`: verified the server loop was correctly integrated with the deterministic rules engine and persisted the required complete and incomplete session bundles
+- `EPIC-3-003`: added integration coverage for deterministic replay and incomplete-match persistence when an agent dies mid-match
+
 ## Scope delivered
 
 The current orchestration surface lives primarily in:
@@ -44,6 +51,7 @@ Timeout policy:
 - on timeout, the server applies a fold itself via the rules engine
 - the persisted hand artifact records `action: "auto_fold"` with `forced_reason: "decision_timeout"`
 - timeout handling stays server-side; agents do not self-report timeout outcomes
+- if an agent exits or protocol handling fails mid-match, the runner still writes `manifest.json` with `completed: false` and keeps any already-finished `hands.jsonl` records
 
 ## `internal/sessionlog`
 
@@ -77,6 +85,12 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 - decision timeout conversion into persisted `auto_fold`
 - incomplete-match persistence when an agent exits during hand 2, including manifest `completed: false` and preservation of already-finished hands
 - byte-for-byte deterministic `hands.jsonl` output for repeated runs with the same seed and deterministic agents
+
+The EPIC-3 verification recipe recorded in the archived task logs was:
+- `go build ./...`
+- `go test ./...`
+- `go vet ./...`
+- `go test ./internal/match`
 
 ## Current boundaries
 
