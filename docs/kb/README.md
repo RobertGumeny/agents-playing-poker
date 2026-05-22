@@ -23,3 +23,6 @@ Do not duplicate the normative sources:
 - [`server-orchestration.md`](server-orchestration.md)
   - What EPIC-3 delivered in the Go server and match orchestrator.
   - Covers the epic delivery slices, process lifecycle, timeout/incomplete-match handling, session artifacts, and deterministic replay coverage.
+- [`scripted-baseline-agents.md`](scripted-baseline-agents.md)
+  - What EPIC-4 delivered in the scripted non-LLM agent layer and step-4 demo path.
+  - Covers `random` and `heuristic` agent behavior, baseline constraints, demo verification, and the timeout-tested local run surface.
