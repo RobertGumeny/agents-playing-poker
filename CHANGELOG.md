@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added CLI-level step-4 demo coverage for poker-server, including random-vs-heuristic session bundle verification and timeout auto-fold behavior, and documented how to run and inspect the non-LLM demo.
 - feat: add scripted heuristic Go agent baseline and support short blind all-in match completion
 - Implemented the protocol-compliant Go random agent baseline and verified it completes full server-driven matches using only server-advertised legal actions.
 - test: add integration coverage for deterministic session artifacts and incomplete matches

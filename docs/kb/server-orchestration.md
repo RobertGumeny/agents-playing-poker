@@ -92,6 +92,10 @@ The EPIC-3 verification recipe recorded in the archived task logs was:
 - `go vet ./...`
 - `go test ./internal/match`
 
+EPIC-4 extended that coverage with CLI-level tests in `cmd/poker-server/main_test.go` to prove:
+- the shipped `poker-server` binary can run a real `random` versus `heuristic` demo match and write a valid `sessions/<id>/` bundle
+- a slow or sleeping agent is auto-folded on `decision_deadline` and the server process still exits cleanly
+
 ## Current boundaries
 
 Still out of scope here:

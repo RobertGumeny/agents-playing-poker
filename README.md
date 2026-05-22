@@ -6,9 +6,59 @@ The goal is to produce a measurable, inspectable demonstration that durable stru
 
 ## Status
 
-v0, pre-implementation. The specification is complete; the code is not yet written.
+v0 is in progress. Build-order steps 1–4 are implemented: the rules engine, wire protocol, `poker-server`, and the scripted `random` / `heuristic` Go agents.
+
+## Run the step-4 demo
+
+Build the three Go binaries:
+
+```bash
+go build -o bin/poker-server ./cmd/poker-server
+go build -o bin/random-agent ./cmd/random-agent
+go build -o bin/heuristic-agent ./cmd/heuristic-agent
+```
+
+Run a non-LLM demo match:
+
+```bash
+./bin/poker-server \
+  -sessions-dir sessions \
+  -session-id ses_demo_random_vs_heuristic \
+  -match-id mat_demo \
+  -seed 17 \
+  -hand-count 200 \
+  -agent0-name random \
+  -agent0-cmd "$(pwd)/bin/random-agent" \
+  -agent1-name heuristic \
+  -agent1-cmd "$(pwd)/bin/heuristic-agent"
+```
+
+The server prints the session directory on success, for example:
+
+```text
+session_dir=sessions/ses_demo_random_vs_heuristic completed=true
+```
+
+## Inspect the session bundle
+
+The demo writes artifacts under `sessions/<id>/`:
+
+- `manifest.json` — match metadata, seat versions, totals, and completion status
+- `hands.jsonl` — one server-authoritative hand record per line
+- `agents/<name>/stdout.log` and `agents/<name>/stderr.log` — per-agent process logs
+
+Useful inspection commands:
+
+```bash
+jq . sessions/ses_demo_random_vs_heuristic/manifest.json
+head -n 3 sessions/ses_demo_random_vs_heuristic/hands.jsonl
+ls sessions/ses_demo_random_vs_heuristic/agents
+```
+
+Timeout behavior is server-enforced. If an agent exceeds `-decision-deadline`, the server records `action: "auto_fold"` with `forced_reason: "decision_timeout"` in `hands.jsonl` and still exits cleanly.
 
 ## Read
 
 - **[`docs/spec.md`](docs/spec.md)** — the v0 specification (architecture, wire protocol, strategy lineup, output format, build phasing).
 - **[`AGENTS.md`](AGENTS.md)** — instructions for AI agents working in this repo.
+- **[`docs/wire-protocol.md`](docs/wire-protocol.md)** — the JSONL agent/server contract.
