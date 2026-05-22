@@ -242,7 +242,7 @@ Optional structured log entry for capture in session artifacts.
 ## Timeouts and misbehavior
 
 - The server advertises the decision deadline in `session_init.match.decision_deadline_ms`.
-- If an `action` reply does not arrive before the deadline, the server records `auto_fold` and continues.
+- If an `action` reply does not arrive before the deadline, the server records `auto_fold`, persists it in `hands.jsonl` with `forced_reason: "decision_timeout"`, and continues.
 - If the agent process exits or crashes mid-match, the server aborts the match, marks it incomplete, and still persists partial artifacts.
 - The server never trusts agent-reported game state. It computes legal actions, betting state, showdown results, and chip deltas itself.
 

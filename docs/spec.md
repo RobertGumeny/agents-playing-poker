@@ -227,7 +227,7 @@ Free-form structured logging the agent wants captured server-side.
 
 ### Timeouts and misbehavior
 
-- Decisions must arrive within `decision_deadline_ms` (configurable per match, default 30s). On timeout the server records `auto_fold` and proceeds.
+- Decisions must arrive within `decision_deadline_ms` (configurable per match, default 30s). On timeout the server records `auto_fold`, persists it in the hand artifact with `forced_reason: "decision_timeout"`, and proceeds.
 - If the agent process dies mid-match, the match is aborted and marked `incomplete`; partial results are still persisted.
 - The server never trusts the agent for state — it computes pot, legal actions, and showdown winners itself.
 
@@ -314,6 +314,8 @@ sessions/
 ### `hands.jsonl`
 
 One JSON object per line, one per hand. Fields: `match_id`, `hand_number`, `dealer_seat`, `stacks_start`, `blinds_posted`, `hole_cards` (both seats — server's record, not what each agent saw), `board`, `actions`, `showdown_reached`, `result`.
+
+`actions` is the server-authoritative action log for the hand. Normal player actions use the same vocabulary as the rules engine (`post_blind`, `fold`, `check`, `call`, `bet`, `raise`). If the server forces a timeout fold, it records `action: "auto_fold"` with `forced_reason: "decision_timeout"` instead of pretending the agent chose an ordinary fold.
 
 ### `agents/<name>/memory.akg`
 
