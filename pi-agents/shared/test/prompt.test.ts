@@ -4,7 +4,7 @@ import { buildDecisionPrompt } from "../src/prompt.js";
 import { createAgentState } from "../src/state.js";
 
 describe("buildDecisionPrompt", () => {
-  it("includes current decision state and augmentation sections", () => {
+  function buildBaseState() {
     const state = createAgentState();
     state.session = {
       sessionId: "ses-1",
@@ -27,10 +27,13 @@ describe("buildDecisionPrompt", () => {
       ],
       yourHoleCards: ["As", "Kh"],
     };
+    return state;
+  }
 
+  it("includes only current decision state in the base prompt", () => {
     const prompt = buildDecisionPrompt(
       {
-        state,
+        state: buildBaseState(),
         handNumber: 7,
         street: "flop",
         board: ["Td", "9h", "2c"],
@@ -40,11 +43,36 @@ describe("buildDecisionPrompt", () => {
         actionHistory: [{ seat: 0, action: "check", street: "preflop" }],
         legalActions: [{ action: "call", amount: 2 }],
       },
-      { sections: ["Memory: none"] },
+      { sections: [] },
     );
 
+    expect(prompt).toContain("Session: ses-1");
+    expect(prompt).toContain("Match: mat-1");
+    expect(prompt).toContain("Agent: llm-nomemory");
+    expect(prompt).toContain("Your seat: 0");
     expect(prompt).toContain("Hand: 7");
     expect(prompt).toContain('Hole cards: ["As","Kh"]');
-    expect(prompt).toContain("Memory: none");
+    expect(prompt).toContain("Current hand action history:");
+    expect(prompt).not.toContain("Previous hand result");
+    expect(prompt).not.toContain("chips_delta");
+  });
+
+  it("includes memory/history sections only when a strategy explicitly adds them", () => {
+    const prompt = buildDecisionPrompt(
+      {
+        state: buildBaseState(),
+        handNumber: 7,
+        street: "flop",
+        board: ["Td", "9h", "2c"],
+        pot: 6,
+        toCall: 2,
+        stacks: { "0": 197, "1": 197 },
+        actionHistory: [{ seat: 0, action: "check", street: "preflop" }],
+        legalActions: [{ action: "call", amount: 2 }],
+      },
+      { sections: ["Previous hand result: won 14 chips."] },
+    );
+
+    expect(prompt).toContain("Previous hand result: won 14 chips.");
   });
 });

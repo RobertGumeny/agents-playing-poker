@@ -6,12 +6,17 @@ export function buildDecisionPrompt(context: DecisionContext, augmentation: Prom
   const hand = context.state.hand;
   const session = context.state.session;
 
-  return [
+  const sections = [
     "You are playing heads-up no-limit Texas Hold'em.",
-    "Choose exactly one legal action. Respond with JSON only, with shape {\"action\": string, \"amount\"?: number}.",
+    "Choose exactly one server-advertised legal action.",
+    "Respond with JSON only, with shape {\"action\": string, \"amount\"?: number}.",
     "Do not include commentary, markdown, or extra keys.",
     "",
-    `Agent seat: ${session?.yourSeat ?? "unknown"}`,
+    `Session: ${session?.sessionId ?? "unknown"}`,
+    `Match: ${session?.matchId ?? "unknown"}`,
+    `Agent: ${session?.agentName ?? "unknown"}`,
+    `Your seat: ${session?.yourSeat ?? "unknown"}`,
+    `Seats: ${JSON.stringify(session?.seats ?? [])}`,
     `Hand: ${context.handNumber}`,
     `Street: ${context.street}`,
     `Hole cards: ${JSON.stringify(hand?.yourHoleCards ?? [])}`,
@@ -19,8 +24,9 @@ export function buildDecisionPrompt(context: DecisionContext, augmentation: Prom
     `Pot: ${context.pot}`,
     `To call: ${context.toCall}`,
     `Stacks: ${JSON.stringify(context.stacks)}`,
-    `Action history: ${JSON.stringify(context.actionHistory)}`,
+    `Current hand action history: ${JSON.stringify(context.actionHistory)}`,
     `Legal actions: ${JSON.stringify(context.legalActions)}`,
-    ...augmentation.sections,
-  ].join("\n");
+  ];
+
+  return sections.concat(augmentation.sections).join("\n");
 }

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Hardened shared Pi-agent prompt construction, strict action parsing, legal-action validation, and safe fallback coverage.
 - feat: implement shared Pi agent state transitions and resilient JSONL runner loop
 - feat: complete TypeScript wire protocol payload types and validated JSONL helpers
 - feat: add a narrow npm workspace for pi-agents shared runtime and tests
