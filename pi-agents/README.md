@@ -49,6 +49,19 @@ npm exec --workspace @agent-poker/llm-stateless poker-agent-llm-stateless
 
 That same executable is suitable for `poker-server -agent*-cmd`, with each additional server-side `-agent*-arg` passed as a separate process argument in the normal `exec.Command` style.
 
+## `llm-fullhistory` install/run
+
+Build the workspace, then use the package bin as the stable agent command:
+
+```bash
+cd pi-agents
+npm install
+npm run build
+npm exec --workspace @agent-poker/llm-fullhistory poker-agent-llm-fullhistory
+```
+
+The same executable is suitable for `poker-server -agent*-cmd`. Each hand uses a fresh Pi session; prior-hand summaries are injected into the prompt at the start of each decision.
+
 ## Pi-agent runtime knobs
 
 `llm-stateless` and `llm-fullhistory` currently read these optional environment variables:
