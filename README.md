@@ -53,15 +53,15 @@ For operator convenience, use the higher-level `poker-run` wrapper when you want
 Examples:
 
 ```bash
-go run ./cmd/poker-run -agent0 llm-stateless -agent1 heuristic -hands 50
+go run ./cmd/poker-run -agent0 llm-fullhistory -agent1 heuristic -hands 25
 ```
 
 ```bash
-go run ./cmd/poker-run -agent0 llm-fullhistory -agent1 llm-stateless -hands 50 -model anthropic:claude-sonnet-4
+go run ./cmd/poker-run -agent0 llm-fullhistory -agent1 heuristic -hands 50 -model anthropic:claude-sonnet-4-6
 ```
 
 ```bash
-go run ./cmd/poker-run -agent0 llm-stateless -agent1 random -hands 100 -model anthropic:claude-sonnet-4
+go run ./cmd/poker-run -agent0 llm-stateless -agent1 random -hands 100 -model anthropic:claude-sonnet-4-6
 ```
 
 ```bash
