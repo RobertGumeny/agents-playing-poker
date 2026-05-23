@@ -32,3 +32,6 @@ Do not duplicate the normative sources:
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)
   - What EPIC-7 delivered in the first runnable Pi-backed LLM baseline.
   - Covers the shared TypeScript runtime, per-decision Pi session isolation, external-process command shape, canonical `pi-session.jsonl` artifacts, and test seams that avoid live-model requirements.
+- [`llm-fullhistory-baseline.md`](llm-fullhistory-baseline.md)
+  - Planning and design constraints for the next Pi-backed baseline before implementation lands.
+  - Covers the intended fresh-session-per-hand boundary, compact prior-hand summary format, and the distinction from both `llm-stateless` and future long-running context strategies.

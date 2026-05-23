@@ -10,7 +10,7 @@ Packages:
 
 - `shared/`: shared protocol, state, prompt, action validation, runner, and Pi-session seams.
 - `llm-stateless/`: first LLM baseline; current-hand prompt only, with no strategic memory exposed to the model.
-- `llm-fullhistory/`: future naive memory baseline; injects hand history into prompt context.
+- `llm-fullhistory/`: future naive memory baseline; uses a fresh Pi session per hand and injects compact prior-hand summaries into the prompt.
 - `llm-akg/`: future structured-memory agent; uses AKG retrieval/tools and compaction-aware Pi behavior.
 
 ## Commands
@@ -30,6 +30,11 @@ Target only the shared runtime package when needed:
 The shared runtime tests cover protocol helpers, state updates, prompt construction, action validation/fallback, and the stdio runner loop with fake decision clients.
 
 Pi session logs are observability artifacts and should be stored durably, but they are separate from strategic memory. A stateless agent may persist Pi logs while still ensuring previous hands are not visible to future decisions. When the server provides `session_init.memory_dir`, `llm-stateless` uses that session bundle agent directory as the default home for the canonical `pi-session.jsonl` artifact.
+
+Planned memory-strategy boundaries:
+- `llm-stateless`: fresh Pi session per decision; no prior-hand prompt context.
+- `llm-fullhistory`: fresh Pi session per hand; prior hands injected explicitly as compact human-readable summaries derived from server-visible history.
+- `llm-akg`: long-lived structured-memory strategy with AKG-backed retrieval and compaction-aware Pi behavior.
 
 ## `llm-stateless` install/run
 
