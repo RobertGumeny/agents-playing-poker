@@ -167,6 +167,7 @@ Notes:
 - In `showdown-only` information mode, non-revealed opponent cards are omitted unless shown at showdown.
 - If no showdown occurs, `showdown` contains only revealed winner cards.
 - In `perfect-info`, both players' hole cards are always included.
+- This message gives memory-bearing agents enough server-authoritative information to build later prior-hand summaries without inferring hidden cards.
 
 ### `session_end`
 Final message before shutdown.
@@ -252,3 +253,4 @@ Optional structured log entry for capture in session artifacts.
 - Preserve unknown future fields if you proxy or log messages, but only rely on the fields defined here for v0.
 - Use the domain docs for poker semantics and the server payloads for current legal decisions.
 - Do not attempt to negotiate protocol version or alternate message shapes in v0.
+- For prompt-history strategies such as `llm-fullhistory`, derive prior-hand summaries from protocol-visible state and `hand_end` payloads. Retain only showdown-revealed opponent hole cards unless the match uses `perfect-info`.
