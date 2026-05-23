@@ -171,15 +171,21 @@ Agent acknowledges with `session_ready`.
   "payload": {
     "hand_number": 47,
     "board": ["Td", "9h", "2c", "5s", "Kc"],
+    "action_history": [
+      {"seat": 1, "action": "call", "amount": 1, "street": "preflop"},
+      {"seat": 0, "action": "check", "street": "preflop"},
+      {"seat": 0, "action": "bet", "amount": 2, "street": "flop"},
+      {"seat": 1, "action": "fold", "street": "flop"}
+    ],
+    "showdown_reached": false,
     "showdown": {
-      "0": {"hole_cards": ["As", "Kh"], "rank": "two pair, kings and tens"},
-      "1": {"hole_cards": ["9s", "9d"], "rank": "three of a kind, nines"}
+      "0": {"hole_cards": ["As", "Kh"], "rank": ""}
     },
     "result": [{"seat": 1, "chips_delta": 14}, {"seat": 0, "chips_delta": -14}]
   }
 }
 ```
-If no showdown, `showdown` contains only the winner's cards. For `perfect-info`, both hole cards are always included.
+`action_history` is the final server-authoritative action log for the hand. `showdown_reached` distinguishes true showdowns from non-showdown pots where the winner's cards may still be revealed. If no showdown, `showdown` contains only the winner's cards. For `perfect-info`, both hole cards are always included.
 
 #### `session_end`
 Final message; gives the agent a chance to flush memory writes and exit cleanly.
@@ -256,7 +262,7 @@ Go agents (`random`, `heuristic`) follow the same outer process lifecycle in a p
 
 All three LLM strategies use the same model, same temperature, and the same base system prompt. The only differences are what prior information is exposed to the model, how Pi session state is managed, and what tools the agent has.
 
-For `llm-fullhistory`, the prior information should be injected in a compact human-readable line-oriented format derived from server-authoritative hand history. It should include per-hand action summaries, outcomes, and showdown information. Hole cards that were actually revealed at showdown are retained; unrevealed hole cards are omitted.
+For `llm-fullhistory`, the prior information should be injected in a compact human-readable one-line-per-hand format derived from server-authoritative hand history. Field order is fixed: hand number, hero position, hero hole cards, final board, final action summary, showdown flag, revealed showdown cards if any, and hero chip result. Hole cards that were actually revealed at showdown are retained; unrevealed hole cards are omitted.
 
 ## 9. AKG-aware Pi compaction extension
 

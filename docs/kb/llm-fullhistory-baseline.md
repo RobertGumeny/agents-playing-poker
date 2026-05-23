@@ -1,64 +1,76 @@
 # LLM Fullhistory Baseline
 
-This note captures the intended repository-aligned design for `llm-fullhistory` before implementation lands.
+EPIC-8 delivered the naive prompt-history baseline: `llm-fullhistory`.
 
 ## Purpose
 
-`llm-fullhistory` is the naive full-history-in-context baseline for v0.
-
-It exists to answer a narrow experimental question:
-- what happens if the model gets prior hand history stuffed back into context
-- while everything else stays as close as possible to the shared Pi runtime baseline
-
-It is intentionally distinct from both:
+`llm-fullhistory` is the v0 comparison point between:
 - `llm-stateless`, which exposes no prior-hand strategic context
-- a possible future long-running single-session strategy, which would test session-managed context carryover as its own approach
+- `llm-akg`, which will expose structured memory through AKG-backed retrieval
 
-## Strategy boundary
+It keeps the shared runtime's protocol handling, legality validation, retry budgeting, and safe fallback behavior while changing only:
+- the memory policy, which accumulates prior-hand summaries
+- the decision engine session scope, which resets Pi context once per hand instead of once per decision
 
-The current intended behavior is:
-- one long-lived poker agent process per match, following the standard wire protocol lifecycle
-- one fresh Pi SDK session per hand
-- no conversational carryover across hands inside Pi session state
-- prior-hand memory exposed explicitly through prompt injection
+## Shared runtime seam
 
-This makes the comparison cleaner:
-- `llm-stateless` differs by exposing no prior-hand history
-- `llm-fullhistory` differs by exposing naive explicit history
-- `llm-akg` will differ by exposing structured AKG-backed memory with compaction-aware retrieval
+`pi-agents/shared/` now splits strategy variation across two interfaces:
+- **memory policy**: owns cross-hand retained state and prompt-history formatting
+- **decision engine**: owns model invocation plus Pi session lifecycle
+
+The shared runner remains strategy-agnostic. It still owns:
+- stdio JSONL protocol handling
+- prompt assembly
+- reply correlation
+- legal-action validation
+- retry budgeting
+- safe fallback behavior
+- hand/session lifecycle notifications
+
+This seam keeps `llm-stateless` unchanged in behavior while allowing `llm-fullhistory` to reuse a fresh Pi session for every hand.
 
 ## Prior-hand history format
 
-The prompt history should be:
-- compact
-- human-readable
-- line-oriented
-- derived from server-authoritative hand history semantics rather than free-form prose
-
-The shape should be inspired by diluted `hands.jsonl` records, but it does not need to mirror on-disk JSON exactly.
-
-Desired contents per prior hand:
+`llm-fullhistory` stores all prior hands by default and injects them as compact one-line summaries in fixed field order:
 - hand number
-- position/dealer context if useful
-- board
-- compact action summary
-- showdown reached or not
-- result / chip delta
-- hole cards only when actually revealed at showdown
+- hero position
+- hero hole cards
+- final board
+- final action summary
+- showdown flag
+- revealed showdown cards, if any
+- hero chip result
 
-Do not include unrevealed opponent hole cards in `showdown-only` mode.
+The line format is human-readable and derived from protocol-visible hand data. It retains showdown-revealed hole cards and omits unrevealed opponent hole cards in `showdown-only` mode.
 
-## Implementation constraints
+## Protocol support added for this baseline
 
-When implementation begins, preserve these boundaries:
-- reuse `pi-agents/shared/` rather than building a second protocol stack
-- keep legality validation, retry budgeting, and safe fallback in the shared runtime
-- keep Pi session logs as observability artifacts, not strategic memory
-- avoid over-generalizing abstractions for hypothetical future memory strategies
+To avoid guessing final actions or whether a pot truly reached showdown, `hand_end` now carries:
+- `action_history`: final server-authoritative completed actions for the hand
+- `showdown_reached`: explicit showdown flag
 
-## Normative references
+That makes prompt-history formatting deterministic and server-authoritative.
 
-Use these as the canonical sources when implementation begins:
+## Main code paths
+
+- `pi-agents/shared/src/runner.ts`
+- `pi-agents/shared/src/strategy.ts`
+- `pi-agents/shared/src/pi-session.ts`
+- `pi-agents/llm-fullhistory/src/main.ts`
+- `pi-agents/llm-fullhistory/src/history.ts`
+- `cmd/poker-run/main.go`
+
+## Verification highlights
+
+Coverage now includes:
+- formatter stability for prior-hand lines
+- history accumulation and prompt injection order
+- per-hand Pi session reset behavior
+- seam compatibility with `llm-stateless`
+- subprocess wiring for the published `poker-agent-llm-fullhistory` command
+
+## Related references
+
 - [`../spec.md`](../spec.md)
 - [`../wire-protocol.md`](../wire-protocol.md)
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)

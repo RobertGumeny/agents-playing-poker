@@ -362,10 +362,12 @@ func buildHandEndPayload(infoRealism string, hand *rules.HandState, recipientSea
 		}
 	}
 	return wire.HandEndPayload{
-		HandNumber: hand.HandNumber,
-		Board:      cardsToStrings(hand.Board),
-		Showdown:   showdown,
-		Result:     chipDeltasToWire(hand.Result.Deltas),
+		HandNumber:      hand.HandNumber,
+		Board:           cardsToStrings(hand.Board),
+		ActionHistory:   rulesActionsToWire(hand.ActionHistory),
+		ShowdownReached: hand.Result.Showdown,
+		Showdown:        showdown,
+		Result:          chipDeltasToWire(hand.Result.Deltas),
 	}
 }
 

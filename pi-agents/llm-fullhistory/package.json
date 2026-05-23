@@ -1,0 +1,22 @@
+{
+  "name": "@agent-poker/llm-fullhistory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "poker-agent-llm-fullhistory": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/main.ts",
+    "test": "npm run build --workspace @agent-poker/pi-agent-shared && npm run build && vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@agent-poker/pi-agent-shared": "file:../shared",
+    "@earendil-works/pi-coding-agent": "latest"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
+  }
+}

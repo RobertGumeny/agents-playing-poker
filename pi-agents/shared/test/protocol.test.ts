@@ -136,9 +136,15 @@ describe("protocol helpers", () => {
         payload: {
           hand_number: 7,
           board: ["Td", "9h", "2c", "5s", "Kc"],
+          action_history: [
+            { seat: 1, action: "call", amount: 1, street: "preflop" },
+            { seat: 0, action: "check", street: "preflop" },
+            { seat: 0, action: "bet", amount: 2, street: "flop" },
+            { seat: 1, action: "fold", street: "flop" },
+          ],
+          showdown_reached: false,
           showdown: {
-            "0": { hole_cards: ["As", "Kh"], rank: "two pair, kings and tens" },
-            "1": { hole_cards: ["9s", "9d"], rank: "three of a kind, nines" },
+            "0": { hole_cards: ["As", "Kh"], rank: "" },
           },
           result: [
             { seat: 1, chips_delta: 14 },
@@ -212,6 +218,11 @@ describe("protocol helpers", () => {
       name: "your_turn payload rejects malformed street",
       input: '{"v":1,"type":"your_turn","id":"msg-1","payload":{"hand_number":7,"street":[],"board":[],"pot":1,"to_call":0,"stacks":{},"seats":[],"action_history":[],"legal_actions":[]}}',
       want: "decode your_turn payload.street",
+    },
+    {
+      name: "hand_end payload requires final action history and showdown flag",
+      input: '{"v":1,"type":"hand_end","id":"msg-1","payload":{"hand_number":7,"board":[],"showdown":{},"result":[]}}',
+      want: "decode hand_end payload.action_history",
     },
     {
       name: "multiple json objects in one input are rejected",

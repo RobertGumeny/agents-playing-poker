@@ -154,9 +154,15 @@ Sent once per hand after resolution.
   "payload": {
     "hand_number": 47,
     "board": ["Td", "9h", "2c", "5s", "Kc"],
+    "action_history": [
+      {"seat": 1, "action": "call", "amount": 1, "street": "preflop"},
+      {"seat": 0, "action": "check", "street": "preflop"},
+      {"seat": 0, "action": "bet", "amount": 2, "street": "flop"},
+      {"seat": 1, "action": "fold", "street": "flop"}
+    ],
+    "showdown_reached": false,
     "showdown": {
-      "0": {"hole_cards": ["As", "Kh"], "rank": "two pair, kings and tens"},
-      "1": {"hole_cards": ["9s", "9d"], "rank": "three of a kind, nines"}
+      "0": {"hole_cards": ["As", "Kh"], "rank": ""}
     },
     "result": [{"seat": 1, "chips_delta": 14}, {"seat": 0, "chips_delta": -14}]
   }
@@ -164,10 +170,12 @@ Sent once per hand after resolution.
 ```
 
 Notes:
+- `action_history` is the final server-authoritative completed action log for the hand.
+- `showdown_reached` distinguishes true showdowns from non-showdown pots where the winner's cards may still be revealed under project policy or `perfect-info` mode.
 - In `showdown-only` information mode, non-revealed opponent cards are omitted unless shown at showdown.
 - If no showdown occurs, `showdown` contains only revealed winner cards.
 - In `perfect-info`, both players' hole cards are always included.
-- This message gives memory-bearing agents enough server-authoritative information to build later prior-hand summaries without inferring hidden cards.
+- This message gives memory-bearing agents enough server-authoritative information to build later prior-hand summaries without inferring hidden cards or missing the final action.
 
 ### `session_end`
 Final message before shutdown.
@@ -253,4 +261,4 @@ Optional structured log entry for capture in session artifacts.
 - Preserve unknown future fields if you proxy or log messages, but only rely on the fields defined here for v0.
 - Use the domain docs for poker semantics and the server payloads for current legal decisions.
 - Do not attempt to negotiate protocol version or alternate message shapes in v0.
-- For prompt-history strategies such as `llm-fullhistory`, derive prior-hand summaries from protocol-visible state and `hand_end` payloads. Retain only showdown-revealed opponent hole cards unless the match uses `perfect-info`.
+- For prompt-history strategies such as `llm-fullhistory`, derive prior-hand summaries from protocol-visible state and `hand_end` payloads. Use `hand_end.action_history` as the authoritative final action summary and `hand_end.showdown_reached` as the showdown flag. Retain only showdown-revealed opponent hole cards unless the match uses `perfect-info`.

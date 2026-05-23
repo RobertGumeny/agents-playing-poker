@@ -73,11 +73,12 @@ func TestMessageRoundTrip(t *testing.T) {
 		{
 			name: "hand_end",
 			msg: NewMessage(MessageTypeHandEnd, "msg-4", "", HandEndPayload{
-				HandNumber: 47,
-				Board:      []string{"Td", "9h", "2c", "5s", "Kc"},
+				HandNumber:      47,
+				Board:           []string{"Td", "9h", "2c", "5s", "Kc"},
+				ActionHistory:   []ActionRecord{{Seat: 1, Action: "call", Amount: &amount1, Street: "preflop"}, {Seat: 0, Action: "check", Street: "preflop"}, {Seat: 0, Action: "bet", Amount: &amount2, Street: "flop"}, {Seat: 1, Action: "fold", Street: "flop"}},
+				ShowdownReached: false,
 				Showdown: map[int]ShowdownSeat{
-					0: {HoleCards: []string{"As", "Kh"}, Rank: "two pair, kings and tens"},
-					1: {HoleCards: []string{"9s", "9d"}, Rank: "three of a kind, nines"},
+					0: {HoleCards: []string{"As", "Kh"}, Rank: ""},
 				},
 				Result: []HandResult{{Seat: 1, ChipsDelta: 14}, {Seat: 0, ChipsDelta: -14}},
 			}),

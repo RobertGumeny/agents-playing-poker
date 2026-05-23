@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add llm-fullhistory and split the shared Pi runtime into memory-policy and decision-engine seams
+- feat: add llm-fullhistory as a buildable Pi agent with compact prompt-history memory and fresh Pi session reset per hand
+- feat: split the shared Pi runtime seam into strategy-owned memory policy and strategy-owned decision engine responsibilities
+- feat: add final `hand_end.action_history` plus `hand_end.showdown_reached` so memory strategies can build deterministic prior-hand summaries
+- test: verify llm-fullhistory formatter stability, per-hand Pi session reset behavior, subprocess wiring, and seam compatibility with llm-stateless
 - test: verify llm-stateless external-process wiring and canonical pi-session artifact compatibility
 - test: add stateless fake-client protocol integration coverage
 - feat: make llm-stateless a buildable external agent command and keep session_init metadata in the shared TS runtime
@@ -35,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add heads-up betting-round progression, legal-action generation, blind rotation, and pot accounting
 
 ### Changed
+- docs: update the spec, wire protocol, KB, and operator docs for the implemented llm-fullhistory baseline and shared Pi runtime seam
 - docs: document persisted timeout `auto_fold` entries in session artifacts
 - docs: add concise implementer contract for the stdio JSONL wire protocol
 

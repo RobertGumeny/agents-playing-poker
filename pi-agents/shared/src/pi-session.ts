@@ -15,9 +15,9 @@ import {
 
 import { parseActionResponse } from "./action.js";
 import type { ActionPayload, LegalActionOption } from "./protocol.js";
-import type { DecisionClient } from "./strategy.js";
+import type { CompletedHandContext, DecisionEngine, DecisionRequest } from "./strategy.js";
 
-const STATELESS_SYSTEM_PROMPT = [
+const POKER_SYSTEM_PROMPT = [
   "You are a poker decision engine for heads-up no-limit Texas Hold'em.",
   "Choose exactly one legal action from the user-provided legal_actions list.",
   'Return JSON only with shape {"action": string, "amount"?: number}.',
@@ -28,6 +28,8 @@ const STATELESS_SYSTEM_PROMPT = [
 const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh"] as const;
 
 type PiThinkingLevel = NonNullable<CreateAgentSessionOptions["thinkingLevel"]>;
+export type PiSessionScope = "decision" | "hand";
+
 type PiSession = {
   prompt(text: string): Promise<void>;
   subscribe(listener: (event: AgentSessionEvent) => void): () => void;
@@ -46,39 +48,96 @@ interface ResolvedPiSessionOptions {
   thinkingLevel?: PiThinkingLevel;
 }
 
-export interface PiDecisionClientOptions {
+export interface PiDecisionEngineOptions {
   cwd: string;
   agentDir?: string;
   sessionDir?: string;
   sessionDirProvider?: () => string | undefined;
   model?: string;
   thinkingLevel?: PiThinkingLevel;
+  sessionScope?: PiSessionScope;
   sessionFactory?: PiSessionFactory;
 }
 
-export class PiDecisionClient implements DecisionClient {
-  private readonly sessionFactory: PiSessionFactory;
-  private decisionCount = 0;
+export interface ScriptedDecisionEngineOptions {
+  decisions: ActionPayload[];
+  sessionDirProvider?: () => string | undefined;
+  sessionScope?: PiSessionScope;
+}
 
-  constructor(private readonly options: PiDecisionClientOptions) {
-    this.sessionFactory = options.sessionFactory ?? createStatelessPiSession;
+export class PiDecisionEngine implements DecisionEngine {
+  private readonly sessionFactory: PiSessionFactory;
+  private readonly sessionScope: PiSessionScope;
+  private exportCount = 0;
+  private activeHandSession: { handNumber: number; session: PiSession } | undefined;
+
+  constructor(private readonly options: PiDecisionEngineOptions) {
+    this.sessionFactory = options.sessionFactory ?? createPiSession;
+    this.sessionScope = options.sessionScope ?? "decision";
   }
 
-  async decide(prompt: string, _legalActions: LegalActionOption[]): Promise<ActionPayload> {
-    let session: PiSession | undefined;
+  async decide(request: DecisionRequest): Promise<ActionPayload> {
+    if (this.sessionScope === "hand") {
+      const session = await this.ensureHandSession(request.context.handNumber);
+      return this.promptSession(session, request.prompt);
+    }
+
+    const session = await this.createSession();
+    try {
+      return await this.promptSession(session, request.prompt);
+    } finally {
+      await this.persistAndDispose(session);
+    }
+  }
+
+  async onHandEnd(context: CompletedHandContext): Promise<void> {
+    if (this.sessionScope !== "hand") return;
+    if (this.activeHandSession?.handNumber !== context.handNumber) return;
+
+    const session = this.activeHandSession.session;
+    this.activeHandSession = undefined;
+    await this.persistAndDispose(session);
+  }
+
+  async onSessionEnd(): Promise<void> {
+    if (!this.activeHandSession) return;
+
+    const session = this.activeHandSession.session;
+    this.activeHandSession = undefined;
+    await this.persistAndDispose(session);
+  }
+
+  private async ensureHandSession(handNumber: number): Promise<PiSession> {
+    if (this.activeHandSession?.handNumber === handNumber) {
+      return this.activeHandSession.session;
+    }
+
+    if (this.activeHandSession) {
+      const session = this.activeHandSession.session;
+      this.activeHandSession = undefined;
+      await this.persistAndDispose(session);
+    }
+
+    const session = await this.createSession();
+    this.activeHandSession = { handNumber, session };
+    return session;
+  }
+
+  private async createSession(): Promise<PiSession> {
+    return this.sessionFactory({
+      cwd: this.options.cwd,
+      agentDir: this.options.agentDir ?? getAgentDir(),
+      sessionDir: this.options.sessionDirProvider?.() ?? this.options.sessionDir,
+      model: this.options.model,
+      thinkingLevel: this.options.thinkingLevel,
+    });
+  }
+
+  private async promptSession(session: PiSession, prompt: string): Promise<ActionPayload> {
     let unsubscribe = () => {};
     let streamedAssistantText = "";
 
     try {
-      const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
-      session = await this.sessionFactory({
-        cwd: this.options.cwd,
-        agentDir: this.options.agentDir ?? getAgentDir(),
-        sessionDir,
-        model: this.options.model,
-        thinkingLevel: this.options.thinkingLevel,
-      });
-
       unsubscribe = session.subscribe((event) => {
         if (event.type === "message_update" && event.assistantMessageEvent.type === "text_delta") {
           streamedAssistantText += event.assistantMessageEvent.delta;
@@ -98,16 +157,95 @@ export class PiDecisionClient implements DecisionClient {
       throw new Error(`pi decision failed: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       unsubscribe();
-      if (session) {
-        const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
-        await persistSessionLog(session, sessionDir, ++this.decisionCount);
-        session.dispose();
-      }
+    }
+  }
+
+  private async persistAndDispose(session: PiSession): Promise<void> {
+    try {
+      const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
+      await persistSessionLog(session, sessionDir, ++this.exportCount);
+    } finally {
+      session.dispose();
     }
   }
 }
 
-async function createStatelessPiSession(options: ResolvedPiSessionOptions): Promise<PiSession> {
+export class ScriptedDecisionEngine implements DecisionEngine {
+  private index = 0;
+  private sessionCount = 0;
+  private activeHandNumber: number | undefined;
+
+  constructor(private readonly options: ScriptedDecisionEngineOptions) {}
+
+  async decide(request: DecisionRequest): Promise<ActionPayload> {
+    const decisionNumber = this.index + 1;
+    const decision = this.options.decisions[Math.min(this.index, this.options.decisions.length - 1)];
+    this.index += 1;
+    if (!decision) {
+      throw new Error("no scripted decision available");
+    }
+
+    const matched = request.legalActions.find((action) => {
+      if (action.action !== decision.action) return false;
+      if (decision.amount !== undefined) {
+        return action.amount === decision.amount || (action.min !== undefined && action.max !== undefined && decision.amount >= action.min && decision.amount <= action.max);
+      }
+      return true;
+    });
+    if (!matched) {
+      throw new Error(`scripted decision ${JSON.stringify(decision)} is not legal for this turn`);
+    }
+
+    await this.writeObservabilityLog(request.prompt, request.legalActions, request.context.handNumber, decisionNumber, decision);
+    return decision;
+  }
+
+  onHandStart(context: { handNumber: number }): void {
+    if (this.options.sessionScope === "hand") {
+      this.sessionCount += 1;
+      this.activeHandNumber = context.handNumber;
+    }
+  }
+
+  onHandEnd(context: CompletedHandContext): void {
+    if (this.options.sessionScope === "hand" && this.activeHandNumber === context.handNumber) {
+      this.activeHandNumber = undefined;
+    }
+  }
+
+  private async writeObservabilityLog(
+    prompt: string,
+    legalActions: LegalActionOption[],
+    handNumber: number,
+    decisionNumber: number,
+    decision: ActionPayload,
+  ): Promise<void> {
+    const sessionDir = this.options.sessionDirProvider?.();
+    if (!sessionDir) return;
+
+    if (this.options.sessionScope !== "hand") {
+      this.sessionCount += 1;
+    }
+
+    await mkdir(sessionDir, { recursive: true });
+    await appendFile(
+      path.join(sessionDir, "pi-session.jsonl"),
+      `${JSON.stringify({
+        type: "fake_pi_session",
+        session_scope: this.options.sessionScope ?? "decision",
+        session_number: this.sessionCount,
+        hand_number: handNumber,
+        decision_number: decisionNumber,
+        legal_actions: legalActions,
+        selected_action: decision,
+        prompt,
+      })}\n`,
+      "utf8",
+    );
+  }
+}
+
+async function createPiSession(options: ResolvedPiSessionOptions): Promise<PiSession> {
   const authStorage = AuthStorage.create();
   const modelRegistry = ModelRegistry.create(authStorage);
   const settingsManager = SettingsManager.create(options.cwd, options.agentDir);
@@ -124,7 +262,7 @@ async function createStatelessPiSession(options: ResolvedPiSessionOptions): Prom
     noPromptTemplates: true,
     noThemes: true,
     noContextFiles: true,
-    systemPromptOverride: () => STATELESS_SYSTEM_PROMPT,
+    systemPromptOverride: () => POKER_SYSTEM_PROMPT,
     appendSystemPromptOverride: () => [],
   });
   await resourceLoader.reload();
@@ -173,11 +311,11 @@ function resolveModel(spec: string | undefined, modelRegistry: ModelRegistry): C
   throw new Error(`unknown Pi model ${JSON.stringify(spec)}`);
 }
 
-async function persistSessionLog(session: PiSession, sessionDir: string | undefined, decisionCount: number): Promise<void> {
+async function persistSessionLog(session: PiSession, sessionDir: string | undefined, exportCount: number): Promise<void> {
   if (!sessionDir) return;
 
   await mkdir(sessionDir, { recursive: true });
-  const exportPath = path.join(sessionDir, `pi-session-export-${String(decisionCount).padStart(4, "0")}.jsonl`);
+  const exportPath = path.join(sessionDir, `pi-session-export-${String(exportCount).padStart(4, "0")}.jsonl`);
   const canonicalPath = path.join(sessionDir, "pi-session.jsonl");
   session.exportToJsonl(exportPath);
   const exported = await readFile(exportPath, "utf8");

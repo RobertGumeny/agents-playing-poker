@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "shared",
-    "llm-stateless"
+    "llm-stateless",
+    "llm-fullhistory"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

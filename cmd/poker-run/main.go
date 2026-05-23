@@ -24,6 +24,7 @@ const (
 	defaultDecisionDeadline = 30 * time.Second
 	defaultThinkingLevel    = "low"
 	llmStatelessAlias       = "llm-stateless"
+	llmFullhistoryAlias     = "llm-fullhistory"
 	heuristicAlias          = "heuristic"
 	randomAlias             = "random"
 )
@@ -135,17 +136,19 @@ type agentAliasResolver struct {
 func (r agentAliasResolver) resolve(alias, model, thinkingLevel string) (match.AgentSpec, error) {
 	switch alias {
 	case llmStatelessAlias:
-		return r.resolveLLMStateless(model, thinkingLevel)
+		return r.resolvePiAgent(llmStatelessAlias, model, thinkingLevel)
+	case llmFullhistoryAlias:
+		return r.resolvePiAgent(llmFullhistoryAlias, model, thinkingLevel)
 	case heuristicAlias:
 		return r.resolveGoAgent(heuristicAlias, "./cmd/heuristic-agent", binaryName("heuristic-agent"))
 	case randomAlias:
 		return r.resolveGoAgent(randomAlias, "./cmd/random-agent", binaryName("random-agent"))
 	default:
-		return match.AgentSpec{}, fmt.Errorf("unsupported agent alias %q (supported: %s, %s, %s)", alias, llmStatelessAlias, heuristicAlias, randomAlias)
+		return match.AgentSpec{}, fmt.Errorf("unsupported agent alias %q (supported: %s, %s, %s, %s)", alias, llmStatelessAlias, llmFullhistoryAlias, heuristicAlias, randomAlias)
 	}
 }
 
-func (r agentAliasResolver) resolveLLMStateless(model, thinkingLevel string) (match.AgentSpec, error) {
+func (r agentAliasResolver) resolvePiAgent(alias, model, thinkingLevel string) (match.AgentSpec, error) {
 	nodePath, err := r.lookPath("node")
 	if err != nil {
 		return match.AgentSpec{}, fmt.Errorf("find node: %w", err)
@@ -155,7 +158,7 @@ func (r agentAliasResolver) resolveLLMStateless(model, thinkingLevel string) (ma
 		return match.AgentSpec{}, fmt.Errorf("absolute node path: %w", err)
 	}
 
-	scriptPath := filepath.Join(r.repoDir, "pi-agents", "llm-stateless", "dist", "main.js")
+	scriptPath := filepath.Join(r.repoDir, "pi-agents", alias, "dist", "main.js")
 	if _, err := os.Stat(scriptPath); err != nil {
 		return match.AgentSpec{}, fmt.Errorf("stat %s: %w (build the Pi agent with: cd %s && npm run build)", scriptPath, err, filepath.Join(r.repoDir, "pi-agents"))
 	}
@@ -169,7 +172,7 @@ func (r agentAliasResolver) resolveLLMStateless(model, thinkingLevel string) (ma
 	}
 
 	return match.AgentSpec{
-		Name:    llmStatelessAlias,
+		Name:    alias,
 		Command: nodePath,
 		Args:    []string{scriptPath},
 		Env:     env,

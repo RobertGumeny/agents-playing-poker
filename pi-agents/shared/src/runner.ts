@@ -1,5 +1,6 @@
 // Shared poker-agent runner. This owns stdin/stdout JSONL, state updates,
-// prompt construction, decision parsing, and hand-end hooks.
+// prompt construction, legality validation, retry budgeting, and lifecycle
+// notifications into strategy-owned memory policy and decision engine seams.
 
 import { createInterface } from "node:readline";
 
@@ -12,24 +13,24 @@ import {
   type ActionMessage,
   type HandEndMessage,
   type HandStartMessage,
-  type LegalActionOption,
   type SessionEndMessage,
   type SessionInitMessage,
   type SessionReadyMessage,
   type YourTurnMessage,
 } from "./protocol.js";
 import { applyHandStart, applySessionInit, applyYourTurn, createAgentState, resetHandState, resetSessionState } from "./state.js";
-import type { DecisionClient, DecisionContext, MemoryStrategy } from "./strategy.js";
+import type { CompletedHandContext, DecisionContext, DecisionEngine, HandStartContext, MemoryPolicy } from "./strategy.js";
 
 const DEFAULT_DECISION_ATTEMPTS = 2;
 
 export interface RunPokerAgentOptions {
-  strategy: MemoryStrategy;
-  decisionClient: DecisionClient;
+  memoryPolicy: MemoryPolicy;
+  decisionEngine: DecisionEngine;
   stdin?: NodeJS.ReadableStream;
   stdout?: NodeJS.WritableStream;
   stderr?: NodeJS.WritableStream;
   maxDecisionAttempts?: number;
+  agentVersion: string;
 }
 
 export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void> {
@@ -57,22 +58,23 @@ export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void
             type: "session_ready",
             id: `agent-${nextMessageID++}`,
             in_reply_to: message.id,
-            payload: { version: options.strategy.version },
+            payload: { version: options.agentVersion },
           });
           break;
         }
         case "hand_start": {
           const message: HandStartMessage = envelope;
           applyHandStart(state, message.payload);
+          await options.decisionEngine.onHandStart?.(buildHandStartContext(state));
           break;
         }
         case "your_turn": {
           const message: YourTurnMessage = envelope;
           applyYourTurn(state, message.payload);
           const decisionContext = buildDecisionContext(state, message);
-          const augmentation = await options.strategy.beforeDecision(decisionContext);
+          const augmentation = await options.memoryPolicy.beforeDecision(decisionContext);
           const prompt = buildDecisionPrompt(decisionContext, augmentation);
-          const proposedAction = await decideWithRetry(options.decisionClient, prompt, message.payload.legal_actions, maxDecisionAttempts, stderr);
+          const proposedAction = await decideWithRetry(options.decisionEngine, decisionContext, prompt, maxDecisionAttempts, stderr);
           const action = validateOrFallback(proposedAction, message.payload.legal_actions);
           await writeEnvelope(stdout, {
             v: PROTOCOL_VERSION,
@@ -85,18 +87,15 @@ export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void
         }
         case "hand_end": {
           const message: HandEndMessage = envelope;
-          await options.strategy.afterHandEnd({
-            state,
-            handNumber: message.payload.hand_number,
-            board: message.payload.board,
-            showdown: message.payload.showdown,
-            result: message.payload.result,
-          });
+          const completedHand = buildCompletedHandContext(state, message);
+          await options.memoryPolicy.afterHandEnd(completedHand);
+          await options.decisionEngine.onHandEnd?.(completedHand);
           resetHandState(state);
           break;
         }
         case "session_end": {
           const _message: SessionEndMessage = envelope;
+          await options.decisionEngine.onSessionEnd?.();
           resetSessionState(state);
           return;
         }
@@ -110,6 +109,22 @@ export async function runPokerAgent(options: RunPokerAgentOptions): Promise<void
   } finally {
     reader.close();
   }
+}
+
+function buildHandStartContext(state: ReturnType<typeof createAgentState>): HandStartContext {
+  const hand = state.hand;
+  if (!hand) {
+    throw new Error("hand_start received without shared hand state");
+  }
+
+  return {
+    state,
+    handNumber: hand.handNumber,
+    dealerSeat: hand.dealerSeat,
+    stacks: { ...hand.stacks },
+    blindsPosted: hand.blindsPosted.map((blind) => ({ ...blind })),
+    yourHoleCards: [...hand.yourHoleCards],
+  };
 }
 
 function buildDecisionContext(state: ReturnType<typeof createAgentState>, message: YourTurnMessage): DecisionContext {
@@ -126,10 +141,32 @@ function buildDecisionContext(state: ReturnType<typeof createAgentState>, messag
   };
 }
 
+function buildCompletedHandContext(state: ReturnType<typeof createAgentState>, message: HandEndMessage): CompletedHandContext {
+  const hand = state.hand;
+  const session = state.session;
+  if (!hand || !session) {
+    throw new Error("hand_end received without shared session/hand state");
+  }
+
+  return {
+    state,
+    handNumber: message.payload.hand_number,
+    dealerSeat: hand.dealerSeat,
+    heroSeat: session.yourSeat,
+    seats: session.seats.map((seat) => ({ ...seat })),
+    heroHoleCards: [...hand.yourHoleCards],
+    board: [...message.payload.board],
+    actionHistory: message.payload.action_history.map((entry) => ({ ...entry })),
+    showdownReached: message.payload.showdown_reached,
+    showdown: message.payload.showdown ? Object.fromEntries(Object.entries(message.payload.showdown).map(([seat, entry]) => [seat, { ...entry, hole_cards: [...entry.hole_cards] }])) : undefined,
+    result: message.payload.result.map((entry) => ({ ...entry })),
+  };
+}
+
 async function decideWithRetry(
-  decisionClient: DecisionClient,
+  decisionEngine: DecisionEngine,
+  context: DecisionContext,
   prompt: string,
-  legalActions: LegalActionOption[],
   maxDecisionAttempts: number,
   stderr: NodeJS.WritableStream,
 ) {
@@ -137,7 +174,11 @@ async function decideWithRetry(
 
   for (let attempt = 1; attempt <= maxDecisionAttempts; attempt += 1) {
     try {
-      return await decisionClient.decide(prompt, legalActions);
+      return await decisionEngine.decide({
+        context,
+        prompt,
+        legalActions: context.legalActions.map((action) => ({ ...action })),
+      });
     } catch (error) {
       lastError = error;
       stderr.write(
@@ -147,7 +188,7 @@ async function decideWithRetry(
   }
 
   if (lastError !== undefined) {
-    stderr.write("decision client exhausted retries; using safe fallback action\n");
+    stderr.write("decision engine exhausted retries; using safe fallback action\n");
   }
   return undefined;
 }

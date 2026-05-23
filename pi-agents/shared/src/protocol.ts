@@ -103,6 +103,8 @@ export interface ShowdownEntry {
 export interface HandEndPayload {
   hand_number: number;
   board: string[];
+  action_history: ActionHistoryEntry[];
+  showdown_reached: boolean;
   showdown?: Record<string, ShowdownEntry>;
   result: Array<{ seat: number; chips_delta: number }>;
 }
@@ -292,6 +294,8 @@ function validateHandEndPayload(value: unknown): asserts value is HandEndPayload
   const payload = expectRecord(value, "hand_end payload");
   expectNumber(payload.hand_number, "hand_end payload.hand_number");
   validateStringArray(payload.board, "hand_end payload.board");
+  validateActionHistory(payload.action_history, "hand_end payload.action_history");
+  expectBoolean(payload.showdown_reached, "hand_end payload.showdown_reached");
   if (payload.showdown !== undefined) {
     validateShowdown(payload.showdown, "hand_end payload.showdown");
   }
@@ -431,6 +435,13 @@ function expectString(value: unknown, path: string): string {
 function expectNumber(value: unknown, path: string): number {
   if (typeof value !== "number" || Number.isNaN(value)) {
     throw new Error(`decode ${path}: expected number`);
+  }
+  return value;
+}
+
+function expectBoolean(value: unknown, path: string): boolean {
+  if (typeof value !== "boolean") {
+    throw new Error(`decode ${path}: expected boolean`);
   }
   return value;
 }

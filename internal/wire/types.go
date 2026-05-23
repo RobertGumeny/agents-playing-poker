@@ -179,10 +179,12 @@ type YourTurnPayload struct {
 }
 
 type HandEndPayload struct {
-	HandNumber int                  `json:"hand_number"`
-	Board      []string             `json:"board"`
-	Showdown   map[int]ShowdownSeat `json:"showdown"`
-	Result     []HandResult         `json:"result"`
+	HandNumber      int                  `json:"hand_number"`
+	Board           []string             `json:"board"`
+	ActionHistory   []ActionRecord       `json:"action_history"`
+	ShowdownReached bool                 `json:"showdown_reached"`
+	Showdown        map[int]ShowdownSeat `json:"showdown"`
+	Result          []HandResult         `json:"result"`
 }
 
 type SessionEndPayload struct{}

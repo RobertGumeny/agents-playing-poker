@@ -6,31 +6,21 @@ import {
   parsePiThinkingLevel,
   runPokerAgent,
   type ActionPayload,
-  type MemoryPolicy,
 } from "@agent-poker/pi-agent-shared";
 
-let serverMemoryDir: string | undefined;
+import { FullHistoryMemoryPolicy } from "./history.js";
 
-const memoryPolicy: MemoryPolicy = {
-  async beforeDecision(context) {
-    serverMemoryDir = context.state.session?.memoryDir;
-    return { sections: [] };
-  },
-  async afterHandEnd() {
-    // Deliberately forget prior hands. Durable Pi logs are observability artifacts,
-    // not strategic memory exposed to future prompts.
-  },
-};
+const memoryPolicy = new FullHistoryMemoryPolicy();
 
 function createDecisionEngine() {
   const explicitSessionDir = process.env.PI_POKER_PI_SESSION_DIR;
-  const sessionDirProvider = () => explicitSessionDir ?? serverMemoryDir;
+  const sessionDirProvider = () => explicitSessionDir ?? memoryPolicy.memoryDir;
   const fakeDecisions = parseFakeDecisions(process.env.PI_POKER_FAKE_DECISIONS_JSON);
   if (fakeDecisions) {
     return new ScriptedDecisionEngine({
       decisions: fakeDecisions,
       sessionDirProvider,
-      sessionScope: "decision",
+      sessionScope: "hand",
     });
   }
 
@@ -39,7 +29,7 @@ function createDecisionEngine() {
     sessionDirProvider,
     model: process.env.PI_POKER_MODEL,
     thinkingLevel: parsePiThinkingLevel(process.env.PI_POKER_THINKING_LEVEL),
-    sessionScope: "decision",
+    sessionScope: "hand",
   });
 }
 
@@ -96,6 +86,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 await runPokerAgent({
   memoryPolicy,
   decisionEngine: createDecisionEngine(),
-  agentVersion: "llm-stateless/0.1.0",
+  agentVersion: "llm-fullhistory/0.1.0",
   maxDecisionAttempts: parsePositiveInteger(process.env.PI_POKER_MAX_DECISION_ATTEMPTS),
 });

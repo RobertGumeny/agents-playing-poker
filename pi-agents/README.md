@@ -10,7 +10,7 @@ Packages:
 
 - `shared/`: shared protocol, state, prompt, action validation, runner, and Pi-session seams.
 - `llm-stateless/`: first LLM baseline; current-hand prompt only, with no strategic memory exposed to the model.
-- `llm-fullhistory/`: future naive memory baseline; uses a fresh Pi session per hand and injects compact prior-hand summaries into the prompt.
+- `llm-fullhistory/`: naive memory baseline; uses a fresh Pi session per hand and injects compact prior-hand summaries into the prompt.
 - `llm-akg/`: future structured-memory agent; uses AKG retrieval/tools and compaction-aware Pi behavior.
 
 ## Commands
@@ -27,11 +27,11 @@ Target only the shared runtime package when needed:
 - `npm run typecheck --workspace @agent-poker/pi-agent-shared`
 - `npm run test --workspace @agent-poker/pi-agent-shared`
 
-The shared runtime tests cover protocol helpers, state updates, prompt construction, action validation/fallback, and the stdio runner loop with fake decision clients.
+The shared runtime tests cover protocol helpers, state updates, prompt construction, action validation/fallback, the stdio runner loop, and both per-decision and per-hand Pi session lifecycle seams.
 
 Pi session logs are observability artifacts and should be stored durably, but they are separate from strategic memory. A stateless agent may persist Pi logs while still ensuring previous hands are not visible to future decisions. When the server provides `session_init.memory_dir`, `llm-stateless` uses that session bundle agent directory as the default home for the canonical `pi-session.jsonl` artifact.
 
-Planned memory-strategy boundaries:
+Memory-strategy boundaries:
 - `llm-stateless`: fresh Pi session per decision; no prior-hand prompt context.
 - `llm-fullhistory`: fresh Pi session per hand; prior hands injected explicitly as compact human-readable summaries derived from server-visible history.
 - `llm-akg`: long-lived structured-memory strategy with AKG-backed retrieval and compaction-aware Pi behavior.
@@ -49,9 +49,9 @@ npm exec --workspace @agent-poker/llm-stateless poker-agent-llm-stateless
 
 That same executable is suitable for `poker-server -agent*-cmd`, with each additional server-side `-agent*-arg` passed as a separate process argument in the normal `exec.Command` style.
 
-## `llm-stateless` runtime knobs
+## Pi-agent runtime knobs
 
-The current stateless baseline reads these optional environment variables:
+`llm-stateless` and `llm-fullhistory` currently read these optional environment variables:
 
 - `PI_POKER_MODEL`: Pi model selector (`provider:model-id` or `provider/model-id`)
 - `PI_POKER_THINKING_LEVEL`: Pi thinking level (`off`, `minimal`, `low`, `medium`, `high`, `xhigh`)

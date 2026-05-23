@@ -1,7 +1,7 @@
-// Memory strategy seam. The outer runner stays shared; implementations decide
-// what, if any, prior-session information is exposed to the model.
+// Shared strategy seams. The runner owns the outer poker protocol loop while
+// memory policy and decision-engine behavior vary independently per strategy.
 
-import type { ActionPayload, LegalActionOption } from "./protocol.js";
+import type { ActionHistoryEntry, ActionPayload, LegalActionOption, ShowdownEntry } from "./protocol.js";
 import type { AgentState } from "./state.js";
 
 export interface DecisionContext {
@@ -12,15 +12,30 @@ export interface DecisionContext {
   pot: number;
   toCall: number;
   stacks: Record<string, number>;
-  actionHistory: unknown[];
+  actionHistory: ActionHistoryEntry[];
   legalActions: LegalActionOption[];
 }
 
-export interface HandEndContext {
+export interface HandStartContext {
   state: AgentState;
   handNumber: number;
+  dealerSeat: number;
+  stacks: Record<string, number>;
+  blindsPosted: Array<{ seat: number; amount: number }>;
+  yourHoleCards: string[];
+}
+
+export interface CompletedHandContext {
+  state: AgentState;
+  handNumber: number;
+  dealerSeat: number;
+  heroSeat: number;
+  seats: Array<{ seat: number; name: string }>;
+  heroHoleCards: string[];
   board: string[];
-  showdown?: unknown;
+  actionHistory: ActionHistoryEntry[];
+  showdownReached: boolean;
+  showdown?: Record<string, ShowdownEntry>;
   result: Array<{ seat: number; chips_delta: number }>;
 }
 
@@ -28,13 +43,20 @@ export interface PromptAugmentation {
   sections: string[];
 }
 
-export interface MemoryStrategy {
-  name: string;
-  version: string;
+export interface MemoryPolicy {
   beforeDecision(context: DecisionContext): Promise<PromptAugmentation>;
-  afterHandEnd(context: HandEndContext): Promise<void>;
+  afterHandEnd(context: CompletedHandContext): Promise<void>;
 }
 
-export interface DecisionClient {
-  decide(prompt: string, legalActions: LegalActionOption[]): Promise<ActionPayload>;
+export interface DecisionRequest {
+  context: DecisionContext;
+  prompt: string;
+  legalActions: LegalActionOption[];
+}
+
+export interface DecisionEngine {
+  decide(request: DecisionRequest): Promise<ActionPayload>;
+  onHandStart?(context: HandStartContext): Promise<void> | void;
+  onHandEnd?(context: CompletedHandContext): Promise<void> | void;
+  onSessionEnd?(): Promise<void> | void;
 }
