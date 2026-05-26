@@ -98,6 +98,49 @@ func TestAgentAliasResolverResolvesLLMFullhistoryWithAbsolutePathsAndEnv(t *test
 	}
 }
 
+func TestAgentAliasResolverResolvesLLMAkgRecentWithAbsolutePathsAndEnv(t *testing.T) {
+	t.Parallel()
+
+	repoDir := repoRootForTest(t)
+	resolver := agentAliasResolver{
+		repoDir:  repoDir,
+		goBinary: "go",
+		lookPath: func(string) (string, error) { return "/usr/bin/node", nil },
+		buildBinary: func(repoDir, goBinary, pkg, outputPath string) error {
+			t.Fatalf("buildBinary called unexpectedly for llm-akg-recent")
+			return nil
+		},
+	}
+
+	spec, err := resolver.resolve(llmAkgAlias, "anthropic:claude-sonnet-4", "medium")
+	if err != nil {
+		t.Fatalf("resolve() error = %v", err)
+	}
+	if spec.Name != llmAkgAlias {
+		t.Fatalf("spec.Name = %q, want %q", spec.Name, llmAkgAlias)
+	}
+	if spec.Command != "/usr/bin/node" {
+		t.Fatalf("spec.Command = %q, want /usr/bin/node", spec.Command)
+	}
+	if len(spec.Args) != 1 {
+		t.Fatalf("len(spec.Args) = %d, want 1", len(spec.Args))
+	}
+	if !filepath.IsAbs(spec.Args[0]) {
+		t.Fatalf("spec.Args[0] = %q, want absolute path", spec.Args[0])
+	}
+	if !strings.HasSuffix(spec.Args[0], filepath.Join("pi-agents", "llm-akg-recent", "dist", "main.js")) {
+		t.Fatalf("spec.Args[0] = %q, want llm-akg-recent dist entrypoint", spec.Args[0])
+	}
+	wantEnv := []string{
+		"PI_POKER_FAKE_DECISIONS_JSON=",
+		"PI_POKER_THINKING_LEVEL=medium",
+		"PI_POKER_MODEL=anthropic:claude-sonnet-4",
+	}
+	if strings.Join(spec.Env, "\n") != strings.Join(wantEnv, "\n") {
+		t.Fatalf("spec.Env = %q, want %q", spec.Env, wantEnv)
+	}
+}
+
 func TestAgentAliasResolverBuildsAbsoluteGoAgentBinary(t *testing.T) {
 	t.Parallel()
 
