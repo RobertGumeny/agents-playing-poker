@@ -22,7 +22,7 @@ func TestMessageRoundTrip(t *testing.T) {
 			name: "session_init",
 			msg: NewMessage(MessageTypeSessionInit, "msg-1", "", SessionInitPayload{
 				SessionID: "ses_2026-05-21_001",
-				AgentName: "llm-akg",
+				AgentName: "llm-akg-recent",
 				Match: MatchConfig{
 					MatchID:            "mat_001",
 					Seed:               12345,
@@ -33,7 +33,7 @@ func TestMessageRoundTrip(t *testing.T) {
 					Blinds:             BlindLevel{SB: 1, BB: 2},
 					DecisionDeadlineMS: 30000,
 				},
-				Seats:     []Seat{{Seat: 0, Name: "llm-akg"}, {Seat: 1, Name: "llm-fullhistory"}},
+				Seats:     []Seat{{Seat: 0, Name: "llm-akg-recent"}, {Seat: 1, Name: "llm-fullhistory"}},
 				YourSeat:  0,
 				MemoryDir: "/abs/path/to/agent/dir",
 			}),
@@ -57,7 +57,7 @@ func TestMessageRoundTrip(t *testing.T) {
 				Pot:        6,
 				ToCall:     2,
 				Stacks:     map[int]int{0: 197, 1: 197},
-				Seats:      []Seat{{Seat: 0, Name: "llm-akg"}, {Seat: 1, Name: "llm-fullhistory"}},
+				Seats:      []Seat{{Seat: 0, Name: "llm-akg-recent"}, {Seat: 1, Name: "llm-fullhistory"}},
 				ActionHistory: []ActionRecord{
 					{Seat: 1, Action: "call", Amount: &amount1, Street: "preflop"},
 					{Seat: 0, Action: "check", Street: "preflop"},

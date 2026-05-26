@@ -136,7 +136,7 @@ The primary commands exercised during the epic were:
 
 Still out of scope here:
 - match-long prompt stuffing (`llm-fullhistory`)
-- AKG-backed retrieval or compaction behavior (`llm-akg`)
+- AKG-backed retrieval or compaction behavior (`llm-akg-recent`)
 - reusing Pi session logs as memory
 - live-model integration tests in CI
 - any alternate artifact layout outside the canonical session bundle

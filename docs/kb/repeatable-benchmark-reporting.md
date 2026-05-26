@@ -2,7 +2,7 @@
 
 This document describes how to turn a set of poker session artifacts into a repeatable benchmark review like the ad hoc session review drafted for the `akg-recent-vs-stateless` runs.
 
-The goal is not to claim AKG superiority from early runs. Current `llm-akg` should be reported as `llm-akg-recent`: a deliberately naive bounded-memory baseline that injects an opponent profile plus the last 5 completed hands. The report should make that framing explicit so later, richer AKG memory strategies can be compared against this baseline, and eventually against `llm-fullhistory` on both skill and cost.
+The goal is not to claim AKG superiority from early runs. Current `llm-akg-recent` should be reported as a shallow baseline: a deliberately naive bounded-memory baseline that injects an opponent profile plus the last 5 completed hands. The report should make that framing explicit so later, richer AKG memory strategies can be compared against this baseline, and eventually against `llm-fullhistory` on both skill and cost.
 
 ## Why this report exists
 
@@ -49,8 +49,8 @@ A mirror pair is two sessions with:
 Example:
 
 ```text
-akg-recent-vs-stateless-seed2-a: seat0=llm-akg,       seat1=llm-stateless
-akg-recent-vs-stateless-seed2-b: seat0=llm-stateless, seat1=llm-akg
+akg-recent-vs-stateless-seed2-a: seat0=llm-akg-recent,       seat1=llm-stateless
+akg-recent-vs-stateless-seed2-b: seat0=llm-stateless, seat1=llm-akg-recent
 ```
 
 The report should validate this pairing and warn if any of these differ:

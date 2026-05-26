@@ -86,6 +86,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 await runPokerAgent({
   memoryPolicy,
   decisionEngine: createDecisionEngine(),
-  agentVersion: "llm-akg/0.1.0",
+  agentVersion: "llm-akg-recent/0.1.0",
   maxDecisionAttempts: parsePositiveInteger(process.env.PI_POKER_MAX_DECISION_ATTEMPTS),
 });

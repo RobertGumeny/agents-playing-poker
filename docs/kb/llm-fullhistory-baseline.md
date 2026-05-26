@@ -6,7 +6,7 @@ EPIC-8 delivered the naive prompt-history baseline: `llm-fullhistory`.
 
 `llm-fullhistory` is the v0 comparison point between:
 - `llm-stateless`, which exposes no prior-hand strategic context
-- `llm-akg`, which will expose structured memory through AKG-backed retrieval
+- `llm-akg-recent`, which exposes structured memory through AKG-backed retrieval
 
 It keeps the shared runtime's protocol handling, legality validation, retry budgeting, and safe fallback behavior while changing only:
 - the memory policy, which accumulates prior-hand summaries

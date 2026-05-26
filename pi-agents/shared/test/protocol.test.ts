@@ -15,7 +15,7 @@ describe("protocol helpers", () => {
         id: "msg-1",
         payload: {
           session_id: "ses-1",
-          agent_name: "llm-akg",
+          agent_name: "llm-akg-recent",
           match: {
             match_id: "mat-1",
             seed: 12345,

@@ -1,10 +1,10 @@
 {
-  "name": "@agent-poker/llm-akg",
+  "name": "@agent-poker/llm-akg-recent",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "bin": {
-    "poker-agent-llm-akg": "./dist/main.js"
+    "poker-agent-llm-akg-recent": "./dist/main.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -11,7 +11,7 @@ Packages:
 - `shared/`: shared protocol, state, prompt, action validation, runner, and Pi-session seams.
 - `llm-stateless/`: first LLM baseline; current-hand prompt only, with no strategic memory exposed to the model.
 - `llm-fullhistory/`: naive memory baseline; uses a fresh Pi session per hand and injects compact prior-hand summaries into the prompt.
-- `llm-akg/`: future structured-memory agent; uses AKG retrieval/tools and compaction-aware Pi behavior.
+- `llm-akg-recent/`: shallow AKG-backed recent-memory baseline.
 
 ## Commands
 
@@ -34,7 +34,7 @@ Pi session logs are observability artifacts and should be stored durably, but th
 Memory-strategy boundaries:
 - `llm-stateless`: fresh Pi session per decision; no prior-hand prompt context.
 - `llm-fullhistory`: fresh Pi session per hand; prior hands injected explicitly as compact human-readable summaries derived from server-visible history. Hand history grows throughout match.
-- `llm-akg`: long-lived structured-memory strategy with AKG-backed retrieval.
+- `llm-akg-recent`: long-lived structured-memory baseline with AKG-backed recent-hand retrieval.
 
 ## `llm-stateless` install/run
 
@@ -61,6 +61,19 @@ npm exec --workspace @agent-poker/llm-fullhistory poker-agent-llm-fullhistory
 ```
 
 The same executable is suitable for `poker-server -agent*-cmd`. Each hand uses a fresh Pi session; prior-hand summaries are injected into the prompt at the start of each decision.
+
+## `llm-akg-recent` install/run
+
+Build the workspace, then use the package bin as the stable agent command:
+
+```bash
+cd pi-agents
+npm install
+npm run build
+npm exec --workspace @agent-poker/llm-akg-recent poker-agent-llm-akg-recent
+```
+
+The same executable is suitable for `poker-server -agent*-cmd`. The agent persists its AKG memory file under the server-provided `memory_dir`.
 
 ## Pi-agent runtime knobs
 

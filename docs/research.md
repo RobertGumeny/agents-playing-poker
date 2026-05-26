@@ -14,7 +14,7 @@ The specific claim:
 
 > Given the same model, same game rules, same tools, and the same deal sequence, an LLM agent backed by a mature structured [AKG](https://github.com/RobertGumeny/akg) knowledge graph should match or outperform an agent that dumps the full hand history into its context, while using materially fewer tokens — and both memory strategies should outperform an agent with no memory at all.
 
-The current AKG agent is intentionally treated as an intermediate baseline: `llm-akg` in the CLI is best understood as `llm-akg-recent`, a shallow bounded-memory strategy with recent hands plus a growing opponent profile. The expensive `llm-fullhistory` comparison is reserved for the next AKG strategy generation, where retrieval is more situation-aware and the graph carries more durable opponent modeling signal.
+The current AKG agent is intentionally treated as an intermediate baseline: `llm-akg-recent` is a shallow bounded-memory strategy with recent hands plus a growing opponent profile. The expensive `llm-fullhistory` comparison is reserved for the next AKG strategy generation, where retrieval is more situation-aware and the graph carries more durable opponent modeling signal.
 
 Poker is a good thesis vehicle because it demands two things that memory directly addresses: **opponent modeling** (what does this player tend to do?) and **pattern recognition** (what has happened in hands like this one?). It also produces a clean, objective metric — chip delta — that doesn't require human judgment to interpret.
 
@@ -66,9 +66,9 @@ hand=2 | hero_pos=bb | hero_hole=Kd 9h | board=Ah 7c 2d | ...
 
 This gives the LLM access to everything, but the prompt grows without bound and mixes relevant and irrelevant history indiscriminately. Context eventually fills up, and the model gets no help prioritizing what actually matters.
 
-### `llm-akg-recent` / current `llm-akg`
+### `llm-akg-recent`
 
-Structured memory via [AKG](https://github.com/RobertGumeny/akg), currently implemented under the CLI name `llm-akg`. Instead of replaying raw history, the agent maintains a binary knowledge graph file (`memory.akg`) that persists across the match in the server-provided `memory_dir`. Before each decision, it retrieves two things:
+Structured memory via [AKG](https://github.com/RobertGumeny/akg), currently implemented under the CLI name `llm-akg-recent`. Instead of replaying raw history, the agent maintains a binary knowledge graph file (`memory.akg`) that persists across the match in the server-provided `memory_dir`. Before each decision, it retrieves two things:
 
 1. **An opponent profile** — a singleton node updated after every hand with running behavioral statistics and a generated prose summary
 2. **Recent hand nodes** — the last 5 completed hands, stored compactly and retrieved by recency
@@ -91,7 +91,7 @@ This is the intended `llm-fullhistory` challenger. It should beat or match `llm-
 
 ## AKG Schema
 
-The current `llm-akg-recent` strategy, implemented under the CLI name `llm-akg`, uses two node types. No edges in v0.
+The current `llm-akg-recent` strategy, implemented under the CLI name `llm-akg-recent`, uses two node types. No edges in v0.
 
 ### `opponent` node (singleton)
 
@@ -165,13 +165,13 @@ Compare to `llm-fullhistory`, which injects all 47 prior hands as raw pipe-delim
 
 | Phase | Matchup | What it measures | Budget posture |
 |---|---|---|---|
-| 1 | `llm-akg-recent` / current `llm-akg` vs `llm-stateless` | Does shallow bounded AKG memory change behavior versus no memory, and what is its token profile? | Low-cost multi-seed baseline |
+| 1 | `llm-akg-recent` vs `llm-stateless` | Does shallow bounded AKG memory change behavior versus no memory, and what is its token profile? | Low-cost multi-seed baseline |
 | 2 | `llm-fullhistory` vs `llm-stateless` | Does naive memory help at all, and how quickly does prompt cost grow? | Limited calibration; already expensive |
 | 3 | planned `llm-akg-durable` vs `llm-fullhistory` | Final-boss comparison: can richer structured memory match or beat raw history with bounded context? | Spend only after the durable AKG strategy is implemented |
 
 Each matchup is run as a mirror pair: agent0 and agent1 swap seats and replay the same deal sequence. Chip deltas are averaged across both runs to cancel positional variance (the small blind acts first preflop, which creates a structural edge that would otherwise contaminate the result).
 
-Current research priority: run more seeds for current `llm-akg` against `llm-stateless`, keep `llm-fullhistory` spending controlled, then reserve the full `llm-fullhistory` benchmark for the next AKG memory strategy.
+Current research priority: run more seeds for `llm-akg-recent` against `llm-stateless`, keep `llm-fullhistory` spending controlled, then reserve the full `llm-fullhistory` benchmark for the next AKG memory strategy.
 
 ### Parameters
 
@@ -190,10 +190,10 @@ All research sessions use these unless noted:
 
 Each matchup is two runs with seats swapped. Average the chip deltas across both to get the mirror-corrected result. Vary `-seed` and include the seed in the session id.
 
-**Active low-cost phase: current `llm-akg` (`llm-akg-recent`) vs `llm-stateless`**
+**Active low-cost phase: `llm-akg-recent` vs `llm-stateless`**
 ```bash
-./poker-run -agent0 llm-akg -agent1 llm-stateless -hands 200 -seed 2 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed2-a
-./poker-run -agent0 llm-stateless -agent1 llm-akg -hands 200 -seed 2 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed2-b
+./poker-run -agent0 llm-akg-recent -agent1 llm-stateless -hands 200 -seed 3 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed3-a
+./poker-run -agent0 llm-stateless -agent1 llm-akg-recent -hands 200 -seed 3 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed3-b
 ```
 
 **Limited calibration: `llm-fullhistory` vs `llm-stateless`**
@@ -218,7 +218,7 @@ For repeatable mirrored-session reviews, use the reporting design in [`docs/kb/r
 
 ### Phase-0 exploratory baseline snapshot — 2026-05-26
 
-These early 200-hand mirror pairs are exploratory only. Chip outcomes are dominated by seed, seat, and card assignment: seat 0 won all four completed sessions. Treat chip totals as a smoke-test signal, not evidence of strategic superiority. In this snapshot, `llm-akg` should be interpreted as `llm-akg-recent`: shallow bounded recency memory, not durable AKG-backed retrieval.
+These early 200-hand mirror pairs are exploratory only. Chip outcomes are dominated by seed, seat, and card assignment: seat 0 won all four completed sessions. Treat chip totals as a smoke-test signal, not evidence of strategic superiority. In this snapshot, `llm-akg-recent` is shallow bounded recency memory, not durable AKG-backed retrieval.
 
 | Pair / agent of interest | Sessions | Hands | Agent chip Δ | Total tokens | Cost | Avg cost/hand | First-20 avg cost/hand | Last-20 avg cost/hand | Cost growth |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|

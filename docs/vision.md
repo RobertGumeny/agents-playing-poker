@@ -16,7 +16,7 @@ That is exactly the domain where structured memory should matter most. An agent 
 
 Agent memory in this project is not a fixed feature — it is a design space with a natural layered progression.
 
-**v0 (current, `llm-akg-recent`):** Programmatic writes, LLM reads. The current CLI agent named `llm-akg` is intentionally treated as `llm-akg-recent`: it writes a growing opponent profile and recent hand summaries into an AKG graph, then injects those bounded facts at decision time. This is a shallow memory baseline and cost-control phase, not the final AKG thesis agent.
+**v0 (current, `llm-akg-recent`):** Programmatic writes, LLM reads. The current CLI agent `llm-akg-recent` writes a growing opponent profile and recent hand summaries into an AKG graph, then injects those bounded facts at decision time. This is a shallow memory baseline and cost-control phase, not the final AKG thesis agent.
 
 **Near term:** Durable, situation-aware retrieval. The next strategy should store and retrieve opponent tendencies by street, position, action type, bet sizing, fold/call/raise response, and showdown evidence. Queries like "find hands where villain 3-bet and I held a drawing hand" or "how has villain responded to turn pressure after calling flop?" let the agent pull targeted historical evidence rather than recency-weighted summaries.
 
@@ -47,7 +47,7 @@ A recent-hand AKG snapshot is therefore not a failed experiment, but it must be 
 The desired progression is:
 
 1. Establish the stateless baseline.
-2. Run shallow bounded-memory AKG (`llm-akg-recent`, currently named `llm-akg` in the CLI) against stateless across more seeds as a low-cost recency and token-efficiency control.
+2. Run shallow bounded-memory AKG (`llm-akg-recent`) against stateless across more seeds as a low-cost recency and token-efficiency control.
 3. Use `llm-fullhistory` sparingly as an expensive calibration baseline while the AKG strategy is still shallow.
 4. Replace the shallow snapshot with durable, situation-aware AKG opponent modeling.
 5. Pit the durable AKG strategy against `llm-fullhistory` as the final-boss benchmark.

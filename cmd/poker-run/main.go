@@ -26,7 +26,7 @@ const (
 	defaultThinkingLevel    = "low"
 	llmStatelessAlias       = "llm-stateless"
 	llmFullhistoryAlias     = "llm-fullhistory"
-	llmAkgAlias             = "llm-akg"
+	llmAkgAlias             = "llm-akg-recent"
 	heuristicAlias          = "heuristic"
 	randomAlias             = "random"
 )

@@ -60,7 +60,7 @@ Sent once at startup.
   "id": "msg-1",
   "payload": {
     "session_id": "ses_2026-05-21_001",
-    "agent_name": "llm-akg",
+    "agent_name": "llm-akg-recent",
     "match": {
       "match_id": "mat_001",
       "seed": 12345,
@@ -72,7 +72,7 @@ Sent once at startup.
       "decision_deadline_ms": 30000
     },
     "seats": [
-      {"seat": 0, "name": "llm-akg"},
+      {"seat": 0, "name": "llm-akg-recent"},
       {"seat": 1, "name": "llm-fullhistory"}
     ],
     "your_seat": 0,
@@ -119,7 +119,7 @@ Sent whenever the agent must act.
     "to_call": 2,
     "stacks": {"0": 197, "1": 197},
     "seats": [
-      {"seat": 0, "name": "llm-akg"},
+      {"seat": 0, "name": "llm-akg-recent"},
       {"seat": 1, "name": "llm-fullhistory"}
     ],
     "action_history": [
