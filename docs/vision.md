@@ -39,7 +39,7 @@ A healthy strategy lineup should distinguish these conditions clearly:
 
 - **`llm-stateless`:** current hand only; the low-token baseline.
 - **`llm-fullhistory`:** raw or lightly formatted history stuffed into the prompt; the naive high-token memory baseline.
-- **`llm-akg-recent` / `llm-akg-recent5`:** a shallow recency-memory smoke test; useful for wiring and token-efficiency comparison, but not sufficient proof of durable structured memory.
+- **`llm-akg-recent`:** a shallow recency-memory smoke test; useful for wiring and token-efficiency comparison, but not sufficient proof of durable structured memory.
 - **`llm-akg-durable`:** cumulative structured opponent model with evidence counts, tendencies, bet-sizing patterns, showdown evidence, and retrieved beliefs across all prior hands/sessions; this is where the core thesis lives.
 
 A recent-hand AKG snapshot is therefore not a failed experiment, but it must be labeled honestly. It proves, at most, that a bounded recency layer can change behavior at a lower token cost than full-history prompting. It does not by itself prove that durable structured memory gives an agent a strategic edge. Its value is as a phase-0 control and implementation smoke test that motivates the next step: cumulative, inspectable opponent memory.

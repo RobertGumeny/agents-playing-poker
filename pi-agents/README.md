@@ -34,7 +34,7 @@ Pi session logs are observability artifacts and should be stored durably, but th
 Memory-strategy boundaries:
 - `llm-stateless`: fresh Pi session per decision; no prior-hand prompt context.
 - `llm-fullhistory`: fresh Pi session per hand; prior hands injected explicitly as compact human-readable summaries derived from server-visible history. Hand history grows throughout match.
-- `llm-akg-recent`: long-lived structured-memory baseline with AKG-backed recent-hand retrieval.
+- `llm-akg-recent`: long-lived shallow structured-memory baseline with AKG-backed recent-hand retrieval; future durable AKG agents should use a distinct name such as `llm-akg-durable`.
 
 ## `llm-stateless` install/run
 

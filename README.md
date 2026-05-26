@@ -65,6 +65,10 @@ go run ./cmd/poker-run -agent0 llm-stateless -agent1 random -hands 100 -model an
 ```
 
 ```bash
+go run ./cmd/poker-run -agent0 llm-akg-recent -agent1 llm-stateless -hands 200 -seed 3 -model anthropic:claude-sonnet-4-6
+```
+
+```bash
 go run ./cmd/poker-run \
   -agent0 heuristic \
   -agent1 random \
@@ -76,9 +80,10 @@ go run ./cmd/poker-run \
 
 Notes:
 
-- supported aliases are `llm-stateless`, `llm-fullhistory`, `heuristic`, and `random`
+- supported aliases are `llm-stateless`, `llm-fullhistory`, `llm-akg-recent`, `heuristic`, and `random`
+- `llm-akg-recent` is the current shallow AKG recency-memory baseline; reserve names such as `llm-akg-durable` for future durable AKG strategies
 - `poker-run` resolves agent entrypoints to absolute paths before launch so agent subprocesses still work when `poker-server` sets each child `cmd.Dir` to its session directory
-- for `llm-stateless` and `llm-fullhistory`, the wrapper clears `PI_POKER_FAKE_DECISIONS_JSON`, defaults `PI_POKER_THINKING_LEVEL=low`, and forwards `-model` / `-thinking-level` into Pi agent env
+- for `llm-stateless`, `llm-fullhistory`, and `llm-akg-recent`, the wrapper clears `PI_POKER_FAKE_DECISIONS_JSON`, defaults `PI_POKER_THINKING_LEVEL=low`, and forwards `-model` / `-thinking-level` into Pi agent env
 - Go agents are built into `.tmp/bin/` on demand for wrapper runs
 
 ## Inspect the session bundle
