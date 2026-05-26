@@ -36,5 +36,5 @@ Do not duplicate the normative sources:
   - What EPIC-8 delivered in the prompt-history Pi baseline.
   - Covers the fresh-session-per-hand boundary, compact prior-hand summary format, `hand_end` protocol support, and the shared runtime seam between memory policy and decision engine.
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
-  - How to implement repeatable Markdown reviews for mirrored benchmark sessions.
-  - Covers required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
+  - What EPIC-9 delivered for `llm-akg-recent` naming and repeatable Markdown reviews over mirrored benchmark sessions.
+  - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
