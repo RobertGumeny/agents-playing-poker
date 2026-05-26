@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add reporting session loader and normalized model
 - test: cover llm-akg-recent poker-run alias resolution
 - feat: rename llm-akg Pi agent to llm-akg-recent
 - feat: add llm-fullhistory and split the shared Pi runtime into memory-policy and decision-engine seams
