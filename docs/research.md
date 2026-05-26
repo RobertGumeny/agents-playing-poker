@@ -31,7 +31,10 @@ Heads-up (2-player) no-limit Texas Hold'em, cash-game model with auto-rebuy.
 
 ### Measuring results
 
-Canonical metric: **mean chips per hand** with 95% CI. Reported per session in `sessions/<id>/manifest.json` and derivable from `hands.jsonl`.
+Two primary metrics:
+
+- **Mean chips per hand** with 95% CI — total chip delta divided by hands played, reported per session in `sessions/<id>/manifest.json` and derivable from `hands.jsonl`. CIs must be non-overlapping to claim a result.
+- **Chips per token** — total chip delta divided by total input tokens consumed across the match. This is the efficiency metric: `llm-fullhistory`'s token cost grows with every hand; `llm-akg`'s is bounded. The gap widens as match length increases.
 
 A match is N hands between two agents. The deal sequence is fixed by seed; each agent plays both sides of the same distribution across mirror runs to cancel positional variance.
 
@@ -153,9 +156,11 @@ Compare to `llm-fullhistory`, which injects all 47 prior hands as raw pipe-delim
 
 | Matchup | What it measures |
 |---|---|
-| `llm-akg` vs `llm-fullhistory` | The headline — does structured retrieval beat naive history? |
+| `llm-akg` vs `llm-fullhistory` | The headline — does structured retrieval beat naive history on both chip delta and chips per token? |
 | `llm-akg` vs `llm-stateless` | Does AKG memory beat no memory? |
-| `llm-fullhistory` vs `llm-stateless` | Does naive memory help at all? (sets up AKG as top) |
+| `llm-fullhistory` vs `llm-stateless` | Does naive memory help at all? |
+
+Each matchup is run as a mirror pair: agent0 and agent1 swap seats and replay the same deal sequence. Chip deltas are averaged across both runs to cancel positional variance (the small blind acts first preflop, which creates a structural edge that would otherwise contaminate the result).
 
 ### Parameters
 
@@ -163,17 +168,33 @@ All research sessions use these unless noted:
 
 | Parameter | Value |
 |---|---|
-| Hands per match | 200 |
+| Hands per match | 200 (per mirror run, 400 total per matchup) |
 | Starting stack | 200bb |
 | Blinds | 1/2 |
 | Seed | 1 (fixed across all sessions for same deal sequence) |
 | Info realism | `showdown-only` |
+| Metrics | mean chips/hand (95% CI), chips/token |
 
 ### Running a session
 
+Each matchup is two runs with seats swapped. Average the chip deltas across both to get the mirror-corrected result.
+
+**`llm-akg` vs `llm-fullhistory`**
 ```bash
-cd pi-agents && npm run build && cd ..
-./poker-run -agent0 llm-akg -agent1 llm-fullhistory -hands 200 -model <provider:model>
+./poker-run -agent0 llm-akg -agent1 llm-fullhistory -hands 200 -model anthropic:claude-sonnet-4-6
+./poker-run -agent0 llm-fullhistory -agent1 llm-akg -hands 200 -model anthropic:claude-sonnet-4-6
+```
+
+**`llm-akg` vs `llm-stateless`**
+```bash
+./poker-run -agent0 llm-akg -agent1 llm-stateless -hands 200 -model anthropic:claude-sonnet-4-6
+./poker-run -agent0 llm-stateless -agent1 llm-akg -hands 200 -model anthropic:claude-sonnet-4-6
+```
+
+**`llm-fullhistory` vs `llm-stateless`**
+```bash
+./poker-run -agent0 llm-fullhistory -agent1 llm-stateless -hands 200 -model anthropic:claude-sonnet-4-6
+./poker-run -agent0 llm-stateless -agent1 llm-fullhistory -hands 200 -model anthropic:claude-sonnet-4-6
 ```
 
 Results land in `sessions/<session-id>/`. The AKG memory file for each agent is at `sessions/<id>/agents/<name>/memory.akg`.
