@@ -51,6 +51,7 @@ type Config struct {
 	AKGSpecVersion      string
 	AgentSpecs          []AgentSpec
 	ShutdownGracePeriod time.Duration
+	ProgressWriter      io.Writer
 }
 
 type RunResult struct {
@@ -255,6 +256,23 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 		}
 		for _, delta := range hand.Result.Deltas {
 			matchTotals[delta.Seat] += delta.Delta
+		}
+		if pw := r.config.ProgressWriter; pw != nil {
+			var hd0, hd1 int
+			for _, delta := range hand.Result.Deltas {
+				switch delta.Seat {
+				case 0:
+					hd0 = delta.Delta
+				case 1:
+					hd1 = delta.Delta
+				}
+			}
+			w := len(fmt.Sprint(r.config.HandCount))
+			fmt.Fprintf(pw, "hand %*d/%d | %s %+d (total: %+d) | %s %+d (total: %+d)\n",
+				w, handNumber, r.config.HandCount,
+				r.config.AgentSpecs[0].Name, hd0, matchTotals[0],
+				r.config.AgentSpecs[1].Name, hd1, matchTotals[1],
+			)
 		}
 		for seat, agent := range agents {
 			if err := agent.Send(wire.NewMessage(wire.MessageTypeHandEnd, agent.NextMessageID(), "", buildHandEndPayload(r.config.InfoRealism, hand, seat))); err != nil {

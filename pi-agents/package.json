@@ -4,7 +4,8 @@
   "workspaces": [
     "shared",
     "llm-stateless",
-    "llm-fullhistory"
+    "llm-fullhistory",
+    "llm-akg"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
