@@ -102,10 +102,23 @@ head -n 3 sessions/ses_demo_random_vs_heuristic/hands.jsonl
 ls sessions/ses_demo_random_vs_heuristic/agents
 ```
 
+## Generate a benchmark report
+
+Use `poker-report` to create a repeatable Markdown review from explicit session directories. The report is derived from each session's `manifest.json` and `hands.jsonl` artifacts, not from existing per-session `report.md` files.
+
+```bash
+go run ./cmd/poker-report \
+  -sessions sessions/akg-recent-vs-stateless-seed1-a,sessions/akg-recent-vs-stateless-seed1-b,sessions/akg-recent-vs-stateless-seed2-a,sessions/akg-recent-vs-stateless-seed2-b \
+  -label akg-recent-vs-stateless \
+  -out reports/akg-recent-vs-stateless.md
+```
+
+Historical session artifacts may still contain the old shallow-memory strategy label `llm-akg`. Current reporting canonicalizes that label to `llm-akg-recent` and includes a warning note when normalization occurred; do not rewrite old session bundles just to rename historical artifacts.
+
 Timeout behavior is server-enforced. If an agent exceeds `-decision-deadline`, the server records `action: "auto_fold"` with `forced_reason: "decision_timeout"` in `hands.jsonl` and still exits cleanly.
 
 ## Read
 
-- **[`docs/spec.md`](docs/spec.md)** — the v0 specification (architecture, wire protocol, strategy lineup, output format, build phasing).
+- **[`docs/vision.md`](docs/vision.md)** — project vision and thesis framing.
 - **[`AGENTS.md`](AGENTS.md)** — instructions for AI agents working in this repo.
 - **[`docs/wire-protocol.md`](docs/wire-protocol.md)** — the JSONL agent/server contract.

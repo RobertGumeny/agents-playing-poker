@@ -26,6 +26,8 @@ Minimum required artifacts per session:
 - `sessions/<id>/hands.jsonl`
 - `sessions/<id>/report.md` is optional; prefer deriving metrics from manifest + hands to avoid compounding prior report mistakes.
 
+Historical session artifacts may contain the old `llm-akg` strategy label. Current reports canonicalize that label to `llm-akg-recent` for aggregate display and include a warning/note when normalization occurs. Do not rewrite old session bundles just to rename historical artifacts.
+
 Optional artifacts for cost reporting:
 
 - per-agent Pi usage logs, when present under session agent directories
@@ -248,7 +250,7 @@ Add a small report command rather than hand-writing these reviews.
 Suggested command shape:
 
 ```bash
-./poker-report \
+go run ./cmd/poker-report \
   -sessions sessions/akg-recent-vs-stateless-seed1-a,sessions/akg-recent-vs-stateless-seed1-b,sessions/akg-recent-vs-stateless-seed2-a,sessions/akg-recent-vs-stateless-seed2-b \
   -label akg-recent-vs-stateless \
   -out reports/akg-recent-vs-stateless.md
