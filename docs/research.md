@@ -192,8 +192,8 @@ Each matchup is two runs with seats swapped. Average the chip deltas across both
 
 **Active low-cost phase: current `llm-akg` (`llm-akg-recent`) vs `llm-stateless`**
 ```bash
-./poker-run -agent0 llm-akg -agent1 llm-stateless -hands 200 -seed 1 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed1-a
-./poker-run -agent0 llm-stateless -agent1 llm-akg -hands 200 -seed 1 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed1-b
+./poker-run -agent0 llm-akg -agent1 llm-stateless -hands 200 -seed 2 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed2-a
+./poker-run -agent0 llm-stateless -agent1 llm-akg -hands 200 -seed 2 -model anthropic:claude-sonnet-4-6 -session-id akg-recent-vs-stateless-seed2-b
 ```
 
 **Limited calibration: `llm-fullhistory` vs `llm-stateless`**
@@ -209,6 +209,8 @@ Each matchup is two runs with seats swapped. Average the chip deltas across both
 ```
 
 Results land in `sessions/<session-id>/`. The AKG memory file for each AKG agent is at `sessions/<id>/agents/<name>/memory.akg`.
+
+For repeatable mirrored-session reviews, use the reporting design in [`docs/kb/repeatable-benchmark-reporting.md`](kb/repeatable-benchmark-reporting.md). Reports should distinguish raw session winners from mirror-corrected aggregates, seat-bias checks, behavioral diagnostics, and token/cost efficiency.
 
 ---
 
