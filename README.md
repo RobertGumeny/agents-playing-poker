@@ -103,6 +103,27 @@ head -n 3 sessions/ses_demo_random_vs_heuristic/hands.jsonl
 ls sessions/ses_demo_random_vs_heuristic/agents
 ```
 
+## Run a planned experiment
+
+Use `poker-eval run` when you want deterministic session planning from a checked-in experiment definition instead of manually constructing repeated `poker-run` commands.
+
+```bash
+go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -dry-run
+```
+
+```bash
+go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -model anthropic:claude-sonnet-4-6
+```
+
+Current behavior:
+
+- loads the JSON experiment definition from [`docs/experiment-definition.md`](docs/experiment-definition.md)
+- derives control and treatment session ids, seeds, and expected `sessions/<id>` directories deterministically
+- reports coverage for each planned session as `existing` or `missing`
+- skips already-present session directories on execution
+- launches only missing planned sessions through `poker-run`
+- requires `opponent` metadata for any missing session it needs to launch
+
 ## Generate a benchmark report
 
 Use `poker-report` to create a repeatable Markdown review from explicit session directories. The report is derived from each session's `manifest.json` and `hands.jsonl` artifacts, not from existing per-session `report.md` files.

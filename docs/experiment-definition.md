@@ -71,6 +71,8 @@ Shared group fields:
 - **`opponent`** — optional intended opposing agent identifier
 - **`seeds`** — optional planned seeds in session order
 
+`opponent` remains optional at the file-format level because offline tooling can derive opponents from session artifacts later. However, `poker-eval run` can only launch a missing planned session when that session's group includes `opponent` metadata.
+
 ### Session-base mode
 
 ```json

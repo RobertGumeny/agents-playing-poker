@@ -1,6 +1,7 @@
 package experiment
 
 import (
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -79,6 +80,70 @@ func TestParseValidExplicitSessionDefinition(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("treatment planned sessions = %#v, want %#v", got, want)
+	}
+}
+
+func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
+	def, err := Parse([]byte(`{
+		"id": "run-benchmark",
+		"hands_per_session": 25,
+		"control": {
+			"session_base": "control-group",
+			"sessions_count": 2,
+			"agent": "llm-stateless",
+			"opponent": "heuristic"
+		},
+		"treatment": {
+			"sessions": ["treatment-a", "treatment-b"],
+			"agent": "llm-akg-recent",
+			"opponent": "heuristic",
+			"seeds": [17, 23]
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+
+	plan, err := def.Plan("sessions")
+	if err != nil {
+		t.Fatalf("Plan() error = %v", err)
+	}
+
+	want := []PlannedRun{
+		{GroupLabel: "control", SessionID: "control-group-1", SessionDir: filepath.Join("sessions", "control-group-1"), Seed: 1, Agent: "llm-stateless", Opponent: "heuristic"},
+		{GroupLabel: "control", SessionID: "control-group-2", SessionDir: filepath.Join("sessions", "control-group-2"), Seed: 2, Agent: "llm-stateless", Opponent: "heuristic"},
+		{GroupLabel: "treatment", SessionID: "treatment-a", SessionDir: filepath.Join("sessions", "treatment-a"), Seed: 17, Agent: "llm-akg-recent", Opponent: "heuristic"},
+		{GroupLabel: "treatment", SessionID: "treatment-b", SessionDir: filepath.Join("sessions", "treatment-b"), Seed: 23, Agent: "llm-akg-recent", Opponent: "heuristic"},
+	}
+	if !reflect.DeepEqual(plan.PlannedSessions, want) {
+		t.Fatalf("plan.PlannedSessions = %#v, want %#v", plan.PlannedSessions, want)
+	}
+}
+
+func TestDefinitionPlanRejectsConflictingSessionIDsAcrossGroups(t *testing.T) {
+	def, err := Parse([]byte(`{
+		"id": "conflict",
+		"hands_per_session": 25,
+		"control": {
+			"sessions": ["shared-session"],
+			"agent": "llm-stateless",
+			"opponent": "heuristic",
+			"seeds": [1]
+		},
+		"treatment": {
+			"sessions": ["shared-session"],
+			"agent": "llm-akg-recent",
+			"opponent": "heuristic",
+			"seeds": [2]
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+
+	_, err = def.Plan("sessions")
+	if err == nil || !strings.Contains(err.Error(), "conflicting planned session \"shared-session\"") {
+		t.Fatalf("Plan() error = %v, want conflicting planned session failure", err)
 	}
 }
 

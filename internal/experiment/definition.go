@@ -41,6 +41,22 @@ type PlannedSession struct {
 	Seed       int64
 }
 
+type Plan struct {
+	ExperimentID    string
+	HandsPerSession int
+	SessionsRootDir string
+	PlannedSessions []PlannedRun
+}
+
+type PlannedRun struct {
+	GroupLabel string
+	SessionID  string
+	SessionDir string
+	Seed       int64
+	Agent      string
+	Opponent   string
+}
+
 func Load(path string) (Definition, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -93,6 +109,45 @@ func (d Definition) Validate() error {
 		}
 	}
 	return nil
+}
+
+func (d Definition) Plan(sessionsRootDir string) (Plan, error) {
+	rootDir := filepath.Clean(sessionsRootDir)
+	plan := Plan{
+		ExperimentID:    d.ID,
+		HandsPerSession: d.HandsPerSession,
+		SessionsRootDir: rootDir,
+	}
+
+	seen := make(map[string]PlannedRun)
+	for _, group := range []struct {
+		label string
+		spec  Group
+	}{
+		{label: "control", spec: d.Control},
+		{label: "treatment", spec: d.Treatment},
+	} {
+		for _, planned := range group.spec.PlannedSessions(group.label) {
+			run := PlannedRun{
+				GroupLabel: group.label,
+				SessionID:  planned.SessionID,
+				SessionDir: filepath.Join(rootDir, planned.SessionID),
+				Seed:       planned.Seed,
+				Agent:      group.spec.Agent,
+				Opponent:   group.spec.Opponent,
+			}
+			if prior, ok := seen[run.SessionID]; ok {
+				if prior == run {
+					return Plan{}, fmt.Errorf("plan experiment %q: duplicate planned session %q", d.ID, run.SessionID)
+				}
+				return Plan{}, fmt.Errorf("plan experiment %q: conflicting planned session %q (%s seed=%d agent=%q opponent=%q vs %s seed=%d agent=%q opponent=%q)", d.ID, run.SessionID, prior.GroupLabel, prior.Seed, prior.Agent, prior.Opponent, run.GroupLabel, run.Seed, run.Agent, run.Opponent)
+			}
+			seen[run.SessionID] = run
+			plan.PlannedSessions = append(plan.PlannedSessions, run)
+		}
+	}
+
+	return plan, nil
 }
 
 func (g Group) PlannedSessions(label string) []PlannedSession {
