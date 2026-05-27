@@ -11,6 +11,27 @@ import (
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
 
+func TestCollectWritesEvalJSON(t *testing.T) {
+	rootDir := t.TempDir()
+	sessionDir := createCollectCLIFixture(t, rootDir)
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	if err := run([]string{"collect", sessionDir}, &stdout, &stderr, runDeps{}); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+	if !strings.Contains(stdout.String(), "collected session_id=fixture output="+filepath.Join(sessionDir, "eval.json")) {
+		t.Fatalf("stdout = %q, want collected line", stdout.String())
+	}
+	data, err := os.ReadFile(filepath.Join(sessionDir, "eval.json"))
+	if err != nil {
+		t.Fatalf("ReadFile(eval.json) error = %v", err)
+	}
+	if !strings.Contains(string(data), `"session_id": "fixture"`) || !strings.Contains(string(data), `"retry_metrics"`) {
+		t.Fatalf("eval.json = %s, want session id and retry metrics", string(data))
+	}
+}
+
 func TestRunDryRunPrintsDeterministicPlanAndCoverage(t *testing.T) {
 	var stdout strings.Builder
 	var stderr strings.Builder
@@ -322,6 +343,60 @@ type fixtureOptions struct {
 	Completed    bool
 	Seats        []string
 	HandsWritten int
+}
+
+func createCollectCLIFixture(t *testing.T, rootDir string) string {
+	t.Helper()
+
+	writer, err := sessionlog.New(rootDir, "fixture")
+	if err != nil {
+		t.Fatalf("sessionlog.New() error = %v", err)
+	}
+	defer func() {
+		if err := writer.Close(); err != nil {
+			t.Fatalf("writer.Close() error = %v", err)
+		}
+	}()
+
+	if err := writer.AppendHand(sessionlog.HandRecord{MatchID: "mat_001", HandNumber: 1, Actions: []sessionlog.HandAction{{Seat: 0, Action: "post_blind", Street: "preflop"}, {Seat: 1, Action: "post_blind", Street: "preflop"}, {Seat: 0, Action: "raise", Street: "preflop", Amount: intPtr(6)}, {Seat: 1, Action: "fold", Street: "preflop"}}, Result: []sessionlog.HandResult{{Seat: 0, ChipsDelta: 2}, {Seat: 1, ChipsDelta: -2}}}); err != nil {
+		t.Fatalf("writer.AppendHand() error = %v", err)
+	}
+	if err := writer.WriteManifest(sessionlog.Manifest{
+		SessionID:      "fixture",
+		StartedAt:      "2026-05-27T10:00:00Z",
+		EndedAt:        "2026-05-27T10:00:05Z",
+		Seed:           1,
+		HandCount:      1,
+		Variant:        "heads-up-nlhe",
+		InfoRealism:    "showdown-only",
+		StartingStack:  200,
+		Blinds:         sessionlog.BlindLevel{SB: 1, BB: 2},
+		ServerVersion:  "dev",
+		AKGSpecVersion: "v1-draft-2",
+		Matches: []sessionlog.ManifestMatch{{
+			MatchID:   "mat_001",
+			Seats:     []sessionlog.ManifestSeat{{Seat: 0, Name: "agent-a"}, {Seat: 1, Name: "agent-b"}},
+			Result:    map[int]sessionlog.ManifestSeatResult{0: {ChipsDelta: 2}, 1: {ChipsDelta: -2}},
+			Completed: true,
+		}},
+	}); err != nil {
+		t.Fatalf("writer.WriteManifest() error = %v", err)
+	}
+	agentDir, err := writer.AgentDir("agent-a")
+	if err != nil {
+		t.Fatalf("writer.AgentDir() error = %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(agentDir, "pi-session.jsonl"), []byte("{\"type\":\"fake_pi_session\",\"session_scope\":\"decision\",\"session_number\":1,\"hand_number\":1,\"decision_number\":1,\"prompt\":\"Hand: 1\"}\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(pi-session.jsonl) error = %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(agentDir, "stderr.log"), []byte("decision attempt 1/2 failed: pi decision failed: assistant returned malformed action JSON: \"bad\"\ndecision engine exhausted retries; using safe fallback action\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(stderr.log) error = %v", err)
+	}
+	return filepath.Join(rootDir, "fixture")
+}
+
+func intPtr(v int) *int {
+	return &v
 }
 
 func createSessionFixture(t *testing.T, rootDir, sessionID string, opts fixtureOptions) {

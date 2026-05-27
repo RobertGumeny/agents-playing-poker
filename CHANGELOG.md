@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add poker-eval collect and deterministic eval.json generation
 - feat: add shared offline eval artifact loaders
 - feat: add experiment status and coverage readouts to poker-eval
 - feat: finish poker-eval run wrapper with deterministic planning, dry-run config output, and poker-run delegation

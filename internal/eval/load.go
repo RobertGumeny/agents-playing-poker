@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
@@ -15,6 +16,7 @@ import (
 const (
 	piSessionFileName    = "pi-session.jsonl"
 	memoryExportFileName = "memory-export.json"
+	stderrFileName       = "stderr.log"
 )
 
 type SessionArtifacts struct {
@@ -31,6 +33,8 @@ type AgentArtifacts struct {
 	PiSession        *PiSessionLog
 	MemoryExport     *MemoryExport
 	MemoryExportPath string
+	StderrPath       string
+	RetrySummary     RetrySummary
 }
 
 type PiSessionLog struct {
@@ -76,6 +80,13 @@ type MemoryExportSummary struct {
 	EdgeCount       int
 	NodesByType     map[string]int
 	EdgesByRelation map[string]int
+}
+
+type RetrySummary struct {
+	AttemptFailures        int
+	MalformedActionRetries int
+	ExhaustedCount         int
+	MaxAttemptsObserved    int
 }
 
 func LoadSession(sessionDir string) (SessionArtifacts, error) {
@@ -139,6 +150,18 @@ func loadAgentArtifacts(agentDir string, seat sessionlog.ManifestSeat) (AgentArt
 		return AgentArtifacts{}, fmt.Errorf("load eval agent %q: stat %s: %w", seat.Name, memoryExportPath, err)
 	}
 
+	stderrPath := filepath.Join(agentDir, stderrFileName)
+	if _, err := os.Stat(stderrPath); err == nil {
+		summary, err := ReadRetrySummary(stderrPath)
+		if err != nil {
+			return AgentArtifacts{}, fmt.Errorf("load eval agent %q: %w", seat.Name, err)
+		}
+		agent.StderrPath = stderrPath
+		agent.RetrySummary = summary
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return AgentArtifacts{}, fmt.Errorf("load eval agent %q: stat %s: %w", seat.Name, stderrPath, err)
+	}
+
 	return agent, nil
 }
 
@@ -182,6 +205,42 @@ func ReadMemoryExport(path string) (MemoryExport, error) {
 		export.Edges = []MemoryExportEdge{}
 	}
 	return export, nil
+}
+
+func ReadRetrySummary(path string) (RetrySummary, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return RetrySummary{}, fmt.Errorf("read retry summary %s: %w", path, err)
+	}
+	defer f.Close()
+
+	var summary RetrySummary
+	scanner := bufio.NewScanner(f)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var attempt int
+		var maxAttempts int
+		var message string
+		if _, err := fmt.Sscanf(line, "decision attempt %d/%d failed: %s", &attempt, &maxAttempts, &message); err == nil {
+			summary.AttemptFailures++
+			if maxAttempts > summary.MaxAttemptsObserved {
+				summary.MaxAttemptsObserved = maxAttempts
+			}
+			if strings.Contains(line, "malformed action JSON") {
+				summary.MalformedActionRetries++
+			}
+			continue
+		}
+		if strings.Contains(line, "exhausted retries; using safe fallback action") {
+			summary.ExhaustedCount++
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return RetrySummary{}, fmt.Errorf("read retry summary %s: scan: %w", path, err)
+	}
+	return summary, nil
 }
 
 func (l PiSessionLog) DecisionPromptCount() int {

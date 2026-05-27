@@ -131,6 +131,12 @@ func TestLoadSessionReadsFixturePiSessionAndOptionalMemoryExport(t *testing.T) {
 	}`), 0o644); err != nil {
 		t.Fatalf("WriteFile(memory-export.json) error = %v", err)
 	}
+	if err := os.WriteFile(filepath.Join(agentDir, stderrFileName), []byte(strings.Join([]string{
+		`decision attempt 1/2 failed: pi decision failed: assistant returned malformed action JSON: "bad"`,
+		`decision engine exhausted retries; using safe fallback action`,
+	}, "\n")+"\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(stderr.log) error = %v", err)
+	}
 
 	artifacts, err := LoadSession(sessionDir)
 	if err != nil {
@@ -154,6 +160,9 @@ func TestLoadSessionReadsFixturePiSessionAndOptionalMemoryExport(t *testing.T) {
 	summary := artifacts.Agents[0].MemoryExport.Summary()
 	if summary.NodeCount != 2 || summary.EdgeCount != 1 || summary.NodesByType["opponent"] != 1 || summary.NodesByType["hand"] != 1 || summary.EdgesByRelation["supported_by"] != 1 {
 		t.Fatalf("memory export summary = %#v, want 2 nodes 1 edge with expected buckets", summary)
+	}
+	if artifacts.Agents[0].RetrySummary.AttemptFailures != 1 || artifacts.Agents[0].RetrySummary.MalformedActionRetries != 1 || artifacts.Agents[0].RetrySummary.ExhaustedCount != 1 {
+		t.Fatalf("retry summary = %#v, want attempts=1 malformed=1 exhausted=1", artifacts.Agents[0].RetrySummary)
 	}
 	if artifacts.Agents[1].PiSession != nil {
 		t.Fatal("agent[1].PiSession != nil, want missing optional pi-session artifact")

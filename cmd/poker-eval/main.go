@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/RobertGumeny/agent-poker/internal/eval"
 	"github.com/RobertGumeny/agent-poker/internal/experiment"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
@@ -29,10 +30,12 @@ func main() {
 
 func run(args []string, stdout, stderr io.Writer, deps runDeps) error {
 	if len(args) == 0 {
-		return fmt.Errorf("expected subcommand (supported: run, status)")
+		return fmt.Errorf("expected subcommand (supported: collect, run, status)")
 	}
 
 	switch args[0] {
+	case "collect":
+		return runCollect(args[1:], stdout, stderr)
 	case "run":
 		return runRun(args[1:], stdout, stderr, deps)
 	case "status":
@@ -125,6 +128,29 @@ type runConfig struct {
 type statusConfig struct {
 	experimentPath string
 	sessionsDir    string
+}
+
+type collectConfig struct {
+	sessionDirs []string
+}
+
+func runCollect(args []string, stdout, stderr io.Writer) error {
+	cfg, err := parseCollectConfig(args)
+	if err != nil {
+		return err
+	}
+
+	for _, sessionDir := range cfg.sessionDirs {
+		summary, err := eval.CollectSession(sessionDir)
+		if err != nil {
+			return err
+		}
+		if err := eval.WriteSummary(sessionDir, summary); err != nil {
+			return err
+		}
+		_, _ = fmt.Fprintf(stdout, "collected session_id=%s output=%s\n", summary.SessionID, filepath.Join(sessionDir, "eval.json"))
+	}
+	return nil
 }
 
 func runRun(args []string, stdout, stderr io.Writer, deps runDeps) error {
@@ -252,6 +278,18 @@ func (c planCoverage) groupSummaries() map[string]groupCoverage {
 		summaries[session.Planned.GroupLabel] = summary
 	}
 	return summaries
+}
+
+func parseCollectConfig(args []string) (collectConfig, error) {
+	fs := flag.NewFlagSet("poker-eval collect", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	if err := fs.Parse(args); err != nil {
+		return collectConfig{}, err
+	}
+	if fs.NArg() == 0 {
+		return collectConfig{}, fmt.Errorf("at least one session directory is required")
+	}
+	return collectConfig{sessionDirs: fs.Args()}, nil
 }
 
 func parseRunConfig(args []string) (runConfig, error) {

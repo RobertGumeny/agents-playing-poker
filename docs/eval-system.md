@@ -246,7 +246,7 @@ sessions/<id>/
 
 ### Part 3 — Metrics collector (`poker-eval collect`)
 
-A CLI command that reads session artifacts (including `memory-export.json`) and writes
+A CLI command that reads session artifacts (including `memory-export.json` and agent `stderr.log`) and writes
 a structured `eval.json` into each session directory. Runs post-session, completely
 offline, no LLM, no AKG SDK dependency.
 

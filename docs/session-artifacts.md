@@ -196,11 +196,13 @@ This example matches the checked-in export fixture shape covered by `internal/se
   "agents": {
     "llm-akg-durable": {
       "pi_session": "agents/llm-akg-durable/pi-session.jsonl",
-      "memory_export": "agents/llm-akg-durable/memory-export.json"
+      "memory_export": "agents/llm-akg-durable/memory-export.json",
+      "stderr": "agents/llm-akg-durable/stderr.log"
     },
     "llm-stateless": {
       "pi_session": "agents/llm-stateless/pi-session.jsonl",
-      "memory_export": null
+      "memory_export": null,
+      "stderr": null
     }
   }
 }
@@ -212,6 +214,7 @@ Rules:
 - `agents` is keyed by agent directory name.
 - `pi_session` is the relative path to `pi-session.jsonl` when present, otherwise `null`.
 - `memory_export` is the relative path to `memory-export.json` when present, otherwise `null`.
+- `stderr` is the relative path to `stderr.log` when present, otherwise `null`.
 
 ### `session`
 
@@ -283,6 +286,12 @@ Each seat entry has this shape:
     "akg_list_patterns": 1.08,
     "akg_get_pattern": 0.16
   },
+  "retry_metrics": {
+    "attempt_failures": 2,
+    "malformed_action_retries": 2,
+    "exhausted_count": 1,
+    "max_attempts_observed": 2
+  },
   "memory_export": null
 }
 ```
@@ -297,6 +306,7 @@ Field semantics:
 - `decision_prompt_count` — count of decision prompts observed in that seat's `pi-session.jsonl`; `0` when no Pi session log exists
 - `tool_calls` — map of tool name to count, derived from `pi-session.jsonl` assistant messages where `content[].type == "toolCall"`
 - `tool_calls_per_hand` — `tool_calls[name] / hand_count`, rounded only by normal JSON number formatting
+- `retry_metrics` — per-seat summary derived from `stderr.log`; all counts are `0` when no retry log exists
 - `memory_export` — `null` when no export exists, otherwise a lightweight graph summary object
 
 ### `memory_export` summary object
@@ -334,11 +344,13 @@ This example is derived from the checked-in session fixture `sessions/akg-durabl
     "agents": {
       "llm-akg-durable": {
         "pi_session": "agents/llm-akg-durable/pi-session.jsonl",
-        "memory_export": null
+        "memory_export": null,
+        "stderr": "agents/llm-akg-durable/stderr.log"
       },
       "llm-stateless": {
         "pi_session": "agents/llm-stateless/pi-session.jsonl",
-        "memory_export": null
+        "memory_export": null,
+        "stderr": "agents/llm-stateless/stderr.log"
       }
     }
   },
@@ -383,6 +395,12 @@ This example is derived from the checked-in session fixture `sessions/akg-durabl
         "akg_list_patterns": 1.08,
         "akg_get_pattern": 0.16
       },
+      "retry_metrics": {
+        "attempt_failures": 1,
+        "malformed_action_retries": 1,
+        "exhausted_count": 0,
+        "max_attempts_observed": 2
+      },
       "memory_export": null
     },
     {
@@ -394,6 +412,12 @@ This example is derived from the checked-in session fixture `sessions/akg-durabl
       "decision_prompt_count": 85,
       "tool_calls": {},
       "tool_calls_per_hand": {},
+      "retry_metrics": {
+        "attempt_failures": 0,
+        "malformed_action_retries": 0,
+        "exhausted_count": 0,
+        "max_attempts_observed": 0
+      },
       "memory_export": null
     }
   ]
