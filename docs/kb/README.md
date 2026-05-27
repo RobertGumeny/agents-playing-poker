@@ -39,3 +39,6 @@ Do not duplicate the normative sources:
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
   - What EPIC-9 delivered for `llm-akg-recent` naming and repeatable Markdown reviews over mirrored benchmark sessions.
   - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
+- [`experiment-planning-and-session-artifacts.md`](experiment-planning-and-session-artifacts.md)
+  - What EPIC-11 delivered for experiment-definition parsing and additive analysis artifacts.
+  - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, `eval.json` as a documented future offline artifact, and the authority split between primary and derived session files.
