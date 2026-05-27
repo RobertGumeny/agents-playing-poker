@@ -127,6 +127,7 @@ func runRun(args []string, stdout, stderr io.Writer, deps runDeps) error {
 	}
 
 	_, _ = fmt.Fprintf(stdout, "experiment=%s planned=%d existing=%d missing=%d dry_run=%t\n", plan.ExperimentID, len(plan.PlannedSessions), existingCount, missingCount, cfg.dryRun)
+	_, _ = fmt.Fprintf(stdout, "config hands_per_session=%d sessions_dir=%s model=%s thinking_level=%s\n", plan.HandsPerSession, cfg.sessionsDir, printableValue(cfg.model), cfg.thinkingLevel)
 	for i, planned := range plan.PlannedSessions {
 		_, _ = fmt.Fprintf(stdout, "group=%s session_id=%s seed=%d agent=%s opponent=%s status=%s dir=%s\n", planned.GroupLabel, planned.SessionID, planned.Seed, planned.Agent, planned.Opponent, statuses[i], planned.SessionDir)
 	}
@@ -278,4 +279,11 @@ func binaryName(name string) string {
 		return name + ".exe"
 	}
 	return name
+}
+
+func printableValue(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return "<default>"
+	}
+	return value
 }

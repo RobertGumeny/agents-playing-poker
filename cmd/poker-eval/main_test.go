@@ -49,6 +49,7 @@ func TestRunDryRunPrintsDeterministicPlan(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"experiment=exp-1 planned=3 existing=1 missing=2 dry_run=true",
+		"config hands_per_session=25 sessions_dir=sessions model=<default> thinking_level=low",
 		"group=control session_id=control-1 seed=1 agent=llm-stateless opponent=heuristic status=existing dir=" + filepath.Join("sessions", "control-1"),
 		"group=control session_id=control-2 seed=2 agent=llm-stateless opponent=heuristic status=missing dir=" + filepath.Join("sessions", "control-2"),
 		"group=treatment session_id=treatment-a seed=17 agent=llm-akg-recent opponent=heuristic status=missing dir=" + filepath.Join("sessions", "treatment-a"),

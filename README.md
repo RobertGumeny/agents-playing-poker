@@ -119,6 +119,7 @@ Current behavior:
 
 - loads the JSON experiment definition from [`docs/experiment-definition.md`](docs/experiment-definition.md)
 - derives control and treatment session ids, seeds, and expected `sessions/<id>` directories deterministically
+- prints the planned execution config (`hands_per_session`, `sessions_dir`, model, thinking level) in dry-run and live modes
 - reports coverage for each planned session as `existing` or `missing`
 - skips already-present session directories on execution
 - launches only missing planned sessions through `poker-run`

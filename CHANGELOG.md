@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: finish poker-eval run wrapper with deterministic planning, dry-run config output, and poker-run delegation
 - feat: add poker-eval run planning and deterministic session derivation
 - feat: add non-fatal session teardown memory-export artifacts
 - docs: define JSON experiment-definition contract and add validation coverage
