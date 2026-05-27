@@ -104,37 +104,41 @@ The system has three parts: an **experiment definition**, a **server-side memory
 export** (new session artifact), and two **eval CLI commands**. All post-run analysis
 is runnable with no LLM involvement.
 
+The normative JSON experiment contract now lives in [`experiment-definition.md`](experiment-definition.md).
+
 ---
 
 ### Part 1 — Experiment definition file
 
-A YAML file checked into the repo alongside the session output. Created before the
+A JSON file checked into the repo alongside the session output. Created before the
 sessions are run.
 
-```yaml
-# experiments/test-2b-retrieval-throttle.yaml
-id: test-2b-retrieval-throttle
-hypothesis: >
-  Throttling memory retrieval to once per hand reduces akg_get_opponent calls by ~65%,
-  shortens session duration by ~35%, and recovers chips/hand toward baseline.
-treatment:
-  session_base: akg-durable-throttle-test
-  sessions_count: 5
-  agent: llm-akg-durable@exp-0.1.3-throttle
-  opponent: llm-stateless
-  seeds: []
-control:
-  session_base: akg-durable-vs-stateless-test
-  sessions_count: 5
-  agent: llm-akg-durable/0.1.0
-  opponent: llm-stateless
-  seeds: []
-expected_direction:
-  chips_per_hand: increase
-  akg_get_opponent_per_session: decrease
-  session_duration_s: decrease
-  preflop_only_rate: decrease
-hands_per_session: 25
+```json
+{
+  "id": "test-2b-retrieval-throttle",
+  "hypothesis": "Throttling memory retrieval to once per hand reduces akg_get_opponent calls and session duration.",
+  "treatment": {
+    "session_base": "akg-durable-throttle-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable@exp-0.1.3-throttle",
+    "opponent": "llm-stateless",
+    "seeds": []
+  },
+  "control": {
+    "session_base": "akg-durable-vs-stateless-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable/0.1.0",
+    "opponent": "llm-stateless",
+    "seeds": []
+  },
+  "expected_direction": {
+    "chips_per_hand": "increase",
+    "akg_get_opponent_per_session": "decrease",
+    "session_duration_s": "decrease",
+    "preflop_only_rate": "decrease"
+  },
+  "hands_per_session": 25
+}
 ```
 
 `session_base` and `sessions_count` define the expected session IDs:
@@ -415,7 +419,7 @@ Output — `experiments/test-2b-retrieval-throttle-report.md`:
 ```
 
 The `✅` / `❌` direction check comes directly from `expected_direction` in the
-experiment YAML. The "Memory Graph" section is populated directly from
+experiment JSON. The "Memory Graph" section is populated directly from
 `memory-export.json` — no parsing required.
 
 ---
@@ -447,8 +451,8 @@ block any experiment; the experiments can run without it. But the first time you
 ```
 server change:    sessionlog.WriteMemoryExport     — dumps memory.akg → memory-export.json at session end  (small, land early)
 poker-eval collect — parse session artifacts into eval.json                                                  (core)
-poker-eval compare — diff two session groups from an experiment YAML                                         (core)
-poker-eval init    — scaffold a new experiment YAML from a template                                          (nice-to-have)
+poker-eval compare — diff two session groups from an experiment JSON definition                              (core)
+poker-eval init    — scaffold a new experiment JSON definition from a template                                (nice-to-have)
 poker-eval ls      — list experiments and their session coverage                                              (nice-to-have)
 ```
 
