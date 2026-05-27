@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Verified first-class operator and documentation surfaces for llm-akg-durable across workspace wiring, poker-run alias resolution, and README guidance.
 - test: add durable agent protocol and session-wiring integration coverage
 - test: add deterministic durable-memory coverage for heuristics, pattern thresholds, and AKG query tools
 - feat: wire llm-akg-durable into a hand-scoped custom Pi session with AKG-only tools and a tool-then-JSON prompt contract
