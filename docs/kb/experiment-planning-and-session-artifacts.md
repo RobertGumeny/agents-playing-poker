@@ -96,5 +96,6 @@ When extending this area, preserve these assumptions unless the focused docs cha
 - [`../experiment-definition.md`](../experiment-definition.md)
 - [`../session-artifacts.md`](../session-artifacts.md)
 - [`../eval-system.md`](../eval-system.md)
+- [`experiment-execution-and-coverage.md`](experiment-execution-and-coverage.md)
 - [`server-orchestration.md`](server-orchestration.md)
 - [`llm-akg-durable-active-retrieval.md`](llm-akg-durable-active-retrieval.md)

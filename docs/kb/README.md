@@ -42,3 +42,6 @@ Do not duplicate the normative sources:
 - [`experiment-planning-and-session-artifacts.md`](experiment-planning-and-session-artifacts.md)
   - What EPIC-11 delivered for experiment-definition parsing and additive analysis artifacts.
   - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, `eval.json` as a documented future offline artifact, and the authority split between primary and derived session files.
+- [`experiment-execution-and-coverage.md`](experiment-execution-and-coverage.md)
+  - What EPIC-12 delivered for operator-facing experiment execution and coverage inspection.
+  - Covers `poker-eval run`, `poker-eval status`, delegated `poker-run` execution, present/missing/incomplete session checks, and the current rerun semantics for incomplete sessions.
