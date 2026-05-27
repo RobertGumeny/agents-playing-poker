@@ -87,11 +87,6 @@ export class AkgDurableMemoryPolicy implements MemoryPolicy {
       return { sections: ["AKG memory is not available (no memory_dir provided)."] };
     }
 
-    const opponent = store.getNode(OPPONENT_TYPE, OPPONENT_ID);
-    if (!opponent) {
-      return { sections: ["AKG memory is available. Call akg_get_opponent to read the opponent index."] };
-    }
-
     return { sections: ["AKG memory is available. Call akg_get_opponent to read the opponent index."] };
   }
 

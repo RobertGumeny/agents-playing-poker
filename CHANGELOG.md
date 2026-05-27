@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: wire llm-akg-durable into a hand-scoped custom Pi session with AKG-only tools and a tool-then-JSON prompt contract
 - feat: add durable AKG query tools for llm-akg-durable decision-time retrieval
 - Implemented durable AKG pattern thresholding and idempotent evidence-edge bookkeeping for llm-akg-durable memory updates.
 - Verified the completed-hand durable AKG persistence lifecycle for llm-akg-durable: memory_dir reuse, opponent/hand writes, situational tagging, and safe no-memory degradation are present and passing coverage.

@@ -40,6 +40,16 @@ describe("llm-akg-durable package wiring", () => {
     });
   });
 
+  it("uses a hand-scoped custom Pi session with builtin tools disabled and the durable prompt contract", async () => {
+    const source = await readFile(path.join(packageDir, "src", "main.ts"), "utf8");
+
+    expect(source).toContain('sessionScope: "hand"');
+    expect(source).toContain('noTools: "builtin"');
+    expect(source).toContain('customTools: createQueryTools(() => memoryPolicy.getStore())');
+    expect(source).toContain("You may call akg_list_patterns, akg_get_pattern, akg_list_hands, or akg_get_hand as needed before your final answer.");
+    expect(source).toContain('Your final response must be JSON only: {"action": string, "amount"?: number}.');
+  });
+
   it("runs as a subprocess, writes the canonical pi-session artifact, and exits cleanly on session_end", async () => {
     const { spawn } = await import("node:child_process");
     const sessionDir = path.join(repoRoot, "tmp-llm-akg-durable-session-" + Date.now().toString(36));
