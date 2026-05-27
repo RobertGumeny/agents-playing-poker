@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- test: add durable agent protocol and session-wiring integration coverage
 - test: add deterministic durable-memory coverage for heuristics, pattern thresholds, and AKG query tools
 - feat: wire llm-akg-durable into a hand-scoped custom Pi session with AKG-only tools and a tool-then-JSON prompt contract
 - feat: add durable AKG query tools for llm-akg-durable decision-time retrieval

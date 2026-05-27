@@ -1,185 +1,21 @@
 #!/usr/bin/env node
 
-import {
-  type AgentSessionEvent,
-  AuthStorage,
-  createAgentSession,
-  DefaultResourceLoader,
-  getAgentDir,
-  ModelRegistry,
-  SessionManager,
-  SettingsManager,
-  type CreateAgentSessionOptions,
-} from "@earendil-works/pi-coding-agent";
-import {
-  PiDecisionEngine,
-  ScriptedDecisionEngine,
-  parsePiThinkingLevel,
-  runPokerAgent,
-  type ActionPayload,
-} from "@agent-poker/pi-agent-shared";
+import { runPokerAgent } from "@agent-poker/pi-agent-shared";
 
 import { AkgDurableMemoryPolicy } from "./memory.js";
-import { createQueryTools } from "./tools.js";
-
-const DURABLE_SYSTEM_PROMPT = [
-  "You are a poker decision engine for heads-up no-limit Texas Hold'em.",
-  "You have access to AKG memory tools. The opponent node is your index: call akg_get_opponent first to read a full behavioral summary and discover what patterns have been identified.",
-  "You may call akg_list_patterns, akg_get_pattern, akg_list_hands, or akg_get_hand as needed before your final answer.",
-  "After your research, choose exactly one legal action from the user-provided legal_actions list.",
-  'Your final response must be JSON only: {"action": string, "amount"?: number}.',
-  "No commentary, markdown, code fences, or extra keys in the final JSON response.",
-  "If raising or betting, use an integer chip amount within the server-provided legal range.",
-].join("\n");
+import { createDecisionEngine, parsePositiveInteger } from "./runtime.js";
 
 const memoryPolicy = new AkgDurableMemoryPolicy();
 
-function createDecisionEngine() {
-  const explicitSessionDir = process.env.PI_POKER_PI_SESSION_DIR;
-  const sessionDirProvider = () => explicitSessionDir ?? memoryPolicy.memoryDir;
-  const fakeDecisions = parseFakeDecisions(process.env.PI_POKER_FAKE_DECISIONS_JSON);
-  if (fakeDecisions) {
-    return new ScriptedDecisionEngine({
-      decisions: fakeDecisions,
-      sessionDirProvider,
-      sessionScope: "hand",
-    });
-  }
-
-  return new PiDecisionEngine({
-    cwd: process.cwd(),
-    sessionDirProvider,
-    model: process.env.PI_POKER_MODEL,
-    thinkingLevel: parsePiThinkingLevel(process.env.PI_POKER_THINKING_LEVEL),
-    sessionScope: "hand",
-    sessionFactory: async (options) => {
-      const authStorage = AuthStorage.create();
-      const modelRegistry = ModelRegistry.create(authStorage);
-      const settingsManager = SettingsManager.create(options.cwd, options.agentDir);
-      settingsManager.applyOverrides({
-        compaction: { enabled: false },
-        retry: { enabled: false },
-      });
-
-      const resourceLoader = new DefaultResourceLoader({
-        cwd: options.cwd,
-        agentDir: options.agentDir,
-        noExtensions: true,
-        noSkills: true,
-        noPromptTemplates: true,
-        noThemes: true,
-        noContextFiles: true,
-        systemPromptOverride: () => DURABLE_SYSTEM_PROMPT,
-        appendSystemPromptOverride: () => [],
-      });
-      await resourceLoader.reload();
-
-      const resolvedModel = resolveModel(options.model, modelRegistry);
-      const { session } = await createAgentSession({
-        cwd: options.cwd,
-        agentDir: options.agentDir,
-        authStorage,
-        modelRegistry,
-        model: resolvedModel,
-        thinkingLevel: options.thinkingLevel,
-        resourceLoader,
-        sessionManager: SessionManager.inMemory(options.cwd),
-        settingsManager,
-        noTools: "builtin",
-        customTools: createQueryTools(() => memoryPolicy.getStore()),
-      });
-
-      return {
-        prompt: (text: string) => session.prompt(text),
-        subscribe: (listener: (event: AgentSessionEvent) => void) => session.subscribe(listener),
-        getLastAssistantText: () => session.getLastAssistantText(),
-        exportToJsonl: (outputPath?: string) => session.exportToJsonl(outputPath),
-        dispose: () => session.dispose(),
-      };
-    },
-  });
-}
-
-function resolveModel(spec: string | undefined, modelRegistry: ModelRegistry): CreateAgentSessionOptions["model"] {
-  if (!spec) return undefined;
-
-  const colonIndex = spec.indexOf(":");
-  const slashIndex = spec.indexOf("/");
-  const delimiterIndex = [colonIndex, slashIndex].filter((index) => index > 0).sort((left, right) => left - right)[0] ?? -1;
-  if (delimiterIndex > 0) {
-    const provider = spec.slice(0, delimiterIndex);
-    const modelID = spec.slice(delimiterIndex + 1);
-    const model = modelRegistry.find(provider, modelID);
-    if (!model) {
-      throw new Error(`unknown Pi model ${JSON.stringify(spec)}`);
-    }
-    return model;
-  }
-
-  const matches = modelRegistry.getAll().filter((model) => model.id === spec);
-  if (matches.length === 1) {
-    return matches[0];
-  }
-  if (matches.length > 1) {
-    throw new Error(`ambiguous Pi model ${JSON.stringify(spec)}; use provider:model syntax`);
-  }
-
-  throw new Error(`unknown Pi model ${JSON.stringify(spec)}`);
-}
-
-function parsePositiveInteger(value: string | undefined): number | undefined {
-  if (value === undefined || value.length === 0) return undefined;
-
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`invalid positive integer ${JSON.stringify(value)}`);
-  }
-
-  return parsed;
-}
-
-function parseFakeDecisions(value: string | undefined): ActionPayload[] | undefined {
-  if (value === undefined || value.length === 0) return undefined;
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(value);
-  } catch (error) {
-    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON: ${error instanceof Error ? error.message : String(error)}`);
-  }
-
-  if (!Array.isArray(parsed)) {
-    throw new Error("invalid PI_POKER_FAKE_DECISIONS_JSON: expected JSON array");
-  }
-
-  return parsed.map((entry, index) => parseFakeDecision(entry, index));
-}
-
-function parseFakeDecision(entry: unknown, index: number): ActionPayload {
-  if (!isRecord(entry)) {
-    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}]: expected object`);
-  }
-  const action = entry.action;
-  if (action !== "fold" && action !== "check" && action !== "call" && action !== "bet" && action !== "raise") {
-    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}].action`);
-  }
-  const rawAmount = entry.amount;
-  if (rawAmount === undefined) {
-    return { action };
-  }
-  if (typeof rawAmount !== "number" || !Number.isInteger(rawAmount) || rawAmount < 0) {
-    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}].amount`);
-  }
-  return { action, amount: rawAmount };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 await runPokerAgent({
   memoryPolicy,
-  decisionEngine: createDecisionEngine(),
+  decisionEngine: createDecisionEngine(memoryPolicy, {
+    cwd: process.cwd(),
+    sessionDir: process.env.PI_POKER_PI_SESSION_DIR,
+    model: process.env.PI_POKER_MODEL,
+    thinkingLevel: process.env.PI_POKER_THINKING_LEVEL,
+    fakeDecisionsJSON: process.env.PI_POKER_FAKE_DECISIONS_JSON,
+  }),
   agentVersion: "llm-akg-durable/0.1.0",
   maxDecisionAttempts: parsePositiveInteger(process.env.PI_POKER_MAX_DECISION_ATTEMPTS),
 });

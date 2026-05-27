@@ -1,16 +1,27 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { decodeEnvelope, type Envelope } from "@agent-poker/pi-agent-shared";
+import {
+  decodeEnvelope,
+  type CompletedHandContext,
+  type DecisionRequest,
+  type Envelope,
+} from "@agent-poker/pi-agent-shared";
+
+import { AkgDurableMemoryPolicy } from "../src/memory.js";
+import { createDecisionEngine, createDurableSessionFactory, DURABLE_SYSTEM_PROMPT } from "../src/runtime.js";
 
 const repoRoot = path.resolve(import.meta.dirname, "..", "..", "..");
 const packageDir = path.resolve(import.meta.dirname, "..");
 const entrypoint = path.join(packageDir, "dist", "main.js");
 const packageJSONPath = path.join(packageDir, "package.json");
 const childProcesses: Array<import("node:child_process").ChildProcess> = [];
+const tmpDirs: string[] = [];
 
 afterEach(async () => {
   await Promise.all(
@@ -27,7 +38,54 @@ afterEach(async () => {
     ),
   );
   childProcesses.length = 0;
+
+  await Promise.all(tmpDirs.map((dir) => rm(dir, { recursive: true, force: true })));
+  tmpDirs.length = 0;
 });
+
+function makeDecisionRequest(handNumber = 1): DecisionRequest {
+  return {
+    prompt: "Return JSON only.",
+    legalActions: [{ action: "call", amount: 2 }],
+    context: {
+      state: { session: { memoryDir: "" } } as never,
+      handNumber,
+      street: "flop",
+      board: ["Td", "9h", "2c"],
+      pot: 6,
+      toCall: 2,
+      stacks: { "0": 197, "1": 197 },
+      actionHistory: [{ seat: 0, action: "check", street: "preflop" }],
+      legalActions: [{ action: "call", amount: 2 }],
+    },
+  };
+}
+
+function makeCompletedHandContext(handNumber = 1, memoryDir = ""): CompletedHandContext {
+  return {
+    state: { session: { memoryDir, match: { blinds: { bb: 2 } } } } as never,
+    handNumber,
+    dealerSeat: 1,
+    heroSeat: 0,
+    seats: [
+      { seat: 0, name: "llm-akg-durable" },
+      { seat: 1, name: "caller" },
+    ],
+    heroHoleCards: ["As", "Kh"],
+    board: ["Td", "9h", "2c", "5s", "Kc"],
+    actionHistory: [
+      { seat: 0, action: "raise", amount: 4, street: "preflop" },
+      { seat: 1, action: "call", amount: 2, street: "preflop" },
+      { seat: 0, action: "bet", amount: 6, street: "flop" },
+      { seat: 1, action: "fold", street: "flop" },
+    ],
+    showdownReached: false,
+    result: [
+      { seat: 0, chips_delta: 6 },
+      { seat: 1, chips_delta: -6 },
+    ],
+  };
+}
 
 describe("llm-akg-durable package wiring", () => {
   it("publishes a stable poker-server entrypoint", async () => {
@@ -40,20 +98,117 @@ describe("llm-akg-durable package wiring", () => {
     });
   });
 
-  it("uses a hand-scoped custom Pi session with builtin tools disabled and the durable prompt contract", async () => {
-    const source = await readFile(path.join(packageDir, "src", "main.ts"), "utf8");
+  it("registers only the AKG query tools, disables builtin tools, and preserves the JSON-only durable prompt contract", async () => {
+    const memoryPolicy = new AkgDurableMemoryPolicy();
+    const createAgentSessionCalls: Array<Record<string, unknown>> = [];
+    const resourceLoaderOptions: Array<Record<string, unknown>> = [];
+    const settingsOverrides: Array<Record<string, unknown>> = [];
 
-    expect(source).toContain('sessionScope: "hand"');
-    expect(source).toContain('noTools: "builtin"');
-    expect(source).toContain('customTools: createQueryTools(() => memoryPolicy.getStore())');
-    expect(source).toContain("You may call akg_list_patterns, akg_get_pattern, akg_list_hands, or akg_get_hand as needed before your final answer.");
-    expect(source).toContain('Your final response must be JSON only: {"action": string, "amount"?: number}.');
+    const factory = createDurableSessionFactory(memoryPolicy, {
+      createAuthStorage: () => ({}) as never,
+      createModelRegistry: () => ({ find: () => undefined, getAll: () => [] }) as never,
+      createSettingsManager: () => ({
+        applyOverrides(overrides: Record<string, unknown>) {
+          settingsOverrides.push(overrides);
+        },
+      }) as never,
+      createResourceLoader: (options) => {
+        resourceLoaderOptions.push(options as Record<string, unknown>);
+        return { reload: async () => {} } as never;
+      },
+      createSessionManager: () => ({}) as never,
+      createAgentSession: async (options) => {
+        createAgentSessionCalls.push(options as Record<string, unknown>);
+        return {
+          session: {
+            prompt: async () => {},
+            subscribe: () => () => {},
+            getLastAssistantText: () => '{"action":"call","amount":2}',
+            exportToJsonl: () => "",
+            dispose: () => {},
+          },
+        } as never;
+      },
+    });
+
+    await factory({
+      cwd: repoRoot,
+      agentDir: packageDir,
+      model: undefined,
+      thinkingLevel: undefined,
+    });
+
+    expect(settingsOverrides).toEqual([{ compaction: { enabled: false }, retry: { enabled: false } }]);
+    expect(resourceLoaderOptions).toHaveLength(1);
+    expect(resourceLoaderOptions[0]).toMatchObject({
+      noExtensions: true,
+      noSkills: true,
+      noPromptTemplates: true,
+      noThemes: true,
+      noContextFiles: true,
+    });
+    expect((resourceLoaderOptions[0].systemPromptOverride as () => string)()).toBe(DURABLE_SYSTEM_PROMPT);
+
+    expect(createAgentSessionCalls).toHaveLength(1);
+    expect(createAgentSessionCalls[0].noTools).toBe("builtin");
+    expect(((createAgentSessionCalls[0].customTools as Array<{ name: string }>)).map((tool) => tool.name)).toEqual([
+      "akg_get_opponent",
+      "akg_list_patterns",
+      "akg_get_pattern",
+      "akg_list_hands",
+      "akg_get_hand",
+    ]);
+    expect(DURABLE_SYSTEM_PROMPT).toContain('Your final response must be JSON only: {"action": string, "amount"?: number}.');
+    expect(DURABLE_SYSTEM_PROMPT).toContain("No commentary, markdown, code fences, or extra keys in the final JSON response.");
   });
 
-  it("runs as a subprocess, writes the canonical pi-session artifact, and exits cleanly on session_end", async () => {
+  it("keeps the canonical pi-session artifact under the hand-scoped durable session lifecycle", async () => {
+    const sessionDir = await mkdtemp(path.join(tmpdir(), "llm-akg-durable-engine-"));
+    tmpDirs.push(sessionDir);
+
+    const memoryPolicy = new AkgDurableMemoryPolicy();
+    let sessionFactoryCalls = 0;
+    let exportPaths: string[] = [];
+    let disposed = 0;
+
+    const engine = createDecisionEngine(memoryPolicy, {
+      cwd: repoRoot,
+      sessionDir,
+      sessionFactory: async () => {
+        sessionFactoryCalls += 1;
+        return {
+          prompt: async () => {},
+          subscribe: () => () => {},
+          getLastAssistantText: () => '{"action":"call","amount":2}',
+          exportToJsonl: (outputPath?: string) => {
+            exportPaths = [...exportPaths, outputPath ?? ""];
+            if (outputPath) {
+              writeFileSync(outputPath, '{"type":"fake_pi_session","session_scope":"hand"}\n', "utf8");
+            }
+            return outputPath ?? "";
+          },
+          dispose: () => {
+            disposed += 1;
+          },
+        };
+      },
+    });
+
+    await expect(engine.decide(makeDecisionRequest())).resolves.toEqual({ action: "call", amount: 2 });
+    expect(sessionFactoryCalls).toBe(1);
+
+    await engine.onHandEnd?.(makeCompletedHandContext(1, sessionDir));
+
+    expect(exportPaths).toEqual([expect.stringContaining("pi-session-export-0001.jsonl")]);
+    expect(disposed).toBe(1);
+    await expect(readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8")).resolves.toContain('"type":"fake_pi_session"');
+  });
+
+  it("runs as a subprocess with repeated extra args, speaks the protocol from session_init through session_end, and exits cleanly without live credentials", async () => {
     const { spawn } = await import("node:child_process");
     const sessionDir = path.join(repoRoot, "tmp-llm-akg-durable-session-" + Date.now().toString(36));
-    const child = spawn(process.execPath, [entrypoint], {
+    tmpDirs.push(sessionDir);
+    const child = spawn(process.execPath, [entrypoint, "--ignored-flag", "value", "--another-ignored-flag", "value-2"], {
       cwd: repoRoot,
       env: {
         ...process.env,
