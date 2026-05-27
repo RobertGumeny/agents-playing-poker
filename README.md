@@ -120,10 +120,17 @@ Current behavior:
 - loads the JSON experiment definition from [`docs/experiment-definition.md`](docs/experiment-definition.md)
 - derives control and treatment session ids, seeds, and expected `sessions/<id>` directories deterministically
 - prints the planned execution config (`hands_per_session`, `sessions_dir`, model, thinking level) in dry-run and live modes
-- reports coverage for each planned session as `existing` or `missing`
+- reports coverage for each planned session as `present`, `missing`, or `incomplete`
+- prints per-group coverage summaries for control and treatment
 - skips already-present session directories on execution
-- launches only missing planned sessions through `poker-run`
-- requires `opponent` metadata for any missing session it needs to launch
+- launches missing or incomplete planned sessions through `poker-run`
+- requires `opponent` metadata for any missing or incomplete session it needs to launch
+
+To inspect experiment coverage without launching anything:
+
+```bash
+go run ./cmd/poker-eval status -experiment experiments/test-2b-retrieval-throttle.json
+```
 
 ## Generate a benchmark report
 

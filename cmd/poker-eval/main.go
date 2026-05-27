@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/RobertGumeny/agent-poker/internal/experiment"
+	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
 
 const defaultThinkingLevel = "low"
@@ -28,12 +29,14 @@ func main() {
 
 func run(args []string, stdout, stderr io.Writer, deps runDeps) error {
 	if len(args) == 0 {
-		return fmt.Errorf("expected subcommand (supported: run)")
+		return fmt.Errorf("expected subcommand (supported: run, status)")
 	}
 
 	switch args[0] {
 	case "run":
 		return runRun(args[1:], stdout, stderr, deps)
+	case "status":
+		return runStatus(args[1:], stdout, stderr, deps)
 	default:
 		return fmt.Errorf("unsupported subcommand %q", args[0])
 	}
@@ -41,7 +44,7 @@ func run(args []string, stdout, stderr io.Writer, deps runDeps) error {
 
 type runDeps struct {
 	loadDefinition func(string) (experiment.Definition, error)
-	sessionStatus  func(string) (string, error)
+	inspectSession func(experiment.PlannedRun, int) (sessionInspection, error)
 	execute        func(context.Context, executeConfig) error
 }
 
@@ -56,12 +59,37 @@ type executeConfig struct {
 	ThinkingLevel string
 }
 
+type sessionInspection struct {
+	Status string
+	Reason string
+}
+
+type planCoverage struct {
+	Plan       experiment.Plan
+	Sessions   []sessionCoverage
+	Present    int
+	Missing    int
+	Incomplete int
+}
+
+type sessionCoverage struct {
+	Planned    experiment.PlannedRun
+	Inspection sessionInspection
+}
+
+type groupCoverage struct {
+	Planned    int
+	Present    int
+	Missing    int
+	Incomplete int
+}
+
 func newRunDeps() runDeps {
 	repoDir, err := repoRoot()
 	if err != nil {
 		return runDeps{
 			loadDefinition: experiment.Load,
-			sessionStatus:  sessionStatus,
+			inspectSession: inspectSession,
 			execute: func(context.Context, executeConfig) error {
 				return err
 			},
@@ -81,7 +109,7 @@ func newRunDeps() runDeps {
 
 	return runDeps{
 		loadDefinition: experiment.Load,
-		sessionStatus:  sessionStatus,
+		inspectSession: inspectSession,
 		execute:        executor.execute,
 	}
 }
@@ -94,72 +122,136 @@ type runConfig struct {
 	thinkingLevel  string
 }
 
+type statusConfig struct {
+	experimentPath string
+	sessionsDir    string
+}
+
 func runRun(args []string, stdout, stderr io.Writer, deps runDeps) error {
 	cfg, err := parseRunConfig(args)
 	if err != nil {
 		return err
 	}
 
-	def, err := deps.loadDefinition(cfg.experimentPath)
-	if err != nil {
-		return err
-	}
-	plan, err := def.Plan(cfg.sessionsDir)
+	coverage, err := loadPlanCoverage(cfg.experimentPath, cfg.sessionsDir, deps)
 	if err != nil {
 		return err
 	}
 
-	existingCount := 0
-	missingCount := 0
-	statuses := make([]string, len(plan.PlannedSessions))
-	for i, planned := range plan.PlannedSessions {
-		status, err := deps.sessionStatus(planned.SessionDir)
-		if err != nil {
-			return fmt.Errorf("inspect session %q: %w", planned.SessionID, err)
-		}
-		statuses[i] = status
-		switch status {
-		case "existing":
-			existingCount++
-		default:
-			missingCount++
-		}
-	}
-
-	_, _ = fmt.Fprintf(stdout, "experiment=%s planned=%d existing=%d missing=%d dry_run=%t\n", plan.ExperimentID, len(plan.PlannedSessions), existingCount, missingCount, cfg.dryRun)
-	_, _ = fmt.Fprintf(stdout, "config hands_per_session=%d sessions_dir=%s model=%s thinking_level=%s\n", plan.HandsPerSession, cfg.sessionsDir, printableValue(cfg.model), cfg.thinkingLevel)
-	for i, planned := range plan.PlannedSessions {
-		_, _ = fmt.Fprintf(stdout, "group=%s session_id=%s seed=%d agent=%s opponent=%s status=%s dir=%s\n", planned.GroupLabel, planned.SessionID, planned.Seed, planned.Agent, planned.Opponent, statuses[i], planned.SessionDir)
-	}
+	printCoverage(stdout, coverage, func() string {
+		return fmt.Sprintf("config hands_per_session=%d sessions_dir=%s model=%s thinking_level=%s", coverage.Plan.HandsPerSession, cfg.sessionsDir, printableValue(cfg.model), cfg.thinkingLevel)
+	}())
 
 	if cfg.dryRun {
 		return nil
 	}
 
-	for i, planned := range plan.PlannedSessions {
-		if statuses[i] == "existing" {
-			_, _ = fmt.Fprintf(stdout, "skip session_id=%s reason=existing\n", planned.SessionID)
+	for _, session := range coverage.Sessions {
+		if session.Inspection.Status == "present" {
+			_, _ = fmt.Fprintf(stdout, "skip session_id=%s reason=present\n", session.Planned.SessionID)
 			continue
 		}
-		if strings.TrimSpace(planned.Opponent) == "" {
-			return fmt.Errorf("session %q cannot run without opponent metadata in experiment definition", planned.SessionID)
+		if strings.TrimSpace(session.Planned.Opponent) == "" {
+			return fmt.Errorf("session %q cannot run without opponent metadata in experiment definition", session.Planned.SessionID)
 		}
-		_, _ = fmt.Fprintf(stdout, "run session_id=%s group=%s seed=%d\n", planned.SessionID, planned.GroupLabel, planned.Seed)
+		_, _ = fmt.Fprintf(stdout, "run session_id=%s group=%s seed=%d prior_status=%s\n", session.Planned.SessionID, session.Planned.GroupLabel, session.Planned.Seed, session.Inspection.Status)
 		if err := deps.execute(context.Background(), executeConfig{
-			Agent0:        planned.Agent,
-			Agent1:        planned.Opponent,
-			Hands:         plan.HandsPerSession,
-			Seed:          planned.Seed,
-			SessionID:     planned.SessionID,
+			Agent0:        session.Planned.Agent,
+			Agent1:        session.Planned.Opponent,
+			Hands:         coverage.Plan.HandsPerSession,
+			Seed:          session.Planned.Seed,
+			SessionID:     session.Planned.SessionID,
 			SessionsDir:   cfg.sessionsDir,
 			Model:         cfg.model,
 			ThinkingLevel: cfg.thinkingLevel,
 		}); err != nil {
-			return fmt.Errorf("run session %q: %w", planned.SessionID, err)
+			return fmt.Errorf("run session %q: %w", session.Planned.SessionID, err)
 		}
 	}
 
 	return nil
+}
+
+func runStatus(args []string, stdout, stderr io.Writer, deps runDeps) error {
+	cfg, err := parseStatusConfig(args)
+	if err != nil {
+		return err
+	}
+
+	coverage, err := loadPlanCoverage(cfg.experimentPath, cfg.sessionsDir, deps)
+	if err != nil {
+		return err
+	}
+
+	printCoverage(stdout, coverage, fmt.Sprintf("config hands_per_session=%d sessions_dir=%s", coverage.Plan.HandsPerSession, cfg.sessionsDir))
+	return nil
+}
+
+func loadPlanCoverage(experimentPath, sessionsDir string, deps runDeps) (planCoverage, error) {
+	def, err := deps.loadDefinition(experimentPath)
+	if err != nil {
+		return planCoverage{}, err
+	}
+	plan, err := def.Plan(sessionsDir)
+	if err != nil {
+		return planCoverage{}, err
+	}
+
+	coverage := planCoverage{Plan: plan}
+	for _, planned := range plan.PlannedSessions {
+		inspection, err := deps.inspectSession(planned, plan.HandsPerSession)
+		if err != nil {
+			return planCoverage{}, fmt.Errorf("inspect session %q: %w", planned.SessionID, err)
+		}
+		coverage.Sessions = append(coverage.Sessions, sessionCoverage{Planned: planned, Inspection: inspection})
+		switch inspection.Status {
+		case "present":
+			coverage.Present++
+		case "incomplete":
+			coverage.Incomplete++
+		default:
+			coverage.Missing++
+		}
+	}
+
+	return coverage, nil
+}
+
+func printCoverage(stdout io.Writer, coverage planCoverage, configLine string) {
+	_, _ = fmt.Fprintf(stdout, "experiment=%s planned=%d present=%d missing=%d incomplete=%d\n", coverage.Plan.ExperimentID, len(coverage.Sessions), coverage.Present, coverage.Missing, coverage.Incomplete)
+	_, _ = fmt.Fprintln(stdout, configLine)
+	for _, label := range []string{"control", "treatment"} {
+		summary := coverage.groupSummaries()[label]
+		_, _ = fmt.Fprintf(stdout, "group_summary group=%s planned=%d present=%d missing=%d incomplete=%d\n", label, summary.Planned, summary.Present, summary.Missing, summary.Incomplete)
+	}
+	for _, session := range coverage.Sessions {
+		reason := session.Inspection.Reason
+		if strings.TrimSpace(reason) == "" {
+			reason = "-"
+		}
+		_, _ = fmt.Fprintf(stdout, "group=%s session_id=%s seed=%d agent=%s opponent=%s status=%s reason=%s dir=%s\n", session.Planned.GroupLabel, session.Planned.SessionID, session.Planned.Seed, session.Planned.Agent, session.Planned.Opponent, session.Inspection.Status, reason, session.Planned.SessionDir)
+	}
+}
+
+func (c planCoverage) groupSummaries() map[string]groupCoverage {
+	summaries := map[string]groupCoverage{
+		"control":   {},
+		"treatment": {},
+	}
+	for _, session := range c.Sessions {
+		summary := summaries[session.Planned.GroupLabel]
+		summary.Planned++
+		switch session.Inspection.Status {
+		case "present":
+			summary.Present++
+		case "incomplete":
+			summary.Incomplete++
+		default:
+			summary.Missing++
+		}
+		summaries[session.Planned.GroupLabel] = summary
+	}
+	return summaries
 }
 
 func parseRunConfig(args []string) (runConfig, error) {
@@ -169,7 +261,7 @@ func parseRunConfig(args []string) (runConfig, error) {
 	cfg := runConfig{}
 	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
 	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
-	fs.BoolVar(&cfg.dryRun, "dry-run", false, "print the deterministic session plan without launching missing sessions")
+	fs.BoolVar(&cfg.dryRun, "dry-run", false, "print the deterministic session plan without launching missing or incomplete sessions")
 	fs.StringVar(&cfg.model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&cfg.thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
 
@@ -185,15 +277,88 @@ func parseRunConfig(args []string) (runConfig, error) {
 	return cfg, nil
 }
 
-func sessionStatus(sessionDir string) (string, error) {
-	_, err := os.Stat(sessionDir)
+func parseStatusConfig(args []string) (statusConfig, error) {
+	fs := flag.NewFlagSet("poker-eval status", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+
+	cfg := statusConfig{}
+	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+
+	if err := fs.Parse(args); err != nil {
+		return statusConfig{}, err
+	}
+	if fs.NArg() != 0 {
+		return statusConfig{}, fmt.Errorf("unexpected positional arguments: %s", strings.Join(fs.Args(), " "))
+	}
+	if strings.TrimSpace(cfg.experimentPath) == "" {
+		return statusConfig{}, fmt.Errorf("-experiment is required")
+	}
+	return cfg, nil
+}
+
+func inspectSession(planned experiment.PlannedRun, handsPerSession int) (sessionInspection, error) {
+	_, err := os.Stat(planned.SessionDir)
 	if err == nil {
-		return "existing", nil
+		return inspectExistingSession(planned, handsPerSession)
 	}
 	if errors.Is(err, os.ErrNotExist) {
-		return "missing", nil
+		return sessionInspection{Status: "missing"}, nil
 	}
-	return "", err
+	return sessionInspection{}, err
+}
+
+func inspectExistingSession(planned experiment.PlannedRun, handsPerSession int) (sessionInspection, error) {
+	manifest, err := sessionlog.ReadManifest(planned.SessionDir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return sessionInspection{Status: "incomplete", Reason: "manifest_missing"}, nil
+		}
+		return sessionInspection{Status: "incomplete", Reason: "manifest_unreadable"}, nil
+	}
+	if manifest.SessionID != "" && manifest.SessionID != planned.SessionID {
+		return sessionInspection{Status: "incomplete", Reason: "session_id_mismatch"}, nil
+	}
+	if manifest.Seed != planned.Seed {
+		return sessionInspection{Status: "incomplete", Reason: "seed_mismatch"}, nil
+	}
+	if manifest.HandCount != handsPerSession {
+		return sessionInspection{Status: "incomplete", Reason: "hand_count_mismatch"}, nil
+	}
+	if len(manifest.Matches) == 0 {
+		return sessionInspection{Status: "incomplete", Reason: "manifest_missing_match"}, nil
+	}
+	if !manifest.Matches[0].Completed {
+		return sessionInspection{Status: "incomplete", Reason: "match_incomplete"}, nil
+	}
+	if !matchHasSeat(manifest.Matches[0], planned.Agent) {
+		return sessionInspection{Status: "incomplete", Reason: "agent_missing"}, nil
+	}
+	if strings.TrimSpace(planned.Opponent) != "" && !matchHasSeat(manifest.Matches[0], planned.Opponent) {
+		return sessionInspection{Status: "incomplete", Reason: "opponent_missing"}, nil
+	}
+
+	hands, err := sessionlog.ReadHands(planned.SessionDir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return sessionInspection{Status: "incomplete", Reason: "hands_missing"}, nil
+		}
+		return sessionInspection{Status: "incomplete", Reason: "hands_unreadable"}, nil
+	}
+	if len(hands) != handsPerSession {
+		return sessionInspection{Status: "incomplete", Reason: "hands_count_mismatch"}, nil
+	}
+
+	return sessionInspection{Status: "present"}, nil
+}
+
+func matchHasSeat(match sessionlog.ManifestMatch, name string) bool {
+	for _, seat := range match.Seats {
+		if seat.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 type pokerRunExecutor struct {
