@@ -12,6 +12,7 @@ Packages:
 - `llm-stateless/`: first LLM baseline; current-hand prompt only, with no strategic memory exposed to the model.
 - `llm-fullhistory/`: naive memory baseline; uses a fresh Pi session per hand and injects compact prior-hand summaries into the prompt.
 - `llm-akg-recent/`: shallow AKG-backed recent-memory baseline.
+- `llm-akg-durable/`: durable AKG retrieval agent with read-only graph-query tools.
 
 ## Commands
 
@@ -34,7 +35,8 @@ Pi session logs are observability artifacts and should be stored durably, but th
 Memory-strategy boundaries:
 - `llm-stateless`: fresh Pi session per decision; no prior-hand prompt context.
 - `llm-fullhistory`: fresh Pi session per hand; prior hands injected explicitly as compact human-readable summaries derived from server-visible history. Hand history grows throughout match.
-- `llm-akg-recent`: long-lived shallow structured-memory baseline with AKG-backed recent-hand retrieval; future durable AKG agents should use a distinct name such as `llm-akg-durable`.
+- `llm-akg-recent`: long-lived shallow structured-memory baseline with AKG-backed recent-hand retrieval.
+- `llm-akg-durable`: durable AKG retrieval agent; uses one Pi session per hand, writes richer post-hand graph state, and exposes five read-only AKG query tools during decisions.
 
 ## `llm-stateless` install/run
 
@@ -75,9 +77,22 @@ npm exec --workspace @agent-poker/llm-akg-recent poker-agent-llm-akg-recent
 
 The same executable is suitable for `poker-server -agent*-cmd`. The agent persists its AKG memory file under the server-provided `memory_dir`.
 
+## `llm-akg-durable` install/run
+
+Build the workspace, then use the package bin as the stable agent command:
+
+```bash
+cd pi-agents
+npm install
+npm run build
+npm exec --workspace @agent-poker/llm-akg-durable poker-agent-llm-akg-durable
+```
+
+The same executable is suitable for `poker-server -agent*-cmd`. The agent persists its AKG memory file under the server-provided `memory_dir` and exposes only its read-only AKG query tools to Pi.
+
 ## Pi-agent runtime knobs
 
-`llm-stateless` and `llm-fullhistory` currently read these optional environment variables:
+`llm-stateless`, `llm-fullhistory`, `llm-akg-recent`, and `llm-akg-durable` currently read these optional environment variables:
 
 - `PI_POKER_MODEL`: Pi model selector (`provider:model-id` or `provider/model-id`)
 - `PI_POKER_THINKING_LEVEL`: Pi thinking level (`off`, `minimal`, `low`, `medium`, `high`, `xhigh`)
