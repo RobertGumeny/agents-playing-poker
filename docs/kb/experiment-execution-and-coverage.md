@@ -21,16 +21,18 @@ The current implementation and operator-facing references live in:
 
 ## CLI surface
 
-`cmd/poker-eval` currently supports two subcommands:
+EPIC-12 specifically delivered the experiment-driven execution subcommands:
 - `poker-eval run`
 - `poker-eval status`
 
-Shared behavior:
-- both commands require `-experiment`
-- both commands load the JSON definition through `experiment.Load`
-- both commands expand the experiment through `Definition.Plan(sessionsDir)`
-- both commands inspect every planned session directory before printing output
-- both commands print experiment totals, a config line, per-group summaries, and one line per planned session
+The binary now also includes `poker-eval collect`, but that offline summary path is covered separately in [`offline-eval-collection.md`](offline-eval-collection.md).
+
+Shared behavior for the EPIC-12 commands:
+- both require `-experiment`
+- both load the JSON definition through `experiment.Load`
+- both expand the experiment through `Definition.Plan(sessionsDir)`
+- both inspect every planned session directory before printing output
+- both print experiment totals, a config line, per-group summaries, and one line per planned session
 
 Current flags:
 - `run`: `-experiment`, `-sessions-dir`, `-dry-run`, `-model`, `-thinking-level`

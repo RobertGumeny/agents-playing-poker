@@ -41,7 +41,10 @@ Do not duplicate the normative sources:
   - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
 - [`experiment-planning-and-session-artifacts.md`](experiment-planning-and-session-artifacts.md)
   - What EPIC-11 delivered for experiment-definition parsing and additive analysis artifacts.
-  - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, `eval.json` as a documented future offline artifact, and the authority split between primary and derived session files.
+  - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, the authority split between primary and derived session files, and the pre-collector groundwork that EPIC-13 later consumed.
 - [`experiment-execution-and-coverage.md`](experiment-execution-and-coverage.md)
   - What EPIC-12 delivered for operator-facing experiment execution and coverage inspection.
   - Covers `poker-eval run`, `poker-eval status`, delegated `poker-run` execution, present/missing/incomplete session checks, and the current rerun semantics for incomplete sessions.
+- [`offline-eval-collection.md`](offline-eval-collection.md)
+  - What EPIC-13 delivered for deterministic per-session `eval.json` generation.
+  - Covers shared offline artifact loading, `poker-eval collect`, Pi tool-call parsing, retry metrics from `stderr.log`, generic memory-export summaries, and current metric derivation boundaries.

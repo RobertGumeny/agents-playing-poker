@@ -1,6 +1,6 @@
 # Experiment Planning and Session Artifacts
 
-EPIC-11 defined the repo's stable experiment-planning contract and the additive session-artifact layer needed for later offline eval tooling.
+EPIC-11 defined the repo's stable experiment-planning contract and the additive session-artifact layer later consumed by the offline eval tooling delivered in EPIC-13.
 
 ## Epic delivery summary
 
@@ -63,9 +63,9 @@ EPIC-11 clarified the authority split that later eval tooling must preserve:
 - `manifest.json` and `hands.jsonl` remain the primary server-authored session records
 - `memory.akg` remains the primary agent-authored memory store
 - `memory-export.json` is additive and replaceable from `memory.akg`
-- `eval.json` is a future offline summary artifact and must never override the primary artifacts
+- `eval.json` is a derived offline summary artifact and must never override the primary artifacts
 
-Important current state: this repo now defines the stable `eval.json` schema in `docs/session-artifacts.md`, but EPIC-11 did not implement the collector that writes it.
+Historical note: EPIC-11 documented the stable `eval.json` schema in `docs/session-artifacts.md`, and EPIC-13 later implemented the collector that writes it.
 
 ## Test coverage delivered
 
