@@ -1,6 +1,6 @@
 import { join } from "node:path";
 
-import { open, type Edge, type Node, type NodeRef, type Store } from "akg-ts";
+import { open, type Node, type NodeRef, type Store } from "akg-ts";
 
 import type { ActionHistoryEntry, CompletedHandContext, DecisionContext, MemoryPolicy, PromptAugmentation } from "@agent-poker/pi-agent-shared";
 
@@ -42,6 +42,7 @@ interface HandFeatures {
   cbet_fold: boolean;
   three_bet: boolean;
   river_bet: boolean;
+  river_bet_opportunity: boolean;
   river_bet_fold: boolean;
   villain_fold: boolean;
   hero_fold: boolean;
@@ -153,6 +154,7 @@ export function putHand(store: Store, context: CompletedHandContext): NodeRef {
         cbet_fold: features.cbet_fold,
         three_bet: features.three_bet,
         river_bet: features.river_bet,
+        river_bet_opportunity: features.river_bet_opportunity,
         river_bet_fold: features.river_bet_fold,
         showdown_villain: features.showdown_villain,
         showdown_win: features.showdown_win,
@@ -300,11 +302,11 @@ export function computePatternSnapshots(hands: Node[]): Map<PatternSlug, Pattern
 
   const riverFoldSupported = hands.filter((hand) => truthy(hand.meta.river_bet_fold));
   if (riverFoldSupported.length >= 3) {
-    const opportunities = hands.filter((hand) => lastStreet(hand) === "river" || truthy(hand.meta.river_bet_fold)).length;
+    const opportunities = hands.filter((hand) => truthy(hand.meta.river_bet_opportunity)).length;
     bySlug.set("folds-to-river-bet", {
       slug: "folds-to-river-bet",
       title: "Folds to river bets",
-      body: `Villain has folded to hero river bets ${riverFoldSupported.length} times across ${opportunities} river opportunities.`,
+      body: `Villain has folded to hero river bets ${riverFoldSupported.length} times across ${opportunities} river bet opportunities.`,
       count: riverFoldSupported.length,
       opportunities,
       supportedBy: riverFoldSupported.map(toRef),
@@ -347,8 +349,9 @@ export function deriveHandFeatures(context: CompletedHandContext): HandFeatures 
     aggr_river: villainAggressiveByStreet.has("river"),
     cbet_opportunity: heroMadeFlopCBet(preflopHeroActions, heroActions),
     cbet_fold: villainFoldedToHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "flop"),
-    three_bet: preflopAggressive.length >= 2 && preflopVillainActions.some((entry) => isAggressive(entry.action)) && context.actionHistory.some((entry, index) => entry.seat === villainSeat && isAggressive(entry.action) && entry.street === "preflop" && preflopAggressive.findIndex((candidate) => candidate === entry) >= 1),
+    three_bet: preflopAggressive.length >= 2 && preflopVillainActions.some((entry) => isAggressive(entry.action)) && context.actionHistory.some((entry) => entry.seat === villainSeat && isAggressive(entry.action) && entry.street === "preflop" && preflopAggressive.findIndex((candidate) => candidate === entry) >= 1),
     river_bet: villainActions.some((entry) => entry.street === "river" && isAggressive(entry.action)),
+    river_bet_opportunity: seatFacedHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "river"),
     river_bet_fold: villainFoldedToHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "river"),
     villain_fold: villainActions.some((entry) => entry.action === "fold" || entry.action === "auto_fold"),
     hero_fold: heroActions.some((entry) => entry.action === "fold" || entry.action === "auto_fold"),
@@ -463,6 +466,19 @@ function didSeatFoldToHeroBet(history: ActionHistoryEntry[], heroSeat: number, t
   return false;
 }
 
+function seatFacedHeroStreetAggression(history: ActionHistoryEntry[], heroSeat: number, targetSeat: number | undefined, street: string): boolean {
+  if (targetSeat === undefined) return false;
+  for (let index = 1; index < history.length; index += 1) {
+    const prev = history[index - 1];
+    const current = history[index];
+    if (prev.street !== street || current.street !== street) continue;
+    if (prev.seat === heroSeat && isAggressive(prev.action) && current.seat === targetSeat) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function villainFoldedToHeroStreetAggression(history: ActionHistoryEntry[], heroSeat: number, targetSeat: number | undefined, street: string): boolean {
   if (targetSeat === undefined) return false;
   for (let index = 1; index < history.length; index += 1) {
@@ -489,11 +505,6 @@ function lastStreetReached(context: CompletedHandContext): string {
     if (streets.has(street)) last = street;
   }
   return last;
-}
-
-function lastStreet(hand: Node): string {
-  const street = hand.meta.street_reached;
-  return typeof street === "string" ? street : "preflop";
 }
 
 function isAggressive(action: ActionHistoryEntry["action"]): boolean {

@@ -187,12 +187,65 @@ describe("AkgDurableMemoryPolicy", () => {
 
     const pattern = store.getNode("pattern", "folds-to-cbet");
     expect(pattern).not.toBeNull();
+    expect(pattern!.body).toContain("Villain has folded to hero flop c-bet 3 times across 3 c-bet opportunities.");
     expect(pattern!.meta.count).toBe(3);
     expect(pattern!.meta.opportunities).toBe(3);
+
     const supportEdges = store.outboundEdges({ type: "pattern", id: "folds-to-cbet" }, "supported_by");
     expect(supportEdges).toHaveLength(3);
+    expect(supportEdges.map((edge) => edge.to.type)).toEqual(["hand", "hand", "hand"]);
+    expect(supportEdges.map((edge) => edge.meta.hand_number).sort((left, right) => Number(left) - Number(right))).toEqual([1, 2, 3]);
+    expect(supportEdges.every((edge) => edge.strength === 1 && edge.confidence === 1)).toBe(true);
+
     const showsPattern = store.outboundEdges({ type: "opponent", id: "villain" }, "shows_pattern");
-    expect(showsPattern.find((edge) => edge.to.id === "folds-to-cbet")?.meta.count).toBe(3);
+    expect(showsPattern.find((edge) => edge.to.id === "folds-to-cbet")).toMatchObject({
+      strength: 1,
+      confidence: null,
+      meta: { count: 3, opportunities: 3 },
+    });
+  });
+
+  it("derives river and long-horizon patterns with the expected evidence counts", async () => {
+    const policy = new AkgDurableMemoryPolicy();
+
+    for (let handNumber = 1; handNumber <= 3; handNumber += 1) {
+      await policy.afterHandEnd(makeHandContext(handNumber, {
+        board: ["Td", "9h", "2c", "5s", "Kc"],
+        actionHistory: [
+          { seat: 0, action: "raise", amount: 4, street: "preflop" },
+          { seat: 1, action: "raise", amount: 12, street: "preflop" },
+          { seat: 0, action: "call", amount: 8, street: "preflop" },
+          { seat: 0, action: "bet", amount: 12, street: "river" },
+          { seat: 1, action: "fold", street: "river" },
+        ],
+      }));
+    }
+
+    for (let handNumber = 4; handNumber <= 15; handNumber += 1) {
+      await policy.afterHandEnd(makeHandContext(handNumber, {
+        actionHistory: [
+          { seat: 0, action: "raise", amount: 4, street: "preflop" },
+          { seat: 1, action: "call", amount: 2, street: "preflop" },
+          { seat: 0, action: "bet", amount: 6, street: "flop" },
+          { seat: 1, action: "call", amount: 6, street: "flop" },
+        ],
+        result: [
+          { seat: 0, chips_delta: 0 },
+          { seat: 1, chips_delta: 0 },
+        ],
+      }));
+    }
+
+    const store = await open(join(tmpDir, "memory.akg"));
+
+    expect(store.getNode("pattern", "3bet-tendency")?.meta).toMatchObject({ count: 3, opportunities: 15 });
+    expect(store.getNode("pattern", "folds-to-river-bet")?.meta).toMatchObject({ count: 3, opportunities: 3 });
+    expect(store.getNode("pattern", "river-aggressor")).toBeNull();
+
+    const callsWide = store.getNode("pattern", "calls-wide");
+    expect(callsWide).not.toBeNull();
+    expect(callsWide!.meta).toMatchObject({ count: 12, opportunities: 15 });
+    expect(callsWide!.body).toContain("only 3 times across 15 completed hands");
   });
 
   it("supports the AKG query tools", async () => {
