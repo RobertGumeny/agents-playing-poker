@@ -21,6 +21,7 @@ There is no single monolithic spec anymore. Repository-specific contracts now li
 - [`docs/wire-protocol.md`](docs/wire-protocol.md) — server/agent JSONL protocol
 - [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md) — durable AKG agent contract
 - [`docs/eval-system.md`](docs/eval-system.md) — proposed eval and experiment-definition system
+- [`docs/session-artifacts.md`](docs/session-artifacts.md) — stable additive session-artifact schemas for `memory-export.json` and `eval.json`
 - [`docs/experiment-definition.md`](docs/experiment-definition.md) — normative JSON contract for planned experiment session sets
 - [`docs/kb/README.md`](docs/kb/README.md) — implementation knowledge-base index
 
@@ -90,7 +91,7 @@ LLM-agent behavior is not unit-tested (nondeterministic); validate it by running
 The original v0 build phasing is complete through the non-LLM demo and LLM baseline layers. For new work:
 
 1. Read [`docs/kb/README.md`](docs/kb/README.md) and only the KB articles relevant to the task.
-2. Read the focused contract for the subsystem you are touching, such as [`docs/wire-protocol.md`](docs/wire-protocol.md), [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md), [`docs/eval-system.md`](docs/eval-system.md), or [`docs/experiment-definition.md`](docs/experiment-definition.md).
+2. Read the focused contract for the subsystem you are touching, such as [`docs/wire-protocol.md`](docs/wire-protocol.md), [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md), [`docs/eval-system.md`](docs/eval-system.md), [`docs/session-artifacts.md`](docs/session-artifacts.md), or [`docs/experiment-definition.md`](docs/experiment-definition.md).
 3. Keep implementation and docs changes aligned in the same patch when behavior changes.
 
 ## When you're unsure

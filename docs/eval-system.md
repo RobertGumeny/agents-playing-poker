@@ -104,7 +104,7 @@ The system has three parts: an **experiment definition**, a **server-side memory
 export** (new session artifact), and two **eval CLI commands**. All post-run analysis
 is runnable with no LLM involvement.
 
-The normative JSON experiment contract now lives in [`experiment-definition.md`](experiment-definition.md).
+The normative JSON experiment contract now lives in [`experiment-definition.md`](experiment-definition.md). The stable additive session-artifact schemas now live in [`session-artifacts.md`](session-artifacts.md).
 
 ---
 
@@ -219,67 +219,8 @@ Signature notes:
 
 #### Output: `sessions/<id>/agents/<name>/memory-export.json`
 
-Full graph dump — all nodes with complete body/meta/tags, all edges with relation and
-meta. The schema is stable by construction: it mirrors the AKG node/edge types directly.
-
-```json
-{
-  "nodes": [
-    {
-      "type": "opponent",
-      "id": "villain",
-      "title": "villain",
-      "body": "Villain is loose-passive (VPIP 74%, PFR 22%) and folds to hero flop c-bets 4/7 times (57%). River aggression shows up in 1/23 hands (4%). Villain has won 6 of 8 showdowns.",
-      "meta": {
-        "hands_played": 23,
-        "vpip": 17,
-        "pfr": 5,
-        "fold_to_bet": 14,
-        "cbet_opportunities": 7,
-        "cbet_folds": 4
-      },
-      "tags": ["opponent"]
-    },
-    {
-      "type": "pattern",
-      "id": "folds-to-cbet",
-      "title": "Folds to flop c-bets",
-      "body": "Villain has folded to hero flop c-bet 4 times across 7 c-bet opportunities.",
-      "meta": { "count": 4, "opportunities": 7 },
-      "tags": ["pattern"]
-    },
-    {
-      "type": "hand",
-      "id": "0a6761eab5f6f19b",
-      "title": "Hand 1",
-      "body": "Hand 1: hero sb, hole [8c Qc], board [-]. preflop: hero raise 6, villain fold. Reached preflop. Net: +2.",
-      "meta": {
-        "hand_number": 1,
-        "hero_position": "sb",
-        "hero_net": 2,
-        "street_reached": "preflop",
-        "villain_fold": true,
-        "villain_vpip": false
-      },
-      "tags": ["hand", "villain_fold"]
-    }
-  ],
-  "edges": [
-    {
-      "from": { "type": "opponent", "id": "villain" },
-      "relation": "shows_pattern",
-      "to": { "type": "pattern", "id": "folds-to-cbet" },
-      "meta": { "count": 4, "opportunities": 7 }
-    },
-    {
-      "from": { "type": "pattern", "id": "folds-to-cbet" },
-      "relation": "supported_by",
-      "to": { "type": "hand", "id": "0a6761eab5f6f19b" },
-      "meta": { "hand_number": 1 }
-    }
-  ]
-}
-```
+Full graph dump — all nodes with complete body/meta/tags and all exported outbound edges.
+The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#memory-exportjson).
 
 After this, the session artifact layout for a memory-capable agent is:
 
@@ -318,62 +259,7 @@ or the AKG SDK directly.
 
 Output per session — `sessions/<id>/eval.json`:
 
-```json
-{
-  "session_id": "akg-durable-throttle-test-1",
-  "agent": "llm-akg-durable@exp-0.1.3-throttle",
-  "agent_seat": 0,
-  "hands": 25,
-  "seed": 1,
-  "duration_s": 541,
-  "chips_delta": 56,
-  "chips_per_hand": 2.24,
-  "preflop_only_rate": 0.52,
-  "showdown_rate": 0.08,
-  "biggest_pot": 19,
-  "tool_calls": {
-    "akg_get_opponent": 28,
-    "akg_list_patterns": 6,
-    "akg_get_pattern": 3,
-    "akg_list_hands": 0,
-    "akg_get_hand": 0
-  },
-  "tool_calls_per_hand": {
-    "akg_get_opponent": 1.12,
-    "akg_list_patterns": 0.24
-  },
-  "memory": {
-    "hand_nodes": 25,
-    "pattern_nodes": 2,
-    "opponent_nodes": 1,
-    "shows_pattern_edges": 2,
-    "supported_by_edges": 8,
-    "opponent_summary": "Villain is loose-passive (VPIP 74%, PFR 22%)...",
-    "patterns": [
-      {
-        "slug": "folds-to-cbet",
-        "title": "Folds to flop c-bets",
-        "body": "Villain has folded to hero flop c-bet 4 times across 7 c-bet opportunities.",
-        "count": 4,
-        "opportunities": 7,
-        "first_hand": 9,
-        "supporting_hand_count": 4
-      }
-    ]
-  },
-  "decision_attempts": 47,
-  "unique_decision_spots": 45,
-  "retry_count": 2,
-  "retry_rate": 0.04
-}
-```
-
-Sources for each field:
-- `chips_delta`, `duration_s`, `seed`, `hands` — `manifest.json`
-- `preflop_only_rate`, `showdown_rate`, `biggest_pot` — `hands.jsonl`
-- `tool_calls` — `pi-session.jsonl` (parse `content[].type == "toolCall"`)
-- `memory.*` — `memory-export.json` (plain JSON, no special parser)
-- `decision_attempts`, `retry_count` — `pi-session.jsonl`
+The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#evaljson). The finalized shape is session-level, keeps both seats in one file, and summarizes memory exports generically rather than hard-coding current poker-specific node inventories.
 
 ---
 
@@ -433,8 +319,7 @@ This is intentionally minimal for v0. It does not need to:
 - produce statistical significance tests (sample sizes are too small for that to matter)
 - be a web dashboard
 
-The whole thing is probably 500–700 lines of Go. The `eval.json` schema and the
-`memory-export.json` schema should both be added to a focused project doc once they stabilize.
+The whole thing is probably 500–700 lines of Go. The stable `eval.json` and `memory-export.json` contracts now live in [`session-artifacts.md`](session-artifacts.md).
 
 ## Where this fits in the build phasing
 

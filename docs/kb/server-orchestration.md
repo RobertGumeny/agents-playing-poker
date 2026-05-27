@@ -62,7 +62,7 @@ Current outputs:
 - `sessions/<id>/hands.jsonl`
 - `sessions/<id>/agents/<name>/stdout.log`
 - `sessions/<id>/agents/<name>/stderr.log`
-- `sessions/<id>/agents/<name>/memory-export.json` when `memory.akg` exists and can be exported non-fatally at teardown
+- `sessions/<id>/agents/<name>/memory-export.json` when `memory.akg` exists and can be exported non-fatally at teardown (stable schema in [`../session-artifacts.md`](../session-artifacts.md))
 
 Important current shape decisions:
 - `hands.jsonl` is streamed one hand per line in play order

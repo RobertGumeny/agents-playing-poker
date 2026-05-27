@@ -93,7 +93,7 @@ The demo writes artifacts under `sessions/<id>/`:
 - `manifest.json` — match metadata, seat versions, totals, and completion status
 - `hands.jsonl` — one server-authoritative hand record per line
 - `agents/<name>/stdout.log` and `agents/<name>/stderr.log` — per-agent process logs
-- `agents/<name>/memory-export.json` — optional server-generated JSON snapshot for memory-capable agents when `memory.akg` is present
+- `agents/<name>/memory-export.json` — optional server-generated JSON snapshot for memory-capable agents when `memory.akg` is present; see [`docs/session-artifacts.md`](docs/session-artifacts.md)
 
 Useful inspection commands:
 
@@ -123,3 +123,4 @@ Timeout behavior is server-enforced. If an agent exceeds `-decision-deadline`, t
 - **[`docs/vision.md`](docs/vision.md)** — project vision and thesis framing.
 - **[`AGENTS.md`](AGENTS.md)** — instructions for AI agents working in this repo.
 - **[`docs/wire-protocol.md`](docs/wire-protocol.md)** — the JSONL agent/server contract.
+- **[`docs/session-artifacts.md`](docs/session-artifacts.md)** — stable additive session-artifact schemas for `memory-export.json` and `eval.json`.
