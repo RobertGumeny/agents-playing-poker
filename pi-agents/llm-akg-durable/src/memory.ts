@@ -343,7 +343,7 @@ export function deriveHandFeatures(context: CompletedHandContext): HandFeatures 
     aggr_turn: villainAggressiveByStreet.has("turn"),
     aggr_river: villainAggressiveByStreet.has("river"),
     cbet_opportunity: heroMadeFlopCBet(preflopHeroActions, heroActions),
-    cbet_fold: villainFoldedToHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "flop"),
+    cbet_fold: heroMadeFlopCBet(preflopHeroActions, heroActions) && villainFoldedToHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "flop"),
     three_bet: preflopAggressive.length >= 2 && preflopVillainActions.some((entry) => isAggressive(entry.action)) && context.actionHistory.some((entry) => entry.seat === villainSeat && isAggressive(entry.action) && entry.street === "preflop" && preflopAggressive.findIndex((candidate) => candidate === entry) >= 1),
     river_bet: villainActions.some((entry) => entry.street === "river" && isAggressive(entry.action)),
     river_bet_opportunity: seatFacedHeroStreetAggression(context.actionHistory, context.heroSeat, villainSeat, "river"),
