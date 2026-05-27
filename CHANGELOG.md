@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add non-fatal session teardown memory-export artifacts
 - docs: define JSON experiment-definition contract and add validation coverage
 - test: complete benchmark reporting fixture and golden coverage
 - feat: add poker-report CLI for explicit session directories

@@ -93,6 +93,7 @@ The demo writes artifacts under `sessions/<id>/`:
 - `manifest.json` — match metadata, seat versions, totals, and completion status
 - `hands.jsonl` — one server-authoritative hand record per line
 - `agents/<name>/stdout.log` and `agents/<name>/stderr.log` — per-agent process logs
+- `agents/<name>/memory-export.json` — optional server-generated JSON snapshot for memory-capable agents when `memory.akg` is present
 
 Useful inspection commands:
 
