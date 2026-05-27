@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 
@@ -42,7 +43,7 @@ describe("llm-stateless package wiring", () => {
 
   it("runs as a subprocess with repeated extra args, replies over stdio, and writes the canonical pi-session artifact path", async () => {
     const { spawn } = await import("node:child_process");
-    const sessionDir = path.join(repoRoot, "tmp-llm-stateless-session-" + Date.now().toString(36));
+    const sessionDir = await mkdtemp(path.join(tmpdir(), "llm-stateless-session-"));
     const child = spawn(process.execPath, [entrypoint, "--ignored-flag", "value", "--another-ignored-flag", "value-2"], {
       cwd: repoRoot,
       env: {
