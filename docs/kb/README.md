@@ -38,3 +38,6 @@ Do not duplicate the normative sources:
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
   - What EPIC-9 delivered for `llm-akg-recent` naming and repeatable Markdown reviews over mirrored benchmark sessions.
   - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
+- [`llm-akg-durable-active-retrieval.md`](llm-akg-durable-active-retrieval.md)
+  - What EPIC-10 delivered in the durable AKG Pi agent.
+  - Covers the durable hand-write model, opponent/pattern rebuild strategy, read-only AKG query tools, hand-scoped custom Pi session wiring, operator surfaces, and current verification boundaries.
