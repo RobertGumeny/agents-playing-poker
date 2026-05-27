@@ -1,6 +1,6 @@
 # Server Orchestration Foundation
 
-EPIC-3 implemented build-order step 3 from [`../spec.md`](../spec.md): the Go `poker-server` process lifecycle and stdio match orchestration for v0 agent sessions.
+EPIC-3 implemented the Go `poker-server` process lifecycle and stdio match orchestration for v0 agent sessions.
 
 ## Epic delivery summary
 
@@ -28,8 +28,8 @@ It now provides:
 ## Normative sources
 
 This implementation is anchored to repository docs rather than ad hoc runtime behavior:
-- [`../spec.md`](../spec.md) for lifecycle, timeout policy, and session outputs
 - [`../wire-protocol.md`](../wire-protocol.md) for JSONL envelope and message flow
+- [`../research.md`](../research.md) for current match parameters and benchmark framing
 - [`../domain/texas-holdem.md`](../domain/texas-holdem.md)
 - [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md)
 

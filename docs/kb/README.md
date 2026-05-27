@@ -1,6 +1,6 @@
 # Knowledge Base
 
-This directory captures durable implementation knowledge that is more operational than the top-level spec.
+This directory captures durable implementation knowledge that is more operational than the top-level project docs.
 
 Use it for:
 - module-level architecture notes
@@ -9,7 +9,8 @@ Use it for:
 - epic summaries that future tasks should understand before extending a subsystem
 
 Do not duplicate the normative sources:
-- Use [`../spec.md`](../spec.md) for repository-level product and architecture decisions.
+- Use [`../vision.md`](../vision.md) and [`../research.md`](../research.md) for repository-level product and research framing.
+- Use focused subsystem docs such as [`../wire-protocol.md`](../wire-protocol.md) and [`../llm-akg-durable-spec.md`](../llm-akg-durable-spec.md) for implementation contracts.
 - Use [`../domain/README.md`](../domain/README.md) for Texas Hold'em rules and terminology.
 
 ## Index

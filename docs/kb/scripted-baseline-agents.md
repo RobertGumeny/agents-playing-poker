@@ -1,6 +1,6 @@
 # Scripted Baseline Agents And Step-4 Demo
 
-EPIC-4 implemented build-order step 4 from [`../spec.md`](../spec.md): the non-LLM baseline agents and the end-to-end local demo path for v0.
+EPIC-4 implemented the non-LLM baseline agents and the end-to-end local demo path for v0.
 
 ## Epic delivery summary
 
@@ -32,7 +32,7 @@ It now provides:
 ## Normative sources
 
 This step-4 implementation is anchored to the existing repository docs:
-- [`../spec.md`](../spec.md) for the baseline strategy lineup and build sequencing
+- [`../research.md`](../research.md) for the baseline strategy lineup and current experiment framing
 - [`../wire-protocol.md`](../wire-protocol.md) for message flow and action payloads
 - [`../domain/texas-holdem.md`](../domain/texas-holdem.md)
 - [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md)
@@ -116,7 +116,7 @@ Still out of scope here:
 - Pi integration and compaction hooks
 - multiplayer or tournament scheduling
 
-Those belong to later build-order steps in [`../spec.md`](../spec.md).
+Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
 ## Why this matters for later work
 

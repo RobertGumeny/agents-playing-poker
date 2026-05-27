@@ -1,6 +1,6 @@
 # Rules Engine Foundation
 
-EPIC-1 implemented build-order step 1 from [`../spec.md`](../spec.md): the deterministic Go rules engine foundation for v0 heads-up no-limit Texas Hold'em.
+EPIC-1 implemented the deterministic Go rules engine foundation for v0 heads-up no-limit Texas Hold'em.
 
 ## Scope delivered
 
@@ -15,7 +15,7 @@ It now provides:
 - hand start / blind posting / dealer-button rotation for repeated cash-game hands
 - server-owned legal-action generation for check, call, fold, bet, and raise
 - betting-round progression across preflop, flop, turn, river, and showdown
-- fold settlement, showdown resolution, split-pot handling, and the spec odd-chip policy
+- fold settlement, showdown resolution, split-pot handling, and the heads-up odd-chip policy
 - table-driven tests for the rules behaviors called out in the repository instructions
 
 ## Normative sources
@@ -23,7 +23,7 @@ It now provides:
 The code is intentionally anchored to the repository docs rather than ad hoc poker logic:
 - [`../domain/texas-holdem.md`](../domain/texas-holdem.md)
 - [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md)
-- [`../spec.md`](../spec.md) for project-specific overrides such as heads-up odd-chip settlement
+- [`../research.md`](../research.md) for current match framing and research constraints
 
 Package docs in `internal/deck` and `internal/rules` point back to those sources.
 
@@ -48,7 +48,7 @@ Key details:
 - `MatchState.StartHand`:
   - rotates the button every hand
   - posts small and big blinds
-  - auto-rebuys busted players at hand start, per the spec cash-game model
+  - auto-rebuys busted players at hand start, per the repository's cash-game model
   - loads deterministic hole cards and the precomputed full board from the dealer
 - `MatchState.FinalizeHand` persists end-of-hand stacks back into match state once the hand is complete and showdown is resolved if needed.
 
@@ -72,7 +72,7 @@ The engine resolves both major hand endings:
 - **folds**: uncontested pot settlement with unmatched-chip refund before awarding the pot
 - **showdowns**: best-hand evaluation from hole cards plus board, winner selection, split-pot handling, and odd-chip award to the first tied seat clockwise from the button
 
-For heads-up ties, that odd chip goes to the big blind, matching the explicit override in [`../spec.md`](../spec.md).
+For heads-up ties, that odd chip goes to the big blind, matching the implemented project policy.
 
 ### Hand evaluation
 
@@ -117,7 +117,7 @@ Not implemented here:
 - session artifact writing
 - LLM or AKG integration
 
-Those belong to later build-order steps in [`../spec.md`](../spec.md).
+Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
 ## Why this matters for later work
 

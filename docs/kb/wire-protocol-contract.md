@@ -1,6 +1,6 @@
 # Wire Protocol Contract
 
-EPIC-2 implemented build-order step 2 from [`../spec.md`](../spec.md): the typed Go wire-protocol contract and its implementer-facing documentation for the v0 server↔agent JSONL protocol.
+EPIC-2 implemented the typed Go wire-protocol contract and its implementer-facing documentation for the v0 server↔agent JSONL protocol.
 
 ## Scope delivered
 
@@ -19,8 +19,8 @@ It now provides:
 ## Normative sources
 
 The protocol implementation is intentionally anchored to repository docs instead of drifting into ad hoc JSON shapes:
-- [`../spec.md`](../spec.md) for the authoritative v0 contract
-- [`../wire-protocol.md`](../wire-protocol.md) for the concise implementer-facing summary
+- [`../wire-protocol.md`](../wire-protocol.md) for the authoritative implementer-facing contract
+- [`../research.md`](../research.md) for the current match and strategy framing
 - [`../domain/texas-holdem.md`](../domain/texas-holdem.md)
 - [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md)
 
@@ -64,15 +64,15 @@ Required today:
 
 This keeps the wire contract explicit before the server loop exists.
 
-## Spec clarifications captured during EPIC-2
+## Contract clarifications captured during EPIC-2
 
-EPIC-2 resolved a few implementation-significant ambiguities in the draft spec and aligned the docs/code around them:
+EPIC-2 resolved a few implementation-significant ambiguities in the draft contract and aligned the docs/code around them:
 - `your_turn.seats` is explicitly part of the payload shape
 - `session_ready` is explicitly defined as the reply to `session_init`
 - `session_end` carries an explicit empty payload object
 - the optional structured `log` message is part of the documented contract
 
-Future wire changes should amend `docs/spec.md` first instead of silently changing `internal/wire`.
+Future wire changes should amend `docs/wire-protocol.md` first instead of silently changing `internal/wire`.
 
 ## Test coverage
 
@@ -99,7 +99,7 @@ Not implemented here:
 - JSON Schema artifacts
 - agent behavior beyond matching the documented message shapes
 
-Those belong to later build-order steps in [`../spec.md`](../spec.md).
+Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
 ## Why this matters for later work
 

@@ -4,13 +4,12 @@ This directory is the canonical source for **Texas Hold'em domain semantics** us
 
 Use it for rules and terminology that agents should treat as ground truth rather than re-deriving from memory.
 
-## Split from `docs/spec.md`
+## Split from project docs
 
-- **`docs/spec.md`** is the project's technical contract.
+- **Project docs** describe repository-specific behavior.
   - Architecture
   - Wire protocol
   - Session outputs
-  - Build order
   - Scope and non-goals
   - Project-specific policy decisions
 
@@ -25,10 +24,10 @@ Use it for rules and terminology that agents should treat as ground truth rather
 
 Rule of thumb:
 
-- If it is true because of **this repository**, put it in `docs/spec.md`.
+- If it is true because of **this repository**, put it in the focused project doc under `docs/`.
 - If it is true because of **Texas Hold'em**, put it in `docs/domain/`.
 
-If a project-specific behavior intentionally constrains or overrides generic poker rules, `docs/spec.md` takes precedence for that case.
+If a project-specific behavior intentionally constrains or overrides generic poker rules, the focused project doc for that subsystem takes precedence for that case.
 
 ## How to use these docs when implementing
 
@@ -40,12 +39,12 @@ Treat these docs as **normative** for poker behavior in this repository.
 
 Do **not** fill gaps by guessing from memory when implementing rules code.
 
-If implementation requires a poker rule that is not clearly stated in these docs or intentionally overridden in [`../spec.md`](../spec.md), treat that as a documentation gap and amend the docs rather than silently inventing behavior.
+If implementation requires a poker rule that is not clearly stated in these docs or intentionally overridden in a focused project doc, treat that as a documentation gap and amend the docs rather than silently inventing behavior.
 
 ## Documents in this directory
 
 - [`docs/domain/README.md`](README.md)
-  - Index for domain docs and the spec/domain split.
+  - Index for domain docs and the project/domain split.
 - [`docs/domain/texas-holdem.md`](texas-holdem.md)
   - Canonical rules reference for generic Texas Hold'em.
   - Covers cards, streets, betting-round flow, legal action vocabulary, hand rankings, and showdown.

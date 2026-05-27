@@ -73,7 +73,7 @@ One failed EPIC-5 attempt also exposed a real gameplay edge case: a short small-
 ## Normative sources
 
 This wrapper layer should stay aligned with:
-- [`../spec.md`](../spec.md) for build sequencing and v0 scope boundaries
+- [`../vision.md`](../vision.md) and [`../research.md`](../research.md) for scope boundaries and current experiment framing
 - [`../README.md`](../README.md) for the current operator-facing run path
 - [`server-orchestration.md`](server-orchestration.md) for the underlying server lifecycle and artifact contract
 - [`scripted-baseline-agents.md`](scripted-baseline-agents.md) for the baseline agent behavior and step-4 demo context

@@ -71,6 +71,6 @@ Coverage now includes:
 
 ## Related references
 
-- [`../spec.md`](../spec.md)
+- [`../research.md`](../research.md)
 - [`../wire-protocol.md`](../wire-protocol.md)
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)
