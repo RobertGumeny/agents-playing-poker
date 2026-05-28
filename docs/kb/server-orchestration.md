@@ -62,11 +62,13 @@ Current outputs:
 - `sessions/<id>/hands.jsonl`
 - `sessions/<id>/agents/<name>/stdout.log`
 - `sessions/<id>/agents/<name>/stderr.log`
+- `sessions/<id>/agents/<name>/memory-export.json` when `memory.akg` exists and can be exported non-fatally at teardown (stable schema in [`../session-artifacts.md`](../session-artifacts.md))
 
 Important current shape decisions:
 - `hands.jsonl` is streamed one hand per line in play order
 - `actions` is the server-authoritative hand log, including forced timeout actions
 - manifest match results accumulate per-hand deltas rather than relying on final stack snapshots, which preserves cash-game auto-rebuy economics
+- memory export is additive only: missing or unreadable `memory.akg` never flips a completed session into failure
 
 ## `cmd/poker-server`
 

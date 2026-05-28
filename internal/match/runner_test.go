@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/RobertGumeny/agent-poker/internal/randomagent"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 	"github.com/RobertGumeny/agent-poker/internal/wire"
+	akg "github.com/RobertGumeny/akg/sdk/akg-go"
 )
 
 func TestRunnerRunWritesSessionArtifactsAndCapturesStderr(t *testing.T) {
@@ -156,6 +158,49 @@ func TestRunnerRunProducesDeterministicHandsJSONL(t *testing.T) {
 	}
 }
 
+func TestRunnerRunWritesMemoryExportAtTeardown(t *testing.T) {
+	t.Parallel()
+
+	result, err := runTestMatch(t, "write-memory", "caller", 1, 50*time.Millisecond, 77)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if !result.Completed {
+		t.Fatalf("RunResult.Completed = false, want true")
+	}
+
+	exportPath := filepath.Join(result.SessionDir, "agents", "seat-0", "memory-export.json")
+	data, err := os.ReadFile(exportPath)
+	if err != nil {
+		t.Fatalf("ReadFile(memory-export.json) error = %v", err)
+	}
+	if !strings.Contains(string(data), `"type": "opponent"`) {
+		t.Fatalf("memory-export.json = %s, want opponent node", data)
+	}
+	if _, err := os.Stat(filepath.Join(result.SessionDir, "agents", "seat-1", "memory-export.json")); !os.IsNotExist(err) {
+		t.Fatalf("seat-1 memory-export.json stat error = %v, want not exists", err)
+	}
+}
+
+func TestRunnerRunLogsUnreadableMemoryExportNonFatally(t *testing.T) {
+	t.Parallel()
+
+	var progress bytes.Buffer
+	result, err := runTestMatchWithProgress(t, "write-bad-memory", "caller", 1, 50*time.Millisecond, 78, &progress)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if !result.Completed {
+		t.Fatalf("RunResult.Completed = false, want true")
+	}
+	if !strings.Contains(progress.String(), "write memory export for agent seat-0") {
+		t.Fatalf("progress output = %q, want memory export warning", progress.String())
+	}
+	if _, err := os.Stat(filepath.Join(result.SessionDir, "agents", "seat-0", "memory-export.json")); !os.IsNotExist(err) {
+		t.Fatalf("seat-0 memory-export.json stat error = %v, want not exists", err)
+	}
+}
+
 func TestRunnerRunWithRandomAgentsCompletes(t *testing.T) {
 	t.Parallel()
 
@@ -225,6 +270,11 @@ func TestRunnerRunMarksIncompleteMatchAndPersistsCompletedHandsWhenAgentDies(t *
 
 func runTestMatch(t *testing.T, seat0Behavior string, seat1Behavior string, handCount int, deadline time.Duration, seed int64) (RunResult, error) {
 	t.Helper()
+	return runTestMatchWithProgress(t, seat0Behavior, seat1Behavior, handCount, deadline, seed, nil)
+}
+
+func runTestMatchWithProgress(t *testing.T, seat0Behavior string, seat1Behavior string, handCount int, deadline time.Duration, seed int64, progressWriter io.Writer) (RunResult, error) {
+	t.Helper()
 
 	rootDir := t.TempDir()
 	runner, err := NewRunner(Config{
@@ -237,6 +287,7 @@ func runTestMatch(t *testing.T, seat0Behavior string, seat1Behavior string, hand
 		SmallBlind:       1,
 		BigBlind:         2,
 		DecisionDeadline: deadline,
+		ProgressWriter:   progressWriter,
 		AgentSpecs: []AgentSpec{
 			testAgentSpec(t, "seat-0", seat0Behavior),
 			testAgentSpec(t, "seat-1", seat1Behavior),
@@ -288,6 +339,7 @@ func TestHelperAgentProcess(t *testing.T) {
 	scanner := bufio.NewScanner(os.Stdin)
 	encoder := json.NewEncoder(os.Stdout)
 	responseID := 0
+	memoryDir := ""
 	for scanner.Scan() {
 		envelope, err := wire.DecodeEnvelope(scanner.Bytes())
 		if err != nil {
@@ -297,6 +349,12 @@ func TestHelperAgentProcess(t *testing.T) {
 		responseID++
 		switch envelope.Type {
 		case wire.MessageTypeSessionInit:
+			var payload wire.SessionInitPayload
+			if err := envelope.DecodePayload(&payload); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			memoryDir = payload.MemoryDir
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeSessionReady, fmt.Sprintf("helper-%d", responseID), envelope.ID, wire.SessionReadyPayload{Version: "helper/0.1.0"}))
 		case wire.MessageTypeYourTurn:
 			var payload wire.YourTurnPayload
@@ -315,10 +373,50 @@ func TestHelperAgentProcess(t *testing.T) {
 			action := chooseAction(payload.LegalActions)
 			_ = encoder.Encode(wire.NewMessage(wire.MessageTypeAction, fmt.Sprintf("helper-action-%d", responseID), envelope.ID, action))
 		case wire.MessageTypeSessionEnd:
+			switch behavior {
+			case "write-memory":
+				if err := writeHelperMemory(memoryDir); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
+			case "write-bad-memory":
+				if err := os.WriteFile(filepath.Join(memoryDir, "memory.akg"), []byte("not-akg"), 0o644); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
+			}
 			return
 		}
 	}
 	os.Exit(0)
+}
+
+func writeHelperMemory(memoryDir string) error {
+	store, err := akg.Open(filepath.Join(memoryDir, "memory.akg"))
+	if err != nil {
+		return err
+	}
+
+	opponent, err := store.PutNode("opponent", "villain", akg.NodeFields{
+		Title: "villain",
+		Body:  "Helper memory opponent.",
+		Meta:  map[string]any{"hands_played": 1},
+	}, []string{"opponent"})
+	if err != nil {
+		return err
+	}
+	hand, err := store.PutNode("hand", "helper-hand-1", akg.NodeFields{
+		Title: "Hand 1",
+		Body:  "Helper memory hand.",
+		Meta:  map[string]any{"hand_number": 1},
+	}, []string{"hand"})
+	if err != nil {
+		return err
+	}
+	if err := store.PutEdge(opponent, "supported_by", hand, akg.EdgeFields{Meta: map[string]any{"hand_number": 1}}); err != nil {
+		return err
+	}
+	return store.Close()
 }
 
 func hasLegalAction(actions []wire.LegalActionOption, want string) bool {

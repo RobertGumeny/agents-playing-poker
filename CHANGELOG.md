@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add poker-eval init and ls experiment ergonomics
+- feat: add poker-eval compare for experiment treatment/control reporting
+- feat: add poker-eval collect and deterministic eval.json generation
+- feat: add shared offline eval artifact loaders
+- feat: add experiment status and coverage readouts to poker-eval
+- feat: finish poker-eval run wrapper with deterministic planning, dry-run config output, and poker-run delegation
+- feat: add poker-eval run planning and deterministic session derivation
+- feat: add non-fatal session teardown memory-export artifacts
+- docs: define JSON experiment-definition contract and add validation coverage
 - test: complete benchmark reporting fixture and golden coverage
 - feat: add poker-report CLI for explicit session directories
 - feat: add benchmark review Markdown renderer
@@ -47,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add heads-up betting-round progression, legal-action generation, blind rotation, and pot accounting
 
 ### Changed
+- docs: document the end-to-end experiment workflow and command surface
+- docs: define stable session-artifact schemas for memory-export.json and eval.json
 - docs: clarify llm-akg-recent operator references
 - docs: update the spec, wire protocol, KB, and operator docs for the implemented llm-fullhistory baseline and shared Pi runtime seam
 - docs: document persisted timeout `auto_fold` entries in session artifacts
