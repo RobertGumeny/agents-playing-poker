@@ -2,6 +2,7 @@ package evalrun
 
 import (
 	"errors"
+	"io"
 	"os"
 	"strings"
 
@@ -18,6 +19,8 @@ type ExecuteConfig struct {
 	SessionsDir   string
 	Model         string
 	ThinkingLevel string
+	Stdout        io.Writer // optional; overrides Executor.Stdout when set
+	Stderr        io.Writer // optional; overrides Executor.Stderr when set
 }
 
 type SessionInspection struct {

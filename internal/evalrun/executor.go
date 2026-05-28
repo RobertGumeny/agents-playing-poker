@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"sync"
 )
 
 type Executor struct {
@@ -20,6 +21,8 @@ type Executor struct {
 	Stdout      io.Writer
 	Stderr      io.Writer
 	binaryPath  string
+	buildOnce   sync.Once
+	buildErr    error
 }
 
 func NewExecutor(repoDir string, stdout, stderr io.Writer) *Executor {
@@ -52,26 +55,41 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 		args = append(args, "-model", cfg.Model)
 	}
 
+	stdout := e.Stdout
+	if cfg.Stdout != nil {
+		stdout = cfg.Stdout
+	}
+	stderr := e.Stderr
+	if cfg.Stderr != nil {
+		stderr = cfg.Stderr
+	}
+
 	cmd := exec.CommandContext(ctx, binaryPath, args...)
 	cmd.Dir = e.RepoDir
-	cmd.Stdout = e.Stdout
-	cmd.Stderr = e.Stderr
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	if err := e.RunCommand(cmd); err != nil {
 		return fmt.Errorf("execute poker-run: %w", err)
 	}
 	return nil
 }
 
+// PrepareBinary builds the poker-run binary if not already built. Safe to call
+// before spawning parallel Execute calls to avoid a build race.
+func (e *Executor) PrepareBinary() (string, error) {
+	return e.ensureBinary()
+}
+
 func (e *Executor) ensureBinary() (string, error) {
-	if e.binaryPath != "" {
-		return e.binaryPath, nil
-	}
 	outputPath := filepath.Join(e.RepoDir, ".tmp", "bin", BinaryName("poker-run"))
-	if err := e.BuildBinary(e.RepoDir, e.GoBinary, "./cmd/poker-run", outputPath); err != nil {
-		return "", err
-	}
-	e.binaryPath = outputPath
-	return e.binaryPath, nil
+	e.buildOnce.Do(func() {
+		if err := e.BuildBinary(e.RepoDir, e.GoBinary, "./cmd/poker-run", outputPath); err != nil {
+			e.buildErr = err
+			return
+		}
+		e.binaryPath = outputPath
+	})
+	return e.binaryPath, e.buildErr
 }
 
 func BuildGoBinary(repoDir, goBinary, pkg, outputPath string) error {
