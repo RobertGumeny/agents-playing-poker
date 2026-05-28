@@ -48,3 +48,6 @@ Do not duplicate the normative sources:
 - [`offline-eval-collection.md`](offline-eval-collection.md)
   - What EPIC-13 delivered for deterministic per-session `eval.json` generation.
   - Covers shared offline artifact loading, `poker-eval collect`, Pi tool-call parsing, retry metrics from `stderr.log`, generic memory-export summaries, and current metric derivation boundaries.
+- [`experiment-comparison-and-operator-workflow.md`](experiment-comparison-and-operator-workflow.md)
+  - What EPIC-14 delivered for experiment bootstrap, discovery, comparison, and the full operator loop.
+  - Covers `poker-eval init`, `poker-eval ls`, `poker-eval compare`, the `poker-eval`/`poker-run` responsibility split, report semantics, and comparison-time warnings and validation.
