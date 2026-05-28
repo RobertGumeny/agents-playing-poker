@@ -1,16 +1,6 @@
 # LLM Stateless Pi Baseline
 
-EPIC-7 delivered the first runnable Pi-backed LLM agent in the v0 build order: `llm-stateless`.
-
-## Epic delivery summary
-
-The archived EPIC-7 task log shows four delivery slices:
-- `EPIC-7-001`: replaced the placeholder decision path with a real Pi SDK-backed per-decision client
-- `EPIC-7-002`: finished the `llm-stateless` package rename, build output, and external-process entrypoint wiring
-- `EPIC-7-003`: added fake-client integration coverage for the shared stateless protocol path
-- `EPIC-7-004`: added subprocess coverage for the published command shape and canonical Pi session artifact handling
-
-## Scope delivered
+## Scope
 
 The current stateless Pi-agent surface lives primarily in:
 - `pi-agents/shared/src/runner.ts`
@@ -113,9 +103,9 @@ This keeps Pi artifacts aligned with the existing `sessions/<id>/agents/<name>/`
 
 `PI_POKER_FAKE_DECISIONS_JSON` is a test seam, not part of the research strategy surface.
 
-## Verification surface
+## Test coverage
 
-The durable automated coverage added by EPIC-7 proves:
+Automated coverage includes:
 - the shared runner replies with correct `session_ready` and `action` envelopes and preserves `in_reply_to` correlation
 - later stateless prompts do not contain previous-hand showdown or result data
 - state is cleared correctly at `hand_end` and `session_end`
@@ -123,14 +113,6 @@ The durable automated coverage added by EPIC-7 proves:
 - the published `poker-agent-llm-stateless` bin is stable for subprocess launching
 - the built package can run as a child process with repeated extra args and still speak the Go server contract
 - subprocess execution can write the canonical `pi-session.jsonl` artifact without live credentials or billable model calls
-
-The primary commands exercised during the epic were:
-- `cd pi-agents && npm run build`
-- `cd pi-agents && npm run typecheck`
-- `cd pi-agents && npm test`
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
 
 ## Current boundaries
 
@@ -141,10 +123,10 @@ Still out of scope here:
 - live-model integration tests in CI
 - any alternate artifact layout outside the canonical session bundle
 
-## Why this matters for later work
+## Integration contract
 
-Future Pi-agent tasks can treat EPIC-7 as the stable foundation for:
-- a runnable external LLM agent process that already fits the Go server contract
+`llm-stateless` is the stable foundation for:
+- a runnable external LLM agent process that fits the Go server contract
 - a shared TS runtime layer for later memory strategies
 - a strict separation between observability artifacts and strategic memory
 - test seams that keep protocol and subprocess coverage deterministic while real-model behavior stays out of CI

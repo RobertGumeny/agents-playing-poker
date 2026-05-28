@@ -1,15 +1,6 @@
-# Scripted Baseline Agents And Step-4 Demo
+# Scripted Baseline Agents And Demo
 
-EPIC-4 implemented the non-LLM baseline agents and the end-to-end local demo path for v0.
-
-## Epic delivery summary
-
-The archived EPIC-4 task log shows the step-4 work landed in three slices:
-- `EPIC-4-001`: added the minimal `random` Go agent that only chooses from server-advertised legal actions
-- `EPIC-4-002`: added the deterministic `heuristic` Go agent and the rules fix needed for short-blind all-in hands to complete cleanly
-- `EPIC-4-003`: added CLI-level `poker-server` demo coverage, timeout verification, and operator-facing run guidance
-
-## Scope delivered
+## Scope
 
 The current scripted baseline surface lives primarily in:
 - `cmd/poker-demo`
@@ -74,7 +65,7 @@ Important constraint: this agent is meant to behave differently from `random`, n
 
 ## Interaction with rules and orchestration
 
-EPIC-4 also exposed one important rules detail that later work should preserve: if a player cannot cover a blind, the engine allows that player to post a short all-in blind, closes betting once only matched all-in states remain, and refunds unmatched commitments before final settlement. The domain explanation lives in [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md), while the broader orchestration behavior remains documented in [`server-orchestration.md`](server-orchestration.md).
+One important rules detail to preserve: if a player cannot cover a blind, the engine allows that player to post a short all-in blind, closes betting once only matched all-in states remain, and refunds unmatched commitments before final settlement. The domain explanation lives in [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md), while the broader orchestration behavior remains documented in [`server-orchestration.md`](server-orchestration.md).
 
 ## Demo and verification surface
 
@@ -83,7 +74,7 @@ The durable operator path for the non-LLM demo is:
 2. optionally override a small supported set of match knobs such as `-session-id`, `-sessions-dir`, `-match-id`, `-seed`, or `-hand-count`
 3. inspect `sessions/<id>/manifest.json`, `hands.jsonl`, and per-agent logs
 
-For the wrapper-specific UX contract and layering decisions added in EPIC-5, see [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md).
+For the wrapper-specific UX contract and layering decisions, see [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md).
 
 Execution-relevant constraints to preserve in future operator docs:
 - `poker-demo` shells out to `go build`, so a working Go toolchain is required at runtime
@@ -118,10 +109,10 @@ Still out of scope here:
 
 Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
-## Why this matters for later work
+## Integration contract
 
-Future agent and evaluation tasks can treat EPIC-4 as the stable baseline layer for:
+The scripted agents and demo are the stable baseline layer for:
 - a legal but intentionally weak no-memory policy (`random`)
 - a deterministic scripted no-memory policy (`heuristic`)
 - the expected local operator workflow for running a complete non-LLM match
-- the timeout and artifact behavior that later LLM agents must fit into without changing the server contract
+- the timeout and artifact behavior that LLM agents must fit into without changing the server contract

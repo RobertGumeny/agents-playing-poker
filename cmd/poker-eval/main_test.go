@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/RobertGumeny/agent-poker/internal/eval"
+	"github.com/RobertGumeny/agent-poker/internal/evalrun"
 	"github.com/RobertGumeny/agent-poker/internal/experiment"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
@@ -238,17 +239,17 @@ func TestRunDryRunPrintsDeterministicPlanAndCoverage(t *testing.T) {
 				},
 			}, nil
 		},
-		inspectSession: func(planned experiment.PlannedRun, _ int) (sessionInspection, error) {
+		inspectSession: func(planned experiment.PlannedRun, _ int) (evalrun.SessionInspection, error) {
 			switch planned.SessionID {
 			case "control-1":
-				return sessionInspection{Status: "present"}, nil
+				return evalrun.SessionInspection{Status: "present"}, nil
 			case "control-2":
-				return sessionInspection{Status: "incomplete", Reason: "hand_count_mismatch"}, nil
+				return evalrun.SessionInspection{Status: "incomplete", Reason: "hand_count_mismatch"}, nil
 			default:
-				return sessionInspection{Status: "missing"}, nil
+				return evalrun.SessionInspection{Status: "missing"}, nil
 			}
 		},
-		execute: func(context.Context, executeConfig) error {
+		execute: func(context.Context, evalrun.ExecuteConfig) error {
 			t.Fatal("execute called during dry-run")
 			return nil
 		},
@@ -274,7 +275,7 @@ func TestRunDryRunPrintsDeterministicPlanAndCoverage(t *testing.T) {
 }
 
 func TestRunExecutesMissingAndIncompleteSessions(t *testing.T) {
-	var executed []executeConfig
+	var executed []evalrun.ExecuteConfig
 	var stdout strings.Builder
 	var stderr strings.Builder
 	err := run([]string{"run", "-experiment", "experiment.json", "-sessions-dir", "sessions"}, &stdout, &stderr, runDeps{
@@ -295,17 +296,17 @@ func TestRunExecutesMissingAndIncompleteSessions(t *testing.T) {
 				},
 			}, nil
 		},
-		inspectSession: func(planned experiment.PlannedRun, _ int) (sessionInspection, error) {
+		inspectSession: func(planned experiment.PlannedRun, _ int) (evalrun.SessionInspection, error) {
 			switch planned.SessionID {
 			case "control-a":
-				return sessionInspection{Status: "present"}, nil
+				return evalrun.SessionInspection{Status: "present"}, nil
 			case "control-b":
-				return sessionInspection{Status: "incomplete", Reason: "match_incomplete"}, nil
+				return evalrun.SessionInspection{Status: "incomplete", Reason: "match_incomplete"}, nil
 			default:
-				return sessionInspection{Status: "missing"}, nil
+				return evalrun.SessionInspection{Status: "missing"}, nil
 			}
 		},
-		execute: func(_ context.Context, cfg executeConfig) error {
+		execute: func(_ context.Context, cfg evalrun.ExecuteConfig) error {
 			executed = append(executed, cfg)
 			return nil
 		},
@@ -354,10 +355,10 @@ func TestRunRejectsMissingOpponentWhenExecutionNeeded(t *testing.T) {
 				},
 			}, nil
 		},
-		inspectSession: func(experiment.PlannedRun, int) (sessionInspection, error) {
-			return sessionInspection{Status: "missing"}, nil
+		inspectSession: func(experiment.PlannedRun, int) (evalrun.SessionInspection, error) {
+			return evalrun.SessionInspection{Status: "missing"}, nil
 		},
-		execute: func(context.Context, executeConfig) error {
+		execute: func(context.Context, evalrun.ExecuteConfig) error {
 			t.Fatal("execute called unexpectedly")
 			return nil
 		},
@@ -387,11 +388,11 @@ func TestStatusPrintsCoverage(t *testing.T) {
 				},
 			}, nil
 		},
-		inspectSession: func(planned experiment.PlannedRun, _ int) (sessionInspection, error) {
+		inspectSession: func(planned experiment.PlannedRun, _ int) (evalrun.SessionInspection, error) {
 			if planned.SessionID == "control-a" {
-				return sessionInspection{Status: "present"}, nil
+				return evalrun.SessionInspection{Status: "present"}, nil
 			}
-			return sessionInspection{Status: "incomplete", Reason: "hands_missing"}, nil
+			return evalrun.SessionInspection{Status: "incomplete", Reason: "hands_missing"}, nil
 		},
 	})
 	if err != nil {
@@ -428,12 +429,12 @@ func TestInspectExistingSession(t *testing.T) {
 		Seats:        []string{planned.Agent, planned.Opponent},
 		HandsWritten: 2,
 	})
-	inspection, err := inspectExistingSession(planned, 2)
+	inspection, err := evalrun.InspectExistingSession(planned, 2)
 	if err != nil {
-		t.Fatalf("inspectExistingSession() error = %v", err)
+		t.Fatalf("evalrun.InspectExistingSession() error = %v", err)
 	}
-	if inspection != (sessionInspection{Status: "present"}) {
-		t.Fatalf("inspectExistingSession() = %+v, want present", inspection)
+	if inspection != (evalrun.SessionInspection{Status: "present"}) {
+		t.Fatalf("evalrun.InspectExistingSession() = %+v, want present", inspection)
 	}
 }
 
@@ -451,7 +452,7 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 		sessionID       string
 		plannedHands    int
 		fixture         fixtureOptions
-		wantInspection  sessionInspection
+		wantInspection  evalrun.SessionInspection
 		createDirectory bool
 	}{
 		{
@@ -459,7 +460,7 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 			sessionID:      "manifest-missing",
 			plannedHands:   2,
 			fixture:        fixtureOptions{CreateOnly: true},
-			wantInspection: sessionInspection{Status: "incomplete", Reason: "manifest_missing"},
+			wantInspection: evalrun.SessionInspection{Status: "incomplete", Reason: "manifest_missing"},
 		},
 		{
 			name:         "seed mismatch",
@@ -472,7 +473,7 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 				Seats:        []string{basePlanned.Agent, basePlanned.Opponent},
 				HandsWritten: 2,
 			},
-			wantInspection: sessionInspection{Status: "incomplete", Reason: "seed_mismatch"},
+			wantInspection: evalrun.SessionInspection{Status: "incomplete", Reason: "seed_mismatch"},
 		},
 		{
 			name:         "match incomplete",
@@ -485,7 +486,7 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 				Seats:        []string{basePlanned.Agent, basePlanned.Opponent},
 				HandsWritten: 2,
 			},
-			wantInspection: sessionInspection{Status: "incomplete", Reason: "match_incomplete"},
+			wantInspection: evalrun.SessionInspection{Status: "incomplete", Reason: "match_incomplete"},
 		},
 		{
 			name:         "hands count mismatch",
@@ -498,7 +499,7 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 				Seats:        []string{basePlanned.Agent, basePlanned.Opponent},
 				HandsWritten: 1,
 			},
-			wantInspection: sessionInspection{Status: "incomplete", Reason: "hands_count_mismatch"},
+			wantInspection: evalrun.SessionInspection{Status: "incomplete", Reason: "hands_count_mismatch"},
 		},
 	}
 
@@ -509,12 +510,12 @@ func TestInspectExistingSessionIncompleteReasons(t *testing.T) {
 			planned.SessionDir = filepath.Join(rootDir, tt.sessionID)
 			createSessionFixture(t, rootDir, tt.sessionID, tt.fixture)
 
-			inspection, err := inspectExistingSession(planned, tt.plannedHands)
+			inspection, err := evalrun.InspectExistingSession(planned, tt.plannedHands)
 			if err != nil {
-				t.Fatalf("inspectExistingSession() error = %v", err)
+				t.Fatalf("evalrun.InspectExistingSession() error = %v", err)
 			}
 			if inspection != tt.wantInspection {
-				t.Fatalf("inspectExistingSession() = %+v, want %+v", inspection, tt.wantInspection)
+				t.Fatalf("evalrun.InspectExistingSession() = %+v, want %+v", inspection, tt.wantInspection)
 			}
 		})
 	}

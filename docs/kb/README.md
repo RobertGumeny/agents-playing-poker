@@ -6,7 +6,7 @@ Use it for:
 - module-level architecture notes
 - implementation constraints that are already reflected in code
 - testing and verification guidance
-- epic summaries that future tasks should understand before extending a subsystem
+- why a subsystem is designed the way it is
 
 Do not duplicate the normative sources:
 - Use [`../vision.md`](../vision.md) and [`../research.md`](../research.md) for repository-level product and research framing.
@@ -16,38 +16,26 @@ Do not duplicate the normative sources:
 ## Index
 
 - [`rules-engine-foundation.md`](rules-engine-foundation.md)
-  - What EPIC-1 delivered in the Go rules engine.
-  - Covers deck/dealer determinism, hand-state progression, showdown resolution, and current test coverage.
+  - The Go rules engine: deck/dealer determinism, hand-state progression, showdown resolution, and test coverage.
 - [`wire-protocol-contract.md`](wire-protocol-contract.md)
-  - What EPIC-2 delivered in the Go wire protocol contract.
-  - Covers typed message models, envelope validation, reply correlation, and protocol test coverage.
+  - The Go wire protocol: typed message models, envelope validation, reply correlation, and protocol test coverage.
 - [`server-orchestration.md`](server-orchestration.md)
-  - What EPIC-3 delivered in the Go server and match orchestrator.
-  - Covers the epic delivery slices, process lifecycle, timeout/incomplete-match handling, session artifacts, and deterministic replay coverage.
+  - The Go server and match orchestrator: process lifecycle, timeout/incomplete-match handling, session artifacts, and deterministic replay coverage.
 - [`scripted-baseline-agents.md`](scripted-baseline-agents.md)
-  - What EPIC-4 delivered in the scripted non-LLM agent layer and step-4 demo path.
-  - Covers `random` and `heuristic` agent behavior, baseline constraints, demo verification, and the timeout-tested local run surface.
+  - The scripted non-LLM agent layer: `random` and `heuristic` agent behavior, baseline constraints, demo verification, and the timeout-tested local run surface.
 - [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md)
-  - What EPIC-5 delivered in the operator-facing wrapper around the scripted step-4 demo.
-  - Covers `cmd/poker-demo`, its narrow override surface, artifact inspection output, and the layering boundary with `poker-server`.
+  - `cmd/poker-demo`: its narrow override surface, artifact inspection output, and the layering boundary with `poker-server`.
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)
-  - What EPIC-7 delivered in the first runnable Pi-backed LLM baseline.
-  - Covers the shared TypeScript runtime, per-decision Pi session isolation, external-process command shape, canonical `pi-session.jsonl` artifacts, and test seams that avoid live-model requirements.
+  - The stateless LLM baseline: shared TypeScript runtime, per-decision Pi session isolation, external-process command shape, canonical `pi-session.jsonl` artifacts, and test seams that avoid live-model requirements.
 - [`llm-fullhistory-baseline.md`](llm-fullhistory-baseline.md)
-  - What EPIC-8 delivered in the prompt-history Pi baseline.
-  - Covers the fresh-session-per-hand boundary, compact prior-hand summary format, `hand_end` protocol support, and the shared runtime seam between memory policy and decision engine.
+  - The full-history LLM baseline: fresh-session-per-hand boundary, compact prior-hand summary format, `hand_end` protocol support, and the shared runtime seam between memory policy and decision engine.
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
-  - What EPIC-9 delivered for `llm-akg-recent` naming and repeatable Markdown reviews over mirrored benchmark sessions.
-  - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
+  - `cmd/poker-report` and `internal/reporting`: required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
 - [`experiment-planning-and-session-artifacts.md`](experiment-planning-and-session-artifacts.md)
-  - What EPIC-11 delivered for experiment-definition parsing and additive analysis artifacts.
-  - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, the authority split between primary and derived session files, and the pre-collector groundwork that EPIC-13 later consumed.
+  - Experiment-definition parsing and additive analysis artifacts: strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, and the authority split between primary and derived session files.
 - [`experiment-execution-and-coverage.md`](experiment-execution-and-coverage.md)
-  - What EPIC-12 delivered for operator-facing experiment execution and coverage inspection.
-  - Covers `poker-eval run`, `poker-eval status`, delegated `poker-run` execution, present/missing/incomplete session checks, and the current rerun semantics for incomplete sessions.
+  - `poker-eval run` and `poker-eval status`: delegated `poker-run` execution, present/missing/incomplete session checks, and rerun semantics for incomplete sessions.
 - [`offline-eval-collection.md`](offline-eval-collection.md)
-  - What EPIC-13 delivered for deterministic per-session `eval.json` generation.
-  - Covers shared offline artifact loading, `poker-eval collect`, Pi tool-call parsing, retry metrics from `stderr.log`, generic memory-export summaries, and current metric derivation boundaries.
+  - `poker-eval collect`: shared offline artifact loading, Pi tool-call parsing, retry metrics from `stderr.log`, generic memory-export summaries, and current metric derivation boundaries.
 - [`experiment-comparison-and-operator-workflow.md`](experiment-comparison-and-operator-workflow.md)
-  - What EPIC-14 delivered for experiment bootstrap, discovery, comparison, and the full operator loop.
-  - Covers `poker-eval init`, `poker-eval ls`, `poker-eval compare`, the `poker-eval`/`poker-run` responsibility split, report semantics, and comparison-time warnings and validation.
+  - `poker-eval init`, `poker-eval ls`, `poker-eval compare`: the `poker-eval`/`poker-run` responsibility split, report semantics, and comparison-time warnings and validation.

@@ -1,8 +1,6 @@
 # Rules Engine Foundation
 
-EPIC-1 implemented the deterministic Go rules engine foundation for v0 heads-up no-limit Texas Hold'em.
-
-## Scope delivered
+## Scope
 
 The current foundation lives primarily in:
 - `internal/deck`
@@ -91,7 +89,7 @@ Results are captured in `HandResult`, including winning seats, per-seat chip del
 
 ## Test coverage
 
-EPIC-1 added table-driven automated coverage for:
+Table-driven automated coverage includes:
 - deterministic deck behavior and reproducible dealing
 - parse/string round-trips for cards
 - blind rotation and button/sb/bb assignment across hands
@@ -103,11 +101,9 @@ EPIC-1 added table-driven automated coverage for:
 - representative hand-evaluation ordering and tiebreak cases
 - showdown winner resolution, split pots, and odd-chip assignment
 
-This gives the repository a pure-Go validation surface before protocol and server work begin.
-
 ## Current boundaries
 
-This foundation is intentionally still v0-scoped.
+This foundation is intentionally v0-scoped.
 
 Not implemented here:
 - side pots
@@ -119,9 +115,9 @@ Not implemented here:
 
 Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
-## Why this matters for later work
+## Integration contract
 
-Future protocol, server, and agent tasks can treat the rules engine as the server-authoritative source for:
+The rules engine is the server-authoritative source for:
 - legal actions
 - stack and pot accounting
 - blind/button rotation

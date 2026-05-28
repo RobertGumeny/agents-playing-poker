@@ -1,15 +1,6 @@
 # One-Command Scripted Demo Flow
 
-EPIC-5 improved the operator UX for build-order step 4 by adding a supported wrapper around `poker-server` for the default scripted demo.
-
-## Epic delivery summary
-
-The archived EPIC-5 task log shows the work landed in three slices:
-- `EPIC-5-001`: added `cmd/poker-demo` as the supported top-level entrypoint for the default `random` versus `heuristic` match
-- `EPIC-5-002`: made successful runs print the canonical session bundle paths to inspect next
-- `EPIC-5-003`: added focused wrapper-level coverage and promoted the wrapper as the primary step-4 operator path
-
-## Scope delivered
+## Scope
 
 The current one-command demo surface lives primarily in:
 - `cmd/poker-demo`
@@ -50,8 +41,6 @@ That fixed wiring is part of the v0 UX goal: remove setup friction for the basel
 
 ## Relationship to the lower-level server
 
-EPIC-5 did not change the low-level server contract.
-
 Important layering to preserve:
 - `poker-demo` is only a convenience wrapper
 - `poker-server` remains the canonical runtime primitive
@@ -60,15 +49,12 @@ Important layering to preserve:
 
 If future work needs custom seat commands, non-default agents, or lower-level debugging, it should drop to `poker-server` rather than stretching `poker-demo` beyond its narrow purpose.
 
-## Durable operational constraints
+## Operational constraints
 
-The archived session logs surfaced a few constraints worth keeping in docs instead of only in code:
 - the wrapper requires a working Go toolchain at runtime because it shells out to `go build`
 - the current implementation builds fresh temporary binaries before each run instead of assuming prebuilt executables
 - printing absolute artifact paths is intentional so operators can immediately inspect or copy/paste them
 - wrapper-level coverage should stay focused on orchestration helpers and UX output, while full match confidence continues to come from `poker-server`, `internal/match`, and the scripted agent tests
-
-One failed EPIC-5 attempt also exposed a real gameplay edge case: a short small-blind all-in hand could leave the demo unstable until the rules engine advanced directly to showdown when no further action was possible. That fix belongs to the rules and scripted-baseline layers, but it is part of why the wrapper can now be treated as the reliable default operator path.
 
 ## Normative sources
 
@@ -87,10 +73,10 @@ Still out of scope for `poker-demo`:
 - alternative artifact formats
 - long-lived installable packaging beyond the current repo-local Go run path
 
-## Why this matters for later work
+## Operator surfaces
 
-Later agent and evaluation work can assume the repository now has two distinct operator surfaces:
-- a low-level server CLI for explicit wiring and debugging
-- a high-confidence one-command baseline demo for the default scripted checkpoint
+The repository has two distinct operator surfaces:
+- a low-level server CLI for explicit wiring and debugging (`poker-server`)
+- a one-command baseline demo for the default scripted checkpoint (`poker-demo`)
 
-That split keeps the step-4 demo easy to run without weakening the underlying server contract that later LLM-based work must continue to use.
+That split keeps the demo easy to run without weakening the underlying server contract that LLM-based work must continue to use.

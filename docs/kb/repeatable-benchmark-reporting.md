@@ -4,7 +4,7 @@ This document describes how to turn a set of poker session artifacts into a repe
 
 The goal is not to claim AKG superiority from early runs. Current `llm-akg-recent` should be reported as a shallow baseline: a deliberately naive bounded-memory baseline that injects an opponent profile plus the last 5 completed hands. The report makes that framing explicit so later, richer AKG memory strategies can be compared against this baseline, and eventually against `llm-fullhistory` on both skill and cost.
 
-EPIC-9 implemented this surface as `cmd/poker-report` plus `internal/reporting`. The command currently accepts explicit session directories, loads server-authoritative artifacts, canonicalizes historical `llm-akg` labels to `llm-akg-recent` in memory, computes mirror-aware metrics, and renders a conservative Markdown review.
+`cmd/poker-report` plus `internal/reporting` implement this surface. The command accepts explicit session directories, loads server-authoritative artifacts, canonicalizes historical `llm-akg` labels to `llm-akg-recent` in memory, computes mirror-aware metrics, and renders a conservative Markdown review.
 
 ## Why this report exists
 
@@ -298,9 +298,9 @@ It warns, but still renders, for:
 - fallback actions present
 - mirror pair metadata mismatch
 
-### Test coverage delivered
+### Test coverage
 
-EPIC-9 added deterministic Go coverage for:
+Deterministic Go coverage includes:
 
 - valid session loading
 - missing required artifacts

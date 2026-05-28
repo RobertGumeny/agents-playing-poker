@@ -1,8 +1,6 @@
 # Wire Protocol Contract
 
-EPIC-2 implemented the typed Go wire-protocol contract and its implementer-facing documentation for the v0 server↔agent JSONL protocol.
-
-## Scope delivered
+## Scope
 
 The current protocol surface lives in:
 - `internal/wire`
@@ -64,9 +62,9 @@ Required today:
 
 This keeps the wire contract explicit before the server loop exists.
 
-## Contract clarifications captured during EPIC-2
+## Contract clarifications
 
-EPIC-2 resolved a few implementation-significant ambiguities in the draft contract and aligned the docs/code around them:
+A few implementation-significant ambiguities were resolved when the contract was first implemented:
 - `your_turn.seats` is explicitly part of the payload shape
 - `session_ready` is explicitly defined as the reply to `session_init`
 - `session_end` carries an explicit empty payload object
@@ -76,7 +74,7 @@ Future wire changes should amend `docs/wire-protocol.md` first instead of silent
 
 ## Test coverage
 
-`internal/wire/types_test.go` currently covers:
+`internal/wire/types_test.go` covers:
 - JSON round-trip for every message type
 - malformed JSON rejection
 - unsupported protocol version rejection
@@ -86,11 +84,9 @@ Future wire changes should amend `docs/wire-protocol.md` first instead of silent
 - missing required `in_reply_to` rejection
 - malformed payload decoding rejection for every message type
 
-This gives later server/agent work a stable serialization contract before process orchestration is built.
-
 ## Current boundaries
 
-This epic intentionally stopped at the contract layer.
+This layer intentionally stops at the contract layer.
 
 Not implemented here:
 - stdio read/write loops
@@ -101,9 +97,9 @@ Not implemented here:
 
 Those belong to later subsystem work and should be grounded in the focused docs for that layer.
 
-## Why this matters for later work
+## Integration contract
 
-Future server and agent tasks can treat `internal/wire` plus `docs/wire-protocol.md` as the canonical v0 integration surface for:
+`internal/wire` plus `docs/wire-protocol.md` is the canonical v0 integration surface for:
 - message names and payload fields
 - reply-correlation behavior
 - empty-payload handling

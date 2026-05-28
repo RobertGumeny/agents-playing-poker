@@ -1,15 +1,6 @@
 # Experiment Execution and Coverage
 
-EPIC-12 added the operator-facing CLI layer that executes a checked-in experiment definition directly and reports coverage from that definition instead of from ad hoc directory inspection. EPIC-14 extended that surface with experiment bootstrap and discovery ergonomics.
-
-## Epic delivery summary
-
-The archived EPIC-12 task log splits the work into three slices:
-- `EPIC-12-001`: added deterministic experiment planning for runnable sessions, including session ids, seeds, and expected session directories
-- `EPIC-12-002`: implemented `poker-eval run` as a wrapper that launches planned sessions through existing single-session execution logic
-- `EPIC-12-003`: added status and coverage readouts for planned, present, missing, and incomplete sessions
-
-## Current surfaces
+## Surfaces
 
 The current implementation and operator-facing references live in:
 - `cmd/poker-eval/main.go`
@@ -106,9 +97,9 @@ Delegation path:
 
 This preserves `poker-run` as the low-level primitive for single-session execution and avoids duplicating match setup logic inside `poker-eval`.
 
-## Test coverage delivered
+## Test coverage
 
-EPIC-12 added deterministic coverage for:
+Deterministic coverage includes:
 - dry-run output showing totals, config, group summaries, and per-session rows
 - execution behavior that skips `present` sessions and reruns `missing` or `incomplete` sessions
 - runtime failure when execution is required but the planned group omitted `opponent`
@@ -116,11 +107,6 @@ EPIC-12 added deterministic coverage for:
 - fixture-backed inspection of `present` sessions
 - fixture-backed incomplete-session reasons including missing manifests, seed mismatches, incomplete matches, and wrong hand counts
 - planner behavior for session-base mode, explicit-session mode, default seeds, and cross-group session-plan conflicts
-
-The archived task logs recorded the verification recipe:
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
 
 ## Constraints to preserve
 

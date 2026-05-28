@@ -1,15 +1,6 @@
 # Experiment Comparison and Operator Workflow
 
-EPIC-14 completed the operator loop around planned experiments by adding experiment bootstrap, experiment discovery, and collected-session comparison reporting.
-
-## Epic delivery summary
-
-The archived EPIC-14 task log splits the work into three slices:
-- `EPIC-14-001`: added `poker-eval compare` for treatment/control summaries over collected `eval.json` artifacts
-- `EPIC-14-002`: added `poker-eval init` and `poker-eval ls` for experiment bootstrap and discovery
-- `EPIC-14-003`: updated the operator docs for the full definition → run → collect → compare workflow
-
-## Current surfaces
+## Surfaces
 
 The current implementation and operator-facing references live in:
 - `cmd/poker-eval/main.go`
@@ -21,7 +12,7 @@ The current implementation and operator-facing references live in:
 - `docs/experiment-definition.md`
 - `experiments/test-2b-retrieval-throttle.json`
 
-## `poker-eval` command surface after EPIC-14
+## `poker-eval` command surface
 
 The experiment CLI now covers the full v0 operator loop:
 - `poker-eval init`
@@ -123,9 +114,9 @@ Current behavior:
 
 This preserves historical comparisons where the original experiment file did not fully pin opponent metadata while still surfacing drift.
 
-## Operator workflow to preserve
+## Operator workflow
 
-After EPIC-14, the documented v0 workflow is:
+The v0 workflow is:
 1. scaffold or edit an experiment JSON definition
 2. inspect discovered experiments with `poker-eval ls`
 3. inspect one plan with `poker-eval status`
@@ -139,9 +130,9 @@ Artifact flow:
 - `poker-eval collect` adds derived `eval.json`
 - `poker-eval compare` reads those collected summaries and emits Markdown to stdout
 
-## Test coverage delivered
+## Test coverage
 
-EPIC-14 added deterministic coverage for:
+Deterministic coverage includes:
 - valid experiment template generation through `poker-eval init`
 - recursive experiment discovery and coverage summaries through `poker-eval ls`
 - comparison report rendering over collected fixtures
@@ -149,11 +140,6 @@ EPIC-14 added deterministic coverage for:
 - malformed experiment rejection
 - incomplete collected coverage rejection
 - warnings for inconsistent observed group metadata
-
-The archived task logs recorded the verification recipe:
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
 
 ## Constraints to preserve
 

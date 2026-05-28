@@ -1,15 +1,6 @@
 # Server Orchestration Foundation
 
-EPIC-3 implemented the Go `poker-server` process lifecycle and stdio match orchestration for v0 agent sessions.
-
-## Epic delivery summary
-
-The archived EPIC-3 task log shows the server/orchestration work landed in three slices:
-- `EPIC-3-001`: built `poker-server`, long-lived agent process management, stdio JSONL exchange, timeout-enforced forced actions (`auto_check` when legal, otherwise `auto_fold`), and session artifact writing
-- `EPIC-3-002`: verified the server loop was correctly integrated with the deterministic rules engine and persisted the required complete and incomplete session bundles
-- `EPIC-3-003`: added integration coverage for deterministic replay and incomplete-match persistence when an agent dies mid-match
-
-## Scope delivered
+## Scope
 
 The current orchestration surface lives primarily in:
 - `cmd/poker-server`
@@ -81,22 +72,16 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 
 ## Test coverage
 
-`internal/match/runner_test.go` currently covers:
+`internal/match/runner_test.go` covers:
 - full happy-path session execution against helper child processes
 - stderr capture into session logs
 - decision timeout conversion into a persisted forced timeout action (`auto_check` when legal, otherwise `auto_fold`)
 - incomplete-match persistence when an agent exits during hand 2, including manifest `completed: false` and preservation of already-finished hands
 - byte-for-byte deterministic `hands.jsonl` output for repeated runs with the same seed and deterministic agents
 
-The EPIC-3 verification recipe recorded in the archived task logs was:
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
-- `go test ./internal/match`
-
-EPIC-4 extended that coverage with CLI-level tests in `cmd/poker-server/main_test.go` to prove:
-- the shipped `poker-server` binary can run a real `random` versus `heuristic` demo match and write a valid `sessions/<id>/` bundle
-- a slow or sleeping agent is forced into the safest legal timeout action on `decision_deadline` and the server process still exits cleanly
+`cmd/poker-server/main_test.go` covers:
+- the shipped `poker-server` binary running a real `random` versus `heuristic` demo match and writing a valid `sessions/<id>/` bundle
+- a slow or sleeping agent being forced into the safest legal timeout action on `decision_deadline` with the server process still exiting cleanly
 
 ## Current boundaries
 
@@ -106,9 +91,9 @@ Still out of scope here:
 - multiplayer orchestration
 - tournament scheduling / budget gates
 
-## Why this matters for later work
+## Integration contract
 
-Later agent tasks can treat the current server as the canonical runtime contract for:
+The server is the canonical runtime contract for:
 - process lifecycle
 - reply correlation behavior in practice
 - timeout enforcement semantics

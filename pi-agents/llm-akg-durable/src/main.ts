@@ -16,6 +16,6 @@ await runPokerAgent({
     thinkingLevel: process.env.PI_POKER_THINKING_LEVEL,
     fakeDecisionsJSON: process.env.PI_POKER_FAKE_DECISIONS_JSON,
   }),
-  agentVersion: "llm-akg-durable/0.1.0",
+  agentVersion: "llm-akg-durable@exp-0.2.0-once-per-hand",
   maxDecisionAttempts: parsePositiveInteger(process.env.PI_POKER_MAX_DECISION_ATTEMPTS),
 });

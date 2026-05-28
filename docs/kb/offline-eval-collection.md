@@ -1,14 +1,6 @@
 # Offline Eval Collection
 
-EPIC-13 added the offline normalization layer that turns completed session artifacts into deterministic per-session `eval.json` summaries.
-
-## Epic delivery summary
-
-The archived EPIC-13 task log splits the work into two slices:
-- `EPIC-13-001`: added shared eval loaders over `manifest.json`, `hands.jsonl`, `pi-session.jsonl`, optional `memory-export.json`, and optional `stderr.log`
-- `EPIC-13-002`: added `poker-eval collect` plus deterministic `eval.json` writing and metric coverage
-
-## Current surfaces
+## Surfaces
 
 The current implementation and operator-facing references live in:
 - `cmd/poker-eval/main.go`
@@ -78,9 +70,9 @@ Current derivations:
 
 Important boundary: `eval.json` is a derived convenience summary. If it disagrees with `manifest.json`, `hands.jsonl`, `pi-session.jsonl`, or `memory-export.json`, the source artifacts still win.
 
-## Test coverage delivered
+## Test coverage
 
-EPIC-13 added deterministic coverage for:
+Deterministic coverage includes:
 - loading real checked-in Pi session logs with current message and tool-call shapes
 - loading fake fixture logs without requiring live Pi sessions
 - optional `memory-export.json` parsing and generic graph summarization
@@ -88,11 +80,6 @@ EPIC-13 added deterministic coverage for:
 - session-level metric derivation for preflop-only hands, showdown rate, fallback actions, and biggest swing
 - deterministic `eval.json` writing with trailing newline output
 - CLI coverage for `poker-eval collect`
-
-The archived task logs recorded the verification recipe:
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
 
 ## Constraints to preserve
 

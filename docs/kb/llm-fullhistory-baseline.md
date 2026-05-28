@@ -1,7 +1,5 @@
 # LLM Fullhistory Baseline
 
-EPIC-8 delivered the naive prompt-history baseline: `llm-fullhistory`.
-
 ## Purpose
 
 `llm-fullhistory` is the v0 comparison point between:

@@ -1,15 +1,6 @@
 # Experiment Planning and Session Artifacts
 
-EPIC-11 defined the repo's stable experiment-planning contract and the additive session-artifact layer later consumed by the offline eval tooling delivered in EPIC-13.
-
-## Epic delivery summary
-
-The archived EPIC-11 task log splits the work into three slices:
-- `EPIC-11-001`: defined the JSON experiment-definition contract and implemented strict stdlib-only parsing plus validation in `internal/experiment`
-- `EPIC-11-002`: added non-fatal teardown export of `memory.akg` to `agents/<name>/memory-export.json`
-- `EPIC-11-003`: documented the stable schemas and authority rules for `memory-export.json` and future `eval.json`
-
-## Current surfaces
+## Surfaces
 
 The current implementation and contracts live in:
 - `docs/experiment-definition.md`
@@ -59,28 +50,23 @@ The export is intentionally generic:
 
 ## Artifact authority model
 
-EPIC-11 clarified the authority split that later eval tooling must preserve:
+The authority split that eval tooling must preserve:
 - `manifest.json` and `hands.jsonl` remain the primary server-authored session records
 - `memory.akg` remains the primary agent-authored memory store
 - `memory-export.json` is additive and replaceable from `memory.akg`
 - `eval.json` is a derived offline summary artifact and must never override the primary artifacts
 
-Historical note: EPIC-11 documented the stable `eval.json` schema in `docs/session-artifacts.md`, and EPIC-13 later implemented the collector that writes it.
+The stable `eval.json` schema is in `docs/session-artifacts.md`; `poker-eval collect` is the collector that writes it.
 
-## Test coverage delivered
+## Test coverage
 
-EPIC-11 added deterministic coverage for:
+Deterministic coverage includes:
 - valid session-base and explicit-session experiment definitions
 - invalid experiment definitions, including unknown fields, duplicate session ids, bad seed lengths, and unsupported direction values
 - graph export shape from a real AKG store
 - no-op behavior when `memory.akg` is absent
 - unreadable-memory export failures
 - runner teardown integration for successful export and non-fatal export warnings
-
-The archived task logs recorded the verification recipe:
-- `go build ./...`
-- `go test ./...`
-- `go vet ./...`
 
 ## Constraints to preserve
 
