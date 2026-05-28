@@ -141,6 +141,16 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 		if runErr == nil && manifestErr != nil {
 			runErr = manifestErr
 		}
+		for _, spec := range r.config.AgentSpecs {
+			agentDir, err := writer.AgentDir(spec.Name)
+			if err != nil {
+				logNonFatal(r.config.ProgressWriter, "resolve memory export directory for agent %s: %v", spec.Name, err)
+				continue
+			}
+			if err := sessionlog.WriteMemoryExport(agentDir); err != nil {
+				logNonFatal(r.config.ProgressWriter, "write memory export for agent %s: %v", spec.Name, err)
+			}
+		}
 		result.Completed = completed
 	}()
 
@@ -534,6 +544,14 @@ func cardsToStrings(cards []deck.Card) []string {
 
 func intPtr(v int) *int {
 	return &v
+}
+
+func logNonFatal(progressWriter io.Writer, format string, args ...any) {
+	writer := progressWriter
+	if writer == nil {
+		writer = os.Stderr
+	}
+	fmt.Fprintf(writer, format+"\n", args...)
 }
 
 type agentProcess struct {

@@ -1,6 +1,6 @@
 # Wire protocol
 
-This document is the implementer-facing contract for the v0 server↔agent stdio protocol described in [`spec.md`](spec.md).
+This document is the implementer-facing contract for the v0 server↔agent stdio protocol.
 
 For poker rules and terminology, do not infer behavior from this page alone. Use:
 - [`docs/domain/texas-holdem.md`](domain/texas-holdem.md)

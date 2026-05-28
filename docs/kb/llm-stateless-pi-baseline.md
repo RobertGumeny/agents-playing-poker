@@ -35,10 +35,10 @@ It now provides:
 ## Normative sources
 
 This baseline is anchored to:
-- [`../spec.md`](../spec.md) for strategy definitions, process lifecycle, and the stateless-vs-memory experiment design
+- [`../research.md`](../research.md) for strategy definitions and the stateless-vs-memory experiment design
 - [`../wire-protocol.md`](../wire-protocol.md) for the server↔agent JSONL contract
 - [`../domain/README.md`](../domain/README.md) for Hold'em terms referenced by prompts and payloads
-- [`../README.md`](../README.md) and [`../spec.md`](../spec.md) for the v0 build sequence
+- [`../README.md`](../README.md) for current operator-facing run paths
 
 ## Workspace and package boundaries
 

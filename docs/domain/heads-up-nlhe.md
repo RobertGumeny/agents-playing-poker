@@ -182,4 +182,4 @@ It should answer questions such as:
 - how minimum bets and raises work,
 - and when a betting round ends.
 
-Repo-specific items such as wire-format field names, timeout behavior, auto-fold policy, and session artifact layout belong in [`../spec.md`](../spec.md), not here.
+Repo-specific items such as wire-format field names, timeout behavior, auto-fold policy, and session artifact layout belong in focused project docs such as [`../wire-protocol.md`](../wire-protocol.md), not here.

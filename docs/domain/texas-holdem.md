@@ -2,7 +2,7 @@
 
 This document is the canonical rules reference for generic Texas Hold'em used by this repository.
 
-It describes facts that are true because of the game itself, not because of this project's implementation. For project-specific constraints or overrides, see [`../spec.md`](../spec.md). For the documentation split, see [`README.md`](README.md).
+It describes facts that are true because of the game itself, not because of this project's implementation. For project-specific constraints or overrides, see the focused project docs under `docs/`, such as [`../wire-protocol.md`](../wire-protocol.md) for protocol behavior. For the documentation split, see [`README.md`](README.md).
 
 ## Scope of this document
 

@@ -1,6 +1,6 @@
 # Knowledge Base
 
-This directory captures durable implementation knowledge that is more operational than the top-level spec.
+This directory captures durable implementation knowledge that is more operational than the top-level project docs.
 
 Use it for:
 - module-level architecture notes
@@ -9,7 +9,8 @@ Use it for:
 - epic summaries that future tasks should understand before extending a subsystem
 
 Do not duplicate the normative sources:
-- Use [`../spec.md`](../spec.md) for repository-level product and architecture decisions.
+- Use [`../vision.md`](../vision.md) and [`../research.md`](../research.md) for repository-level product and research framing.
+- Use focused subsystem docs such as [`../wire-protocol.md`](../wire-protocol.md) and [`../llm-akg-durable-spec.md`](../llm-akg-durable-spec.md) for implementation contracts.
 - Use [`../domain/README.md`](../domain/README.md) for Texas Hold'em rules and terminology.
 
 ## Index
@@ -38,6 +39,15 @@ Do not duplicate the normative sources:
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
   - What EPIC-9 delivered for `llm-akg-recent` naming and repeatable Markdown reviews over mirrored benchmark sessions.
   - Covers `cmd/poker-report`, `internal/reporting`, historical `llm-akg` canonicalization, required metrics, seat-bias checks, showdown/non-showdown splits, cost reporting gaps, and the comparison ladder from `llm-akg-recent` to durable AKG and `llm-fullhistory`.
-- [`llm-akg-durable-active-retrieval.md`](llm-akg-durable-active-retrieval.md)
-  - What EPIC-10 delivered in the durable AKG Pi agent.
-  - Covers the durable hand-write model, opponent/pattern rebuild strategy, read-only AKG query tools, hand-scoped custom Pi session wiring, operator surfaces, and current verification boundaries.
+- [`experiment-planning-and-session-artifacts.md`](experiment-planning-and-session-artifacts.md)
+  - What EPIC-11 delivered for experiment-definition parsing and additive analysis artifacts.
+  - Covers strict JSON experiment contracts, deterministic planned-session expansion, non-fatal `memory-export.json` teardown behavior, the authority split between primary and derived session files, and the pre-collector groundwork that EPIC-13 later consumed.
+- [`experiment-execution-and-coverage.md`](experiment-execution-and-coverage.md)
+  - What EPIC-12 delivered for operator-facing experiment execution and coverage inspection.
+  - Covers `poker-eval run`, `poker-eval status`, delegated `poker-run` execution, present/missing/incomplete session checks, and the current rerun semantics for incomplete sessions.
+- [`offline-eval-collection.md`](offline-eval-collection.md)
+  - What EPIC-13 delivered for deterministic per-session `eval.json` generation.
+  - Covers shared offline artifact loading, `poker-eval collect`, Pi tool-call parsing, retry metrics from `stderr.log`, generic memory-export summaries, and current metric derivation boundaries.
+- [`experiment-comparison-and-operator-workflow.md`](experiment-comparison-and-operator-workflow.md)
+  - What EPIC-14 delivered for experiment bootstrap, discovery, comparison, and the full operator loop.
+  - Covers `poker-eval init`, `poker-eval ls`, `poker-eval compare`, the `poker-eval`/`poker-run` responsibility split, report semantics, and comparison-time warnings and validation.

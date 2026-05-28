@@ -10,40 +10,36 @@ v0 is single-machine, single-operator, no public-facing tournament. Future versi
 
 ## Read this first
 
-Before doing any implementation work, read these two sources in order:
+Before doing any implementation work, read these sources in order:
 
-1. **[`docs/spec.md`](docs/spec.md)** — the authoritative v0 technical specification
-2. **[`docs/domain/README.md`](docs/domain/README.md)** — the domain-doc index and rules split
+1. **[`docs/vision.md`](docs/vision.md)** — the project thesis, scope, and memory-strategy progression
+2. **[`docs/research.md`](docs/research.md)** — the current experimental setup, strategy lineup, metrics, and run conventions
+3. **[`docs/domain/README.md`](docs/domain/README.md)** — the domain-doc index and rules split
 
-`docs/spec.md` is the technical contract for this repository. `docs/domain/` is the canonical source for poker-domain semantics and terminology used by the implementation.
+There is no single monolithic spec anymore. Repository-specific contracts now live in the focused docs for each subsystem:
 
-The authoritative specification for v0 is **[`docs/spec.md`](docs/spec.md)**. It defines:
+- [`docs/wire-protocol.md`](docs/wire-protocol.md) — server/agent JSONL protocol
+- [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md) — durable AKG agent contract
+- [`docs/eval-system.md`](docs/eval-system.md) — proposed eval and experiment-definition system
+- [`docs/session-artifacts.md`](docs/session-artifacts.md) — stable additive session-artifact schemas for `memory-export.json` and `eval.json`
+- [`docs/experiment-definition.md`](docs/experiment-definition.md) — normative JSON contract for planned experiment session sets
+- [`docs/kb/README.md`](docs/kb/README.md) — implementation knowledge-base index
 
-- The thesis the project must prove
-- System architecture (Go game server, Pi/TS LLM agents, Go scripted agents)
-- The complete wire protocol between server and agents
-- Game model (heads-up NLHE with cash-game auto-rebuy)
-- Strategy lineup for v0
-- SDK helper surface (the small one)
-- The AKG-aware Pi compaction extension
-- Session output format
-- Build phasing (§17) — **start here for sequencing**
+`docs/domain/` is the canonical source for poker-domain semantics and terminology used by the implementation. If a topic-specific contract is ambiguous or missing, surface that and propose an amendment to the relevant doc in the same change. Do not silently make a judgment call that quietly drifts from the documented design.
 
-The spec is a contract. If you find ambiguity or omissions, surface them and propose a spec amendment in the same change — do not silently make a judgment call that quietly drifts from the spec.
-
-### Spec vs. domain docs
+### Project vs. domain docs
 
 Use this split consistently:
 
-- **`docs/spec.md`**: project-specific technical decisions — architecture, wire protocol, session outputs, build sequencing, scope boundaries, and any implementation policy unique to this repo.
+- **Project docs**: repository-specific technical decisions — architecture, wire protocol, session outputs, strategy lineup, scope boundaries, and any implementation policy unique to this repo.
 - **`docs/domain/`**: Texas Hold'em game rules and terminology — flop/turn/river, blinds, hole cards, betting order, hand rankings, showdown concepts, and similar poker-domain truth that agents should not reinvent.
 
 Rule of thumb:
 
-- If it is true because of this repository's design, it belongs in `docs/spec.md`.
+- If it is true because of this repository's design, it belongs in a focused project doc under `docs/`.
 - If it is true because it is part of Texas Hold'em itself, it belongs in `docs/domain/`.
 
-When the code needs actual Hold'em rules, agents should consult `docs/domain/` rather than improvising from memory. If a project-specific behavior intentionally constrains or overrides the generic domain rules, `docs/spec.md` wins for that case.
+When the code needs actual Hold'em rules, agents should consult `docs/domain/` rather than improvising from memory. If a project-specific behavior intentionally constrains or overrides the generic domain rules, the focused project doc for that subsystem wins for that case.
 
 ## Adjacent code you'll need to know about
 
@@ -55,13 +51,13 @@ When the code needs actual Hold'em rules, agents should consult `docs/domain/` r
 
 ### Scope discipline
 
-The single most important rule. The spec lists what's in v0 and what's explicitly out of scope (§15). Do not:
+The single most important rule. Keep changes within the scope described by `docs/vision.md`, `docs/research.md`, and the focused subsystem docs. Do not:
 
-- Build features not in the spec because they "seem obvious."
+- Build features not in the current docs because they "seem obvious."
 - Add abstractions for hypothetical future requirements.
-- Pre-build for 6-max, multiplayer, leaderboards, or any other v1+ thing. The spec calls out the small list of extension points the v0 design should preserve; preserving those is the entire forward-compatibility budget.
+- Pre-build for 6-max, multiplayer, leaderboards, or any other future thing unless a current doc explicitly calls for it.
 
-If something feels missing from the spec, that's a signal to surface a question or propose an amendment — not to invent.
+If something feels missing from the docs, that's a signal to surface a question or propose an amendment — not to invent.
 
 ### Go style
 
@@ -74,7 +70,7 @@ If something feels missing from the spec, that's a signal to surface a question 
 
 ### Determinism
 
-The game server is deterministic given a seed. The rules engine, dealer, and match orchestrator must be pure functions of state + seed wherever feasible. LLM agents are not deterministic (temperature, model nondeterminism); that's fine and is called out in the spec.
+The game server is deterministic given a seed. The rules engine, dealer, and match orchestrator must be pure functions of state + seed wherever feasible. LLM agents are not deterministic (temperature, model nondeterminism); that's fine and is part of the research framing.
 
 ### Tests
 
@@ -92,21 +88,18 @@ LLM-agent behavior is not unit-tested (nondeterministic); validate it by running
 
 ## How to start
 
-Follow the build phasing in [`docs/spec.md`](docs/spec.md) §17. Specifically:
+The original v0 build phasing is complete through the non-LLM demo and LLM baseline layers. For new work:
 
-1. **Rules engine** (pure Go, heavily unit-tested)
-2. **Wire protocol** (Go types + JSON schemas + a short docs page)
-3. **Game server + match orchestrator**
-4. **`random` and `heuristic` agents**
-
-Steps 1–4 are end-to-end demoable with no LLMs and no AKG — at the end you should be able to run `poker-server` and watch two trivial Go agents play a 200-hand match against each other, producing a valid `sessions/<id>/` output bundle. Stop and check in with the user before proceeding to steps 5+ (Go AKG SDK, TS AKG SDK, Pi agents).
+1. Read [`docs/kb/README.md`](docs/kb/README.md) and only the KB articles relevant to the task.
+2. Read the focused contract for the subsystem you are touching, such as [`docs/wire-protocol.md`](docs/wire-protocol.md), [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md), [`docs/eval-system.md`](docs/eval-system.md), [`docs/session-artifacts.md`](docs/session-artifacts.md), or [`docs/experiment-definition.md`](docs/experiment-definition.md).
+3. Keep implementation and docs changes aligned in the same patch when behavior changes.
 
 ## When you're unsure
 
 - About the format / AKG behavior → read `~/source/akg/docs/spec/`.
 - About Texas Hold'em rules or terminology → read `docs/domain/` first.
-- About the wire protocol → it's spec §7. If it doesn't answer your question, propose an amendment.
-- About scope or project behavior → assume it's out of scope unless the spec explicitly includes it. Ask the user.
+- About the wire protocol → read `docs/wire-protocol.md`. If it doesn't answer your question, propose an amendment there.
+- About scope or project behavior → assume it's out of scope unless the current docs explicitly include it. Ask the user.
 - About a third-party library → keep it minimal. The Go stdlib goes very far for this project; reach for `card` / poker libraries only if hand evaluation actually becomes the bottleneck (it won't for v0).
 
 
