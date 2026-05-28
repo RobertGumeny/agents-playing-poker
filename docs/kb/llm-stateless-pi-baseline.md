@@ -28,7 +28,7 @@ This baseline is anchored to:
 - [`../research.md`](../research.md) for strategy definitions and the stateless-vs-memory experiment design
 - [`../wire-protocol.md`](../wire-protocol.md) for the server↔agent JSONL contract
 - [`../domain/README.md`](../domain/README.md) for Hold'em terms referenced by prompts and payloads
-- [`../README.md`](../README.md) for current operator-facing run paths
+- [`../../README.md`](../../README.md) for current operator-facing run paths
 
 ## Workspace and package boundaries
 

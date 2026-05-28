@@ -2,9 +2,11 @@
 
 ## Purpose
 
-`llm-fullhistory` is the v0 comparison point between:
+`llm-fullhistory` is the naive high-token memory baseline. It is the comparison point for structured-memory strategies:
+
 - `llm-stateless`, which exposes no prior-hand strategic context
-- `llm-akg-recent`, which exposes structured memory through AKG-backed retrieval
+- `llm-akg-recent`, which exposes shallow bounded AKG memory
+- `llm-akg-durable`, which exposes durable graph-backed AKG memory and active retrieval
 
 It keeps the shared runtime's protocol handling, legality validation, retry budgeting, and safe fallback behavior while changing only:
 - the memory policy, which accumulates prior-hand summaries

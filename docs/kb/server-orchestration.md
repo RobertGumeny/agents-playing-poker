@@ -86,7 +86,7 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 ## Current boundaries
 
 Still out of scope here:
-- the real `random` and `heuristic` Go agents from build-order step 4
+- strategy details for the `random` and `heuristic` Go agents
 - Pi session log capture (`pi-session.jsonl`)
 - multiplayer orchestration
 - tournament scheduling / budget gates

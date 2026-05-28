@@ -1,326 +1,165 @@
-# Eval System Design
+# Experiment and Evaluation System
 
-## What the current process actually requires
+This document describes the current experiment-first evaluation workflow.
 
-This is a candid account of what it took to produce the Test 2 analysis comparing
-`akg-durable-prompt-test-{1..5}` against `akg-durable-vs-stateless-test-{1..5}`.
-Every step below happened interactively in the LLM conversation — which means waiting
-for tool calls, writing throwaway Python, re-probing file formats, and burning context.
+## Operator model
 
-### Step 1 — discover the sessions
+The normal workflow is:
 
-```
-ls sessions/ | grep <pattern>
-```
+1. Write a JSON experiment definition under `experiments/`.
+2. Run:
 
-Manual. No experiment registry. The session names are typed free-form at run time and
-inferred from convention. If you name something slightly wrong, it just doesn't appear.
+   ```bash
+   go run ./cmd/poker experiment go <experiment-id>
+   ```
 
-### Step 2 — read chips_delta and duration
+3. Review:
+   - `reports/<experiment-id>.md`
+   - `sessions/<session-id>/manifest.json`
+   - `sessions/<session-id>/hands.jsonl`
+   - `sessions/<session-id>/eval.json`
+   - per-agent logs and memory artifacts
 
-```
-cat sessions/*/manifest.json   (×10 files)
-```
+The experiment definition is the planning authority. The filesystem answers which planned sessions are present, missing, or incomplete.
 
-`manifest.json` has the result but not duration — duration is `ended_at - started_at`,
-which requires arithmetic. Chips-per-hand requires dividing by `hand_count`. Neither is
-pre-computed. Both have to be derived every time.
+## Root CLI surface
 
-### Step 3 — read per-hand log and stats
+The canonical CLI is `poker experiment` from `cmd/poker`.
 
-```
-cat sessions/*/report.md   (×10 files)
-```
+| Command | Purpose |
+| --- | --- |
+| `poker experiment status <id>` | Load `experiments/<id>.json` and print planned coverage. |
+| `poker experiment run <id>` | Run only missing or incomplete planned sessions. |
+| `poker experiment analyze <id>` | Collect missing `eval.json` summaries and write `reports/<id>.md`. |
+| `poker experiment go <id>` | Run missing/incomplete sessions, collect summaries, and write the report. |
 
-`report.md` is generated and useful, but the LLM still has to read all 10 files into
-context to compare them. There is no cross-session aggregation anywhere. The showdown
-rate, preflop-only rate, and biggest pot are in the report, but nothing computes a
-mean across sessions.
+All commands accept `-experiments-dir`, `-sessions-dir`, and `-experiment` for explicit path overrides. `run` and `go` also accept runtime model controls such as `-model` and `-thinking-level`.
 
-### Step 4 — count memory file size
+When `-model` is omitted, the runner uses the required `model` field from the experiment JSON.
 
-```
-wc -l sessions/*/agents/llm-akg-durable/memory.akg
-```
+## Experiment definition
 
-This gives line count as a rough proxy for memory density. The actual node/edge counts
-and graph content require parsing the binary AKG file, which no tooling here does.
+An experiment definition is a checked-in JSON plan for a two-group comparison:
 
-### Step 5 — count tool calls from pi-session.jsonl
+- `control`
+- `treatment`
 
-This was the most expensive step. The `pi-session.jsonl` format is not documented in
-this repo. I had to probe it first:
-
-```
-head -c 500 sessions/.../pi-session.jsonl
-```
-
-Then infer the schema: events have `type: "message"`, messages have `content: []`,
-content blocks have `type: "toolCall"` (not `"tool_use"` — easy to get wrong). Then
-write a Python one-liner to count by name:
-
-```python
-for line in f:
-    obj = json.loads(line)
-    if obj["type"] == "message":
-        for c in obj["message"]["content"]:
-            if c["type"] == "toolCall":
-                counts[c["name"]] += 1
-```
-
-Ran that script 10 times across both groups. No pre-existing tooling for this anywhere
-in the repo.
-
-### Step 6 — dig into a specific hand for qualitative evidence
-
-To confirm what the agent was actually doing in a big winning hand, I had to:
-
-1. Identify the hand number from `report.md`
-2. Scan `pi-session.jsonl` for the matching user prompt (grepping for `"Hand: 24"`)
-3. Read the assistant's thinking block and tool calls for that turn
-
-This took 4–5 separate tool calls, all throwaway, outputting hundreds of lines of raw
-JSON into the conversation context.
-
----
-
-## The cost
-
-For a 10-session, 2-group comparison:
-
-- ~20 file reads (manifests + reports)
-- ~10 custom Python scripts written and discarded
-- ~5 format-probing tool calls
-- unknown number of tokens wasted parsing raw JSONL in the LLM context
-- no artifact produced that can be reused for the next experiment
-
-The LLM is doing ETL work that a small CLI could do in milliseconds offline.
-
----
-
-## Eval system and current operator loop
-
-The current system has six operator-facing commands around the same artifact chain:
-
-1. `poker-eval init` — create a schema-valid experiment definition JSON file
-2. `poker-eval ls` — discover checked-in experiment files and summarize coverage
-3. `poker-eval status` — inspect one experiment's planned coverage in detail
-4. `poker-eval run` — launch missing or incomplete planned sessions through `poker-run`
-5. `poker-eval collect` — derive per-session `eval.json` summaries from session artifacts
-6. `poker-eval compare` — render a markdown control-vs-treatment report from collected sessions
-
-The normative JSON experiment contract lives in [`experiment-definition.md`](experiment-definition.md). The stable additive session-artifact schemas live in [`session-artifacts.md`](session-artifacts.md).
-
----
-
-### Part 1 — Experiment definition file
-
-The source of truth is a checked-in JSON plan created before the sessions run.
+Example:
 
 ```json
 {
-  "id": "test-2b-retrieval-throttle",
-  "hypothesis": "Throttling memory retrieval to once per hand reduces akg_get_opponent calls and session duration.",
-  "treatment": {
-    "session_base": "akg-durable-throttle-test",
-    "sessions_count": 5,
-    "agent": "llm-akg-durable@exp-0.1.3-throttle",
-    "opponent": "llm-stateless",
-    "seeds": []
-  },
+  "id": "my-memory-test",
+  "hypothesis": "Durable AKG memory should improve chip efficiency against stateless play.",
+  "model": "anthropic:claude-sonnet-4-6",
+  "hands_per_session": 25,
   "control": {
-    "session_base": "akg-durable-vs-stateless-test",
+    "session_base": "stateless-control",
     "sessions_count": 5,
-    "agent": "llm-akg-durable/0.1.0",
-    "opponent": "llm-stateless",
-    "seeds": []
+    "agent": "llm-stateless",
+    "opponent": "heuristic"
+  },
+  "treatment": {
+    "session_base": "akg-durable-treatment",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "heuristic"
   },
   "expected_direction": {
     "chips_per_hand": "increase",
-    "akg_get_opponent_per_session": "decrease",
-    "session_duration_s": "decrease",
-    "preflop_only_rate": "decrease"
-  },
-  "hands_per_session": 25
-}
-```
-
-`session_base` and `sessions_count` define the expected session ids:
-`<session_base>-1`, `<session_base>-2`, and so on through `sessions_count`.
-`seeds` is optional. If omitted or empty, planned seeds default deterministically to
-`1..sessions_count`.
-
-`opponent` is optional at the file-format level. When present, it records the intended
-opposing agent for that group. `poker-eval run` requires it for any planned session it
-needs to launch. `poker-eval compare` can derive opponents from collected session data
-when the definition omits it.
-
-For already-run sessions whose names do not follow the `<session_base>-N` convention,
-a group can use explicit session ids instead:
-
-```json
-{
-  "treatment": {
-    "sessions": ["akg-durable-throttle-a", "akg-durable-throttle-b"],
-    "agent": "llm-akg-durable@exp-0.1.3-throttle",
-    "seeds": [17, 23]
+    "tokens_per_hand": "decrease"
   }
 }
 ```
 
-This file is the durable plan for what the experiment is testing and what coverage
-should exist on disk.
+The normative schema is [`experiment-definition.md`](experiment-definition.md). It defines required fields, group session modes, seed derivation, validation rules, and `expected_direction` semantics.
 
-`poker-eval init` scaffolds this JSON contract directly:
+## Planning and coverage
 
-```bash
-go run ./cmd/poker-eval init \
-  -out experiments/test-2b-retrieval-throttle.json \
-  -hypothesis "Throttling retrieval should cut tool use and session time." \
-  -control-agent llm-stateless \
-  -control-opponent heuristic \
-  -treatment-agent llm-akg-recent
-```
+Experiment planning is deterministic:
 
----
+- `control` sessions are planned before `treatment` sessions.
+- A group either derives sessions from `session_base` + `sessions_count` or lists explicit `sessions`.
+- Omitted seeds default positionally to `1..N`.
+- Planned session directories are under the selected `sessions/` root.
 
-### Part 2 — Coverage and execution (`poker-eval ls`, `status`, and `run`)
+Coverage inspection classifies each planned session as:
 
-The experiment definition is the source of truth for what should exist. Coverage
-commands inspect the filesystem only to classify whether each planned session is usable.
+- `present` — primary artifacts exist and match the plan
+- `missing` — no usable session directory exists
+- `incomplete` — a directory exists, but primary artifacts are absent, mismatched, or incomplete
 
-Useful commands:
+Coverage is based on `manifest.json` and `hands.jsonl`. Analysis artifacts such as `report.md`, `eval.json`, and `memory-export.json` do not decide whether a planned session is complete.
 
-```bash
-go run ./cmd/poker-eval ls
-go run ./cmd/poker-eval status -experiment experiments/test-2b-retrieval-throttle.json
-go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -dry-run
-go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -model anthropic:claude-sonnet-4-6
-```
+## Execution
 
-Coverage states:
-- `present` — complete `manifest.json` plus matching `hands.jsonl`
-- `missing` — no session directory yet
-- `incomplete` — directory exists but primary artifacts do not match the planned session
+`poker experiment run` and `poker experiment go` execute missing and incomplete sessions. Present sessions are skipped.
 
-Execution semantics:
-- `poker-eval run` skips `present` sessions
-- `poker-eval run` relaunches `missing` and `incomplete` sessions
-- `poker-eval run` delegates each launch to `poker-run`
-- `-model` and `-thinking-level` are runtime-only overrides forwarded into `poker-run`
+The root command delegates actual single-session execution to the existing match runner binary built from `cmd/poker-run`. This preserves one implementation of match setup, agent process wiring, server-authoritative rules, artifact writing, and timeout behavior.
 
-This preserves `poker-run` as the low-level primitive for one real session while
-`poker-eval` handles deterministic multi-session planning and coverage.
+A planned session can only be launched when the group includes `opponent` metadata. Offline analysis can sometimes infer opponents from existing artifacts, but live execution must know both seats before the run starts.
 
----
+Runtime-only settings such as `-model` and `-thinking-level` do not mutate the checked-in experiment definition.
 
-### Part 3 — Single-session execution artifacts (`poker-run`)
+## Collection and report generation
 
-`poker-run` remains the primitive that actually executes one session.
+`poker experiment analyze` performs two additive analysis steps:
 
-```bash
-go run ./cmd/poker-run \
-  -agent0 llm-akg-recent \
-  -agent1 llm-stateless \
-  -hands 200 \
-  -seed 3 \
-  -session-id akg-recent-vs-stateless-seed3-a \
-  -model anthropic:claude-sonnet-4-6
-```
+1. For every present planned session missing `eval.json`, collect a deterministic summary from session artifacts.
+2. Compare control and treatment summaries and write `reports/<experiment-id>.md`.
 
-A completed session writes artifacts under `sessions/<id>/`:
+`eval.json` is derived from:
 
-```
-sessions/<id>/
-  manifest.json
-  hands.jsonl
-  report.md
-  agents/
-    <seat-name>/
-      stdout.log
-      stderr.log
-      pi-session.jsonl      # when the seat is Pi-backed
-      memory.akg            # when the agent owns durable memory
-      memory-export.json    # optional server-generated teardown export
-```
+- `manifest.json`
+- `hands.jsonl`
+- optional `pi-session.jsonl`
+- optional `stderr.log`
+- optional `memory-export.json`
 
-Artifact roles:
-- `manifest.json` and `hands.jsonl` are the primary session authority
-- `report.md` is a convenience single-session report
-- `memory.akg` remains the authoritative durable memory store
-- `memory-export.json` is an additive JSON snapshot for offline analysis
+It is safe to regenerate. It must not override primary session truth.
 
----
+The comparison report includes aggregate treatment/control metrics, per-session rows, tool-use metrics when observed, warnings for inconsistent observed metadata, and `expected_direction` pass/fail checks where supported.
 
-### Part 4 — Metrics collector (`poker-eval collect`)
+## Artifact authority
 
-`collect` reads the session bundle offline and writes `eval.json` into each named
-session directory.
+Primary session authority:
 
-```bash
-go run ./cmd/poker-eval collect sessions/akg-durable-throttle-test-{1..5}
-```
+- `manifest.json`
+- `hands.jsonl`
 
-Because `memory-export.json` is plain JSON, `collect` never opens `memory.akg` and does
-not depend on the AKG SDK.
+Primary agent memory authority:
 
-Output per session:
+- `agents/<name>/memory.akg`
 
-- `sessions/<id>/eval.json` — deterministic derived summary built from `manifest.json`,
-  `hands.jsonl`, optional `pi-session.jsonl`, optional `memory-export.json`, and
-  optional `stderr.log`
+Additive analysis and observability artifacts:
 
-The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#evaljson).
+- `report.md`
+- `eval.json`
+- `agents/<name>/pi-session.jsonl`
+- `agents/<name>/stderr.log`
+- `agents/<name>/memory-export.json`
 
----
+The stable additive schemas are documented in [`session-artifacts.md`](session-artifacts.md).
 
-### Part 5 — Comparison report generator (`poker-eval compare`)
+## Implementation map
 
-`compare` reads the checked-in experiment definition plus collected `eval.json` files
-for every planned session and renders markdown to stdout.
+Current implementation areas:
 
-```bash
-go run ./cmd/poker-eval compare -experiment experiments/test-2b-retrieval-throttle.json
-```
-
-If you want a file, redirect stdout yourself:
-
-```bash
-go run ./cmd/poker-eval compare -experiment experiments/test-2b-retrieval-throttle.json \
-  > reports/test-2b-retrieval-throttle.md
-```
-
-Current report contents include:
-- summary metric table for control vs treatment
-- tool-use table when tool-call metrics were observed
-- warnings for mixed observed group metadata
-- per-session results table
-- `expected_direction` pass/fail checks from the experiment definition
-
----
+- `cmd/poker/main.go` — root `poker experiment` CLI
+- `internal/experiment/definition.go` — experiment JSON parsing, validation, and deterministic planning
+- `internal/evalrun/` — coverage inspection and planned-session execution
+- `internal/eval/` — offline session loading, summary collection, comparison, and Markdown rendering
+- `internal/sessionlog/` — memory export support
 
 ## Scope and non-goals
 
-This is intentionally minimal for v0. It currently supports the operator loop from
-planned experiment definition through run, collect, and compare, but it does not try to:
+The v0 evaluation system is intentionally file-based and local.
 
-- replace `poker-run` as the low-level single-session execution primitive
-- aggregate across multiple experiment definitions in one report
-- produce statistical significance tests
+It does not try to:
+
 - become a dashboard or long-running service
+- aggregate unrelated experiment definitions into one report
+- provide solver-grade poker statistics
+- hide primary artifacts behind a database
+- make single-session ad hoc runs the normal research workflow
 
-The stable `eval.json` and `memory-export.json` contracts live in [`session-artifacts.md`](session-artifacts.md).
-
-## Build-phasing note
-
-Historically, this area landed in stages:
-
-1. experiment-definition parsing and planning
-2. additive `memory-export.json` teardown support
-3. `poker-eval run` and `status`
-4. offline `collect`
-5. offline `compare`
-6. `init` and `ls` operator ergonomics
-
-That phased delivery explains why related implementation notes are split across the KB
-articles in [`docs/kb/`](kb/README.md).
+The durable record is the checked-in experiment JSON plus the generated session/report artifacts.

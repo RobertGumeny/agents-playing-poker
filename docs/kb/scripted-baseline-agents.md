@@ -1,118 +1,106 @@
-# Scripted Baseline Agents And Demo
+# Scripted Baseline Agents
 
 ## Scope
 
-The current scripted baseline surface lives primarily in:
-- `cmd/poker-demo`
+The scripted baseline surface lives in:
+
 - `cmd/random-agent`
 - `cmd/heuristic-agent`
 - `internal/randomagent`
 - `internal/heuristicagent`
-- `cmd/poker-server/main_test.go`
-- `cmd/poker-demo/main_test.go`
+- `cmd/poker-run`
+- `cmd/poker-demo` for a local smoke-test wrapper
 
-It now provides:
-- two protocol-compliant long-lived Go agents that can complete full matches over stdio JSONL
-- one intentionally non-strategic baseline (`random`) and one simple deterministic scripted baseline (`heuristic`)
-- server-authoritative legality, where both agents trust `legal_actions` from the wire contract instead of recomputing betting legality
-- a documented top-level `go run ./cmd/poker-demo` flow that builds the shipped Go binaries, runs a non-LLM `random` versus `heuristic` match, and prints the resulting session bundle plus the canonical artifacts to inspect next
-- `poker-demo` as the primary supported operator entrypoint for build-order step 4
-- retention of `poker-server` as the low-level primitive and debugging escape hatch for explicit seat command wiring
-- CLI-level proof that timeout enforcement still produces a forced timeout action (`auto_check` when possible, otherwise `auto_fold`) and does not hang the server process
+These agents are sanity-check baselines. They validate protocol handling, rules-engine integration, legal-action enforcement, and artifact generation without live LLM calls. They are not the primary evidence surface for memory-strategy research claims.
 
 ## Normative sources
 
-This step-4 implementation is anchored to the existing repository docs:
-- [`../research.md`](../research.md) for the baseline strategy lineup and current experiment framing
+- [`../research.md`](../research.md) for the current strategy lineup
 - [`../wire-protocol.md`](../wire-protocol.md) for message flow and action payloads
 - [`../domain/texas-holdem.md`](../domain/texas-holdem.md)
 - [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md)
-- [`../README.md`](../README.md) for the operator-facing demo command
+- [`../../README.md`](../../README.md) for current operator commands
 
-## `internal/randomagent`
+## `random`
 
-`internal/randomagent` is the intentionally minimal baseline.
+`internal/randomagent` is intentionally minimal.
 
 Current behavior:
-- responds to `session_init` with `session_ready` and reports version `random/0.1.0`
+
+- responds to `session_init` with `session_ready`
+- reports version `random/0.1.0`
 - ignores notification-only `hand_start` and `hand_end` messages
 - exits cleanly on `session_end`
-- samples one entry from `legal_actions`
-- preserves exact server-provided `call` amounts
-- samples inclusive totals between server-provided `min` and `max` for `bet` and `raise`
+- samples one server-provided legal action
+- preserves exact `call` amounts
+- samples legal integer totals for `bet` and `raise`
 
-Important constraint: the random agent is deliberately stateless and does not evaluate hand strength. Its job is only to demonstrate a legal-action baseline.
+It is deliberately stateless and does not evaluate hand strength. Its job is to prove the server can complete hands against a legal but weak policy.
 
-## `internal/heuristicagent`
+## `heuristic`
 
-`internal/heuristicagent` is the simple scripted baseline.
+`internal/heuristicagent` is a deterministic no-memory scripted policy.
 
 Current behavior:
-- responds to `session_init` with `session_ready` and reports version `heuristic/0.1.0`
-- stores hole cards from `hand_start`
-- builds a lightweight decision profile from hole cards plus the current board
+
+- responds to `session_init` with `session_ready`
+- reports version `heuristic/0.1.0`
+- stores current hole cards
+- builds a lightweight decision profile from hole cards and board
 - uses deterministic thresholds rather than RNG, memory, search, or solver logic
 
 Current heuristic shape:
-- **preflop**: a coarse strength score based on rank, pairs, suitedness, connectivity, and broadway/A-high bonuses
-- **postflop made hands**: maps the best current category to a rough equity estimate
-- **draw bonuses**: adds flush-draw, straight-draw, and some overcard value
-- **action selection**:
-  - if no chips are required to continue, prefer the minimum legal `bet` or `raise` when aggression is high enough, otherwise `check`
-  - when facing a wager, compare rough equity to pot odds; strong spots prefer the minimum legal aggressive action, weak spots fold when clearly behind, otherwise call when available
 
-Important constraint: this agent is meant to behave differently from `random`, not to approximate strong poker strategy.
+- preflop rank/pair/suitedness/connectivity/broadway scoring
+- postflop rough made-hand category scoring
+- draw bonuses for flush draws, straight draws, and some overcard value
+- pot-odds-aware calls/folds when facing a wager
+- minimum legal aggression in sufficiently strong spots
+
+It is meant to behave differently from `random`, not to approximate strong poker play.
+
+## Running scripted sanity checks
+
+Prefer the experiment workflow when comparing strategies. For local smoke tests, either run an ad hoc match:
+
+```bash
+go run ./cmd/poker-run -agent0 heuristic -agent1 random -hands 25 -seed 17
+```
+
+or use the convenience wrapper:
+
+```bash
+go run ./cmd/poker-demo
+```
+
+`poker-demo` is only a smoke-test wrapper around the same server/match stack. It should not be treated as the central research workflow.
 
 ## Interaction with rules and orchestration
 
-One important rules detail to preserve: if a player cannot cover a blind, the engine allows that player to post a short all-in blind, closes betting once only matched all-in states remain, and refunds unmatched commitments before final settlement. The domain explanation lives in [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md), while the broader orchestration behavior remains documented in [`server-orchestration.md`](server-orchestration.md).
+Both scripted agents trust `legal_actions` from the server instead of recomputing betting legality. The server remains authoritative for blinds, action order, all-in handling, timeout fallbacks, pot settlement, and artifact writing.
 
-## Demo and verification surface
+One important rules detail to preserve: if a player cannot cover a blind, the engine allows a short all-in blind, closes betting once only matched all-in states remain, and refunds unmatched commitments before final settlement. Domain semantics live in [`../domain/heads-up-nlhe.md`](../domain/heads-up-nlhe.md); orchestration behavior is covered in [`server-orchestration.md`](server-orchestration.md).
 
-The durable operator path for the non-LLM demo is:
-1. run `go run ./cmd/poker-demo` from the repo root
-2. optionally override a small supported set of match knobs such as `-session-id`, `-sessions-dir`, `-match-id`, `-seed`, or `-hand-count`
-3. inspect `sessions/<id>/manifest.json`, `hands.jsonl`, and per-agent logs
+## Test coverage
 
-For the wrapper-specific UX contract and layering decisions, see [`one-command-scripted-demo-flow.md`](one-command-scripted-demo-flow.md).
+Relevant deterministic coverage lives in:
 
-Execution-relevant constraints to preserve in future operator docs:
-- `poker-demo` shells out to `go build`, so a working Go toolchain is required at runtime
-- the wrapper compiles `poker-server`, `random-agent`, and `heuristic-agent` into a temporary directory before launching the match
-- the wrapper intentionally reuses `poker-server`, so artifact layout, timeout handling, and match semantics stay identical to the lower-level CLI
-
-For lower-level debugging or future wrappers, `poker-server` remains available with explicit `-agent0-cmd` and `-agent1-cmd` wiring.
-
-`cmd/poker-server/main_test.go` currently proves:
-- the shipped server binary can run a real `random` versus `heuristic` match and write a valid session bundle
-- a sleeping helper agent that exceeds `-decision-deadline` is recorded as a forced timeout action with `forced_reason: "decision_timeout"` (`auto_check` when legal, otherwise `auto_fold`)
-- the server still exits cleanly after timeout enforcement
-
-`cmd/poker-demo/main_test.go` proves:
-- the wrapper command runs the default scripted match through `poker-server`
-- supported CLI overrides still produce a valid session bundle with the requested hand count
-- focused wrapper-level unit coverage still guards the argument wiring and session-bundle inspection paths without duplicating full-match integration coverage already exercised by `poker-server` and `internal/match`
-
-Related lower-level coverage remains in:
 - `internal/randomagent/agent_test.go`
 - `internal/heuristicagent/agent_test.go`
+- `cmd/poker-server/main_test.go`
+- `cmd/poker-demo/main_test.go`
 - `internal/match/runner_test.go`
 
-## Current boundaries
+Coverage proves that the shipped agents speak the wire protocol, complete sessions, produce valid session bundles, and allow timeout behavior to be tested without live LLM credentials.
 
-Still out of scope here:
-- LLM-backed agents
-- AKG-backed memory strategies
-- prompt-stuffing baselines
-- Pi integration and compaction hooks
-- multiplayer or tournament scheduling
+## Boundaries
 
-Those belong to later subsystem work and should be grounded in the focused docs for that layer.
+Out of scope for the scripted baselines:
 
-## Integration contract
+- LLM-backed decision quality
+- AKG memory behavior
+- prompt-history comparisons
+- tournament scheduling
+- multiplayer experiments
 
-The scripted agents and demo are the stable baseline layer for:
-- a legal but intentionally weak no-memory policy (`random`)
-- a deterministic scripted no-memory policy (`heuristic`)
-- the expected local operator workflow for running a complete non-LLM match
-- the timeout and artifact behavior that LLM agents must fit into without changing the server contract
+Those belong to the experiment-first LLM and memory-strategy workflow.

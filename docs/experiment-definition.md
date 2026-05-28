@@ -14,9 +14,10 @@ The file records:
 
 - the experiment id and optional hypothesis text
 - how each group's session ids are derived or enumerated
+- the model used for Pi-backed agents unless overridden at runtime
 - the intended agent and optional opponent metadata for each group
 - the per-session hand count expectation
-- optional expected metric directions for later compare/report tooling
+- optional expected metric directions for comparison reports
 
 The format is JSON rather than YAML so parsing stays stdlib-only.
 
@@ -26,6 +27,7 @@ The format is JSON rather than YAML so parsing stays stdlib-only.
 {
   "id": "string",
   "hypothesis": "string, optional",
+  "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 25,
   "control": { "...group...": true },
   "treatment": { "...group...": true },
@@ -39,6 +41,7 @@ The format is JSON rather than YAML so parsing stays stdlib-only.
 ### Required fields
 
 - **`id`** — stable experiment identifier
+- **`model`** — model identifier used for Pi-backed LLM agents unless overridden by the runner
 - **`hands_per_session`** — expected hand count for each planned session; must be `> 0`
 - **`control`** — baseline group definition
 - **`treatment`** — comparison group definition
@@ -71,7 +74,7 @@ Shared group fields:
 - **`opponent`** — optional intended opposing agent identifier
 - **`seeds`** — optional planned seeds in session order
 
-`opponent` remains optional at the file-format level because offline tooling can derive opponents from session artifacts later. However, `poker-eval run` can only launch a missing planned session when that session's group includes `opponent` metadata.
+`opponent` remains optional at the file-format level because offline tooling can derive opponents from existing session artifacts. However, `poker experiment run` and `poker experiment go` can only launch a missing planned session when that session's group includes `opponent` metadata.
 
 ### Session-base mode
 
@@ -184,6 +187,7 @@ If a metric is absent from `expected_direction`, later reporting tooling should 
 {
   "id": "test-2b-retrieval-throttle",
   "hypothesis": "Throttling memory retrieval to once per hand should cut tool use and session time.",
+  "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 25,
   "control": {
     "session_base": "akg-durable-vs-stateless-test",
@@ -216,6 +220,7 @@ This expands deterministically to:
 ```json
 {
   "id": "historical-fullhistory-vs-durable",
+  "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 200,
   "control": {
     "sessions": [
@@ -245,6 +250,7 @@ This preserves the explicit session ordering exactly as written.
 A definition is invalid when any of the following are true:
 
 - required top-level fields are missing
+- `model` is empty
 - `hands_per_session <= 0`
 - a group omits `agent`
 - a group mixes session-base and explicit-session fields

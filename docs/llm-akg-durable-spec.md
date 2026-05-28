@@ -1,275 +1,164 @@
-# llm-akg-durable — Agent Spec
+# `llm-akg-durable` Contract
 
-## What this is
+`llm-akg-durable` is the durable structured-memory AKG strategy. It is the current thesis agent for testing whether graph-backed opponent memory can improve or preserve poker performance while keeping prompt growth bounded and inspectable.
 
-`llm-akg-durable` is the second AKG memory strategy in the v0 experiment ladder. It replaces the passive memory dump of `llm-akg-recent` with active graph querying: the model is given read tools at decision time and decides what to retrieve rather than receiving a fixed pre-assembled context block.
+## Strategy role
 
-This is the first agent designed to actually prove the thesis. Either the agent learns to use the graph and adapts its play — or it doesn't and we learn something important about the limits of structured memory for in-context strategy.
+The memory-strategy lineup is documented in [`research.md`](research.md). In that lineup:
 
-## Position in the comparison ladder
+- `llm-stateless` provides the no-memory LLM baseline.
+- `llm-fullhistory` provides the naive high-token prompt-history baseline.
+- `llm-akg-recent` provides a shallow bounded-memory AKG control.
+- `llm-akg-durable` provides cumulative structured opponent memory and active retrieval.
 
-| Step | Matchup | Purpose |
-|---|---|---|
-| 1 ✓ | `llm-akg-recent` vs `llm-stateless` | Baseline calibration, behavior/cost shape |
-| **2** | **`llm-akg-durable` vs `llm-akg-recent`** | **Prove active memory beats passive dump** |
-| 3 | `llm-akg-durable` vs `llm-stateless` | Confirm improvement over no memory |
-| 4 | `llm-akg-durable` vs `llm-fullhistory` | Final skill + cost comparison |
+`llm-akg-durable` should be evaluated through checked-in experiment definitions and `poker experiment go <experiment-id>`, not through one-off procedural run notes.
 
-## Scope
+## Runtime package
 
-**In scope:**
-- New `pi-agents/llm-akg-durable/` package
-- Richer `afterHandEnd` writes: tagged hands, richer opponent profile, pattern nodes with edges
-- Five read-only AKG query tools registered as Pi custom tools
-- Updated Pi system prompt that permits tool calls before the final action JSON
-- Unit tests for memory write logic and tool handlers
-- Subprocess integration test
+The agent lives under `pi-agents/llm-akg-durable/`.
 
-**Explicitly out of scope:**
-- Calibrated `strength` / `confidence` on edges — deferred to v2 (see §Deferred)
-- AKG compaction
-- Writing to the graph during turns
-- Changes to `pi-agents/shared/`, Go server, wire protocol, or reporting
-- Changes to any existing agent
+Important files:
 
----
+- `src/main.ts` — process entry point and protocol runner wiring
+- `src/memory.ts` — durable memory policy and post-hand writes
+- `src/tools.ts` — AKG read-tool definitions
+- `src/runtime.ts` — Pi session creation and prompt contract
+- `test/` — deterministic unit and subprocess coverage
 
-## Memory strategy: what gets written
+The stable executable name is `poker-agent-llm-akg-durable`. The Go runner resolves the strategy alias `llm-akg-durable` for experiment sessions.
 
-### Opponent profile node
+## Write model
 
-**Identity:** `type=opponent, id=villain`  
-**Tags:** `["opponent"]`
+The only strategic graph write point is after a completed hand.
 
-Upserted after every hand. Stats tracked in `meta`:
+Current behavior:
 
-| Field | Description |
-|---|---|
-| `hands_played` | Total hands completed |
-| `vpip` | Voluntarily put chips in preflop |
-| `pfr` | Preflop raiser |
-| `fold_to_bet` | Folded to hero bet or raise |
-| `aggr_preflop` | Aggressive preflop streets |
-| `aggr_flop` | Aggressive flop streets |
-| `aggr_turn` | Aggressive turn streets |
-| `aggr_river` | Aggressive river streets |
-| `cbet_opportunities` | Hands where hero c-bet flop |
-| `cbet_folds` | Times villain folded to hero flop c-bet |
-| `three_bet_count` | Times villain 3-bet preflop |
-| `river_bet_count` | Times villain bet or raised river |
-| `river_bet_folds` | Times villain folded to hero river bet |
-| `showdown_count` | Hands reaching showdown |
-| `showdown_win` | Showdown wins |
+- The agent opens `memory.akg` under the server-provided `memory_dir`.
+- Each completed hand writes or rewrites one `hand` node keyed by hand number.
+- The opponent profile is rebuilt from stored hand nodes.
+- Pattern nodes and evidence edges are rebuilt from stored hand nodes.
+- The store is committed after the post-hand update.
 
-`body` is a human-readable two-sentence narrative summary rebuilt each hand, e.g.:  
-*"Villain is loose-aggressive (VPIP 62%, PFR 31%) and folds to hero c-bets frequently (5/8 opportunities). River aggression is low; villain has shown strong hands at showdown 6 of 7 times."*
+This rebuild-from-hands model keeps the durable state logically idempotent when a hand is replayed or rewritten.
+
+The agent does **not** write to AKG during a decision. Decision-time AKG access is read-only.
+
+## Stored graph shape
+
+### Opponent node
+
+Identity: `opponent/villain`
+
+The opponent profile tracks cumulative behavior, including:
+
+- hands played
+- VPIP and PFR
+- fold-to-bet counts
+- per-street aggression counts
+- c-bet opportunities and c-bet folds
+- 3-bet counts
+- river bet and river fold counts
+- showdown counts and villain showdown wins
+
+The body is a short natural-language summary rebuilt from those counters.
 
 ### Hand nodes
 
-**Identity:** `type=hand, id=<auto-generated>`  
-**Tags:** always `["hand"]`, plus situational tags below
+Identity: `hand/<hand-number>`
 
-One node per completed hand. `meta` carries `hand_number` for retrieval by number.
+Each completed hand stores compact metadata and a single-line summary. Tags include:
 
-Situational tags applied when applicable:
+- `hand`
+- `showdown`
+- `big_pot`
+- `hero_fold`
+- `villain_fold`
+- `3bet_hand`
+- `aggressive_hand`
 
-| Tag | Condition |
-|---|---|
-| `showdown` | Hand reached showdown |
-| `big_pot` | Final pot ≥ 50 BB |
-| `hero_fold` | Hero folded (not preflop BB check) |
-| `villain_fold` | Villain folded |
-| `3bet_hand` | A 3-bet occurred preflop |
-| `aggressive_hand` | 4 or more bet/raise actions total |
-
-`body` format matches `llm-akg-recent`'s single-line summary.
+Tags are applied when their conditions are met; every hand node has `hand`.
 
 ### Pattern nodes
 
-**Identity:** `type=pattern, id=<slug>`  
-**Tags:** `["pattern"]`
+Identity: `pattern/<slug>`
 
-Created or updated when a behavioral pattern reaches the evidence threshold (≥ 3 supporting hands). Pattern nodes are the primary novel addition over `llm-akg-recent`.
+Current pattern slugs:
 
-Initial pattern set:
+- `folds-to-cbet`
+- `3bet-tendency`
+- `river-aggressor`
+- `folds-to-river-bet`
+- `calls-wide`
 
-| Slug | Condition to create | What it means |
-|---|---|---|
-| `folds-to-cbet` | `cbet_folds >= 3` | Villain frequently folds to hero flop c-bet |
-| `3bet-tendency` | `three_bet_count >= 3` | Villain 3-bets preflop often |
-| `river-aggressor` | `river_bet_count >= 3` | Villain bets or raises river often |
-| `folds-to-river-bet` | `river_bet_folds >= 3` | Villain frequently folds to hero river bet |
-| `calls-wide` | `fold_to_bet / hands_played <= 0.20` after ≥ 15 hands | Villain calls down most bets |
+Pattern nodes are created or updated only when their evidence thresholds are met. Each pattern stores a human-readable body plus count/opportunity metadata.
 
-`body` contains a plain-English description of the pattern and supporting count, e.g.:  
-*"Villain has folded to hero flop c-bet 5 times across 8 c-bet opportunities."*
+### Edges
 
-`meta` carries `count` (supporting hands) and `opportunities` (relevant total).
+Current edge relations:
 
----
+- `opponent/villain --[shows_pattern]--> pattern/<slug>`
+- `pattern/<slug> --[supported_by]--> hand/<hand-number>`
 
-## Graph edges
+Edges carry raw count/opportunity metadata where applicable. Calibrated strategic confidence scoring is not part of the current contract.
 
-### Edge: `shows_pattern`
+## Decision-time retrieval tools
 
-`opponent/villain --[shows_pattern]--> pattern/<slug>`
+The durable Pi session registers exactly these read-only AKG tools:
 
-Written when a pattern node is created; updated (version bumps) as evidence grows.
+- `akg_get_opponent`
+- `akg_list_patterns`
+- `akg_get_pattern`
+- `akg_list_hands`
+- `akg_get_hand`
 
-For v1: `strength = 1.0, confidence = null`. Calibrated strength/confidence deferred to v2.
+Builtin Pi tools are disabled for this agent. Tool results are JSON-serializable and deterministic for empty/unknown cases.
 
-`meta` carries `count` and `opportunities` so tools can surface the raw numbers.
+The model may call tools before returning its poker action. The final response must still be JSON only:
 
-### Edge: `supported_by`
-
-`pattern/<slug> --[supported_by]--> hand/<id>`
-
-Written each time a hand contributes to a pattern. One edge per supporting hand.
-
-`strength = 1.0, confidence = 1.0` — this hand is confirmed direct evidence.
-
----
-
-## Query tools
-
-Five read-only tools registered as Pi custom tools at session creation. All close over the AKG `Store` instance held by the memory policy. All return JSON-serializable objects.
-
-### `akg_get_opponent`
-
-Returns the villain profile node: `title`, `body`, and full `meta` stats.
-
-No parameters. Always the first tool to call for baseline context.
-
-### `akg_list_patterns`
-
-Returns all `pattern`-tagged nodes. Each entry includes `id`, `title`, `body`, and `meta.count` / `meta.opportunities`.
-
-No parameters.
-
-### `akg_get_pattern`
-
-Returns a specific pattern node plus the list of hand IDs linked via `supported_by` edges.
-
-Parameters: `{ slug: string }` — the pattern id, e.g., `"folds-to-cbet"`.
-
-### `akg_list_hands`
-
-Returns hand node summaries (body only), most recent first.
-
-Parameters: `{ tag?: string, limit?: number }` — tag filter (e.g., `"showdown"`, `"big_pot"`), default limit 10.
-
-### `akg_get_hand`
-
-Returns full details for a specific hand.
-
-Parameters: `{ hand_number: number }`.
-
----
-
-## Pi session setup
-
-The `llm-akg-durable` entry point creates a custom `sessionFactory` and passes it to `PiDecisionEngine`. No changes to `pi-agents/shared/`.
-
-```
-noTools: "builtin"        // disables read/bash/edit/write
-customTools: createQueryTools(memoryPolicy)   // registers the 5 tools above
-sessionScope: "hand"      // one Pi session per hand, same as llm-akg-recent
+```json
+{"action":"call"}
 ```
 
-### System prompt
+or, for sized actions:
 
-```
-You are a poker decision engine for heads-up no-limit Texas Hold'em.
-You have access to AKG memory tools. The opponent node is your index: call akg_get_opponent
-first to read a full behavioral summary and discover what patterns have been identified.
-Follow up with akg_list_patterns, akg_get_pattern, akg_list_hands, or akg_get_hand as needed.
-After your research, choose exactly one legal action from the user-provided legal_actions list.
-Your final response must be JSON only: {"action": string, "amount"?: number}.
-No commentary, markdown, code fences, or extra keys in the final JSON response.
-If raising or betting, use an integer chip amount within the server-provided legal range.
+```json
+{"action":"raise","amount":12}
 ```
 
-### `beforeDecision` prompt augmentation
+The server-provided `legal_actions` remain authoritative. The shared runtime validates model output and falls back safely on malformed or illegal responses.
 
-Returns a single line signalling that memory is available. The opponent node body is the
-index — it summarises everything known and the model discovers what to query next from there.
+## Prompt contract
 
-```
-AKG memory is available. Call akg_get_opponent to read the opponent index.
-```
+The durable system prompt tells the model:
 
-No counts, no hints about which other tools to call. The graph answers for itself.
+- it is a heads-up no-limit Texas Hold'em decision engine
+- AKG memory tools are available
+- the opponent node is the starting index
+- deeper pattern or hand tools may be used when relevant
+- the final answer must be exactly one legal action encoded as JSON
 
----
+`beforeDecision` injects only a lightweight reminder that AKG memory is available, rather than preloading a fixed history block. This is the active-retrieval distinction from `llm-akg-recent`.
 
-## Package structure
+## Artifacts
 
-```
-pi-agents/llm-akg-durable/
-  src/
-    main.ts       — entry point, wires memory policy + decision engine + session factory
-    memory.ts     — AkgDurableMemoryPolicy (afterHandEnd writes, beforeDecision index, tool factory)
-    tools.ts      — 5 read-only query tool definitions (createQueryTools)
-  test/
-    memory.test.ts   — unit tests for write logic (opponent upsert, hand tagging, pattern thresholds)
-    main.test.ts     — subprocess integration test (fake decisions, verifies protocol compliance)
-  package.json
-  tsconfig.json
-```
+A durable-agent session can produce:
 
-The binary name is `poker-agent-llm-akg-durable`, following the existing naming convention.
+- `agents/<name>/memory.akg` — authoritative durable graph memory
+- `agents/<name>/memory-export.json` — additive JSON export for offline analysis
+- `agents/<name>/pi-session.jsonl` — Pi transcript / observability log
+- `agents/<name>/stderr.log` — retry and fallback diagnostics
 
----
+`memory.akg` is the primary memory store. `memory-export.json` is an analysis artifact and should not be treated as the source of truth when it disagrees with `memory.akg`.
 
-## What carries over from `llm-akg-recent` unchanged
+## Constraints to preserve
 
-- `MemoryPolicy` interface — no changes
-- `PiDecisionEngine` — used as-is with `sessionFactory` override
-- `sessionScope: "hand"` — same
-- Opponent profile upsert structure — extended, not replaced
-- Hand node body format — same single-line summary
-- `Store.open()` / `store.commit()` lifecycle — same
-- `PI_POKER_*` environment variable conventions — extended with no breaking changes
+- Post-hand writes are the only durable graph writes.
+- Decision-time tools stay read-only.
+- `memory_dir` comes from the server and scopes each session's graph and logs.
+- Hand nodes remain the source of truth for rebuilding profile and pattern state.
+- The shared Pi runner remains responsible for protocol handling, action validation, retries, and safe fallback behavior.
+- Evaluation should use the experiment-first workflow in [`eval-system.md`](eval-system.md).
 
----
+## Related implementation note
 
-## Verification requirements
-
-### Unit tests (`memory.test.ts`)
-
-- Opponent profile accumulates all new stat fields correctly across multiple hands
-- Hand nodes are tagged correctly for each situational condition
-- Pattern nodes are NOT created below the threshold (2 supporting hands)
-- Pattern nodes ARE created at threshold (3 supporting hands)
-- `supported_by` edges are written for each contributing hand
-- `shows_pattern` edges are written when pattern is first created
-- Pattern node body and meta update correctly as evidence grows beyond threshold
-
-### Unit tests (`tools.ts` / inline in `memory.test.ts`)
-
-- `akg_get_opponent` returns null body gracefully when no hands played yet
-- `akg_list_patterns` returns empty array when no patterns yet
-- `akg_get_pattern` returns null gracefully for unknown slug
-- `akg_list_hands` respects tag filter and limit
-- `akg_get_hand` returns null gracefully for unknown hand number
-
-### Subprocess test (`main.test.ts`)
-
-- Binary launches and completes a short session with fake decisions
-- Writes `pi-session.jsonl` to agent session dir
-- Session terminates cleanly on `session_end`
-
----
-
-## Deferred to v2
-
-**Calibrated `strength` / `confidence` on edges.** For v1, all `shows_pattern` and `supported_by` edges use `strength = 1.0`. 
-
-This deferral keeps v1 focused on the binary question — does active graph querying change agent behavior at all — before tuning the signal quality.
-
-**Prompt cache optimisation.** The graph has a natural cold/hot split that maps directly onto Anthropic's prompt caching:
-
-- **Cold tier** — hand nodes and `supported_by` edges are immutable once written. The same content appears identically in every subsequent decision prompt that retrieves it.
-- **Hot tier** — the opponent profile node body and meta are rewritten every hand.
-
-A future version should introduce a dedicated batch tool — e.g. `akg_load_history(before_hand: number)` — that returns all immutable hand nodes up to a given point as a single deterministic block. Positioning this call first and consistently means the cached prefix grows with the session while the dynamic opponent summary and current-hand context follow after, uncached. At 150+ hands this should produce meaningful token savings on top of the graph's inherent compactness advantage over `llm-fullhistory`.
+See [`kb/llm-akg-durable-active-retrieval.md`](kb/llm-akg-durable-active-retrieval.md) for package-level implementation details and test coverage notes.
