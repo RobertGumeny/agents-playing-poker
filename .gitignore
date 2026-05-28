@@ -29,7 +29,9 @@ node_modules/
 bin/
 dist/
 .tmp/
-/poker-server
+/poker
+/poker-eval
 /poker-run
+/poker-server
 
 .doug/

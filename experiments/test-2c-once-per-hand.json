@@ -1,0 +1,22 @@
+{
+  "id": "test-2c-once-per-hand",
+  "hypothesis": "Changing the system prompt to instruct the agent to call akg_get_opponent exactly once per hand (rather than 'first' on every decision) should reduce within-hand re-calls without adding retrieval overhead, maintaining or improving chips per hand.",
+  "hands_per_session": 100,
+  "control": {
+    "session_base": "akg-durable-100h-baseline",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless"
+  },
+  "treatment": {
+    "session_base": "akg-durable-once-per-hand-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless"
+  },
+  "expected_direction": {
+    "chips_per_hand": "increase",
+    "akg_get_opponent_per_session": "decrease",
+    "session_duration_s": "decrease"
+  }
+}
