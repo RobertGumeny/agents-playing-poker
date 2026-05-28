@@ -1,10 +1,10 @@
-# Agent Poker
+# Agents Playing Poker
 
-Agent Poker is a research harness for testing whether LLM poker agents get better when they have durable, structured memory.
+![AI Agents Playing Poker in a Data Center](static/AgentsPlayingPoker.png)
 
-The project runs deterministic heads-up no-limit Texas Hold'em matches between agents. The cards, blinds, and rules are fixed by seed; the variable under test is the agent strategy, especially its memory strategy.
+Agents Playing Poker is a research harness, inspired by the classic painting "Dogs Playing Poker", for testing agentic memory strategies and patterns. The project runs deterministic heads-up no-limit Texas Hold'em matches between agents, coordinated by a Go game server. The cards, blinds, and rules are fixed by seed; the variable under test is the agent strategy, especially its memory strategy.
 
-The main workflow is now experiment-first:
+The main workflow is experiment-first:
 
 1. Write an experiment JSON file under `experiments/`.
 2. Run it with `poker experiment go <experiment-id>`.
@@ -15,7 +15,7 @@ The main workflow is now experiment-first:
 Current agent strategies include:
 
 - `llm-stateless` — sees only the current hand.
-- `llm-fullhistory` — injects prior hand history into the prompt.
+- `llm-fullhistory` — injects prior hand history into the prompt. This grows with each hand.
 - `llm-akg-recent` — shallow bounded AKG memory using recent hands and an opponent profile.
 - `llm-akg-durable` — durable structured AKG opponent memory.
 - `heuristic` and `random` — scripted non-LLM baselines.
