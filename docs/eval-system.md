@@ -98,20 +98,24 @@ The LLM is doing ETL work that a small CLI could do in milliseconds offline.
 
 ---
 
-## Proposed eval system
+## Eval system and current operator loop
 
-The system has three parts: an **experiment definition**, a **server-side memory
-export** (new session artifact), and two **eval CLI commands**. All post-run analysis
-is runnable with no LLM involvement.
+The current system has six operator-facing commands around the same artifact chain:
 
-The normative JSON experiment contract now lives in [`experiment-definition.md`](experiment-definition.md). The stable additive session-artifact schemas now live in [`session-artifacts.md`](session-artifacts.md).
+1. `poker-eval init` — create a schema-valid experiment definition JSON file
+2. `poker-eval ls` — discover checked-in experiment files and summarize coverage
+3. `poker-eval status` — inspect one experiment's planned coverage in detail
+4. `poker-eval run` — launch missing or incomplete planned sessions through `poker-run`
+5. `poker-eval collect` — derive per-session `eval.json` summaries from session artifacts
+6. `poker-eval compare` — render a markdown control-vs-treatment report from collected sessions
+
+The normative JSON experiment contract lives in [`experiment-definition.md`](experiment-definition.md). The stable additive session-artifact schemas live in [`session-artifacts.md`](session-artifacts.md).
 
 ---
 
 ### Part 1 — Experiment definition file
 
-A JSON file checked into the repo alongside the session output. Created before the
-sessions are run.
+The source of truth is a checked-in JSON plan created before the sessions run.
 
 ```json
 {
@@ -141,88 +145,90 @@ sessions are run.
 }
 ```
 
-`session_base` and `sessions_count` define the expected session IDs:
+`session_base` and `sessions_count` define the expected session ids:
 `<session_base>-1`, `<session_base>-2`, and so on through `sessions_count`.
-`seeds` is optional. If omitted or empty, the eval runner treats the session index as
-the seed, so the five sessions above use seeds `1..5`. If `seeds` is present, its
-length must match `sessions_count`.
+`seeds` is optional. If omitted or empty, planned seeds default deterministically to
+`1..sessions_count`.
 
-`opponent` is optional. When present, it records the intended opposing agent for that
-group. When omitted, the comparison tooling derives opponents from each session's
-`manifest.json`; if the manifests disagree inside a group, the report calls that out.
+`opponent` is optional at the file-format level. When present, it records the intended
+opposing agent for that group. `poker-eval run` requires it for any planned session it
+needs to launch. `poker-eval compare` can derive opponents from collected session data
+when the definition omits it.
 
-For already-run sessions whose names do not follow this convention, the group can use
-an explicit session list instead:
+For already-run sessions whose names do not follow the `<session_base>-N` convention,
+a group can use explicit session ids instead:
 
-```yaml
-treatment:
-  sessions: [akg-durable-throttle-a, akg-durable-throttle-b]
-  agent: llm-akg-durable@exp-0.1.3-throttle
-  seeds: [17, 23]
+```json
+{
+  "treatment": {
+    "sessions": ["akg-durable-throttle-a", "akg-durable-throttle-b"],
+    "agent": "llm-akg-durable@exp-0.1.3-throttle",
+    "seeds": [17, 23]
+  }
+}
 ```
 
-This file is the source of truth for what the experiment is testing. It also means the
-comparison can be re-run at any time without reconstructing context.
+This file is the durable plan for what the experiment is testing and what coverage
+should exist on disk.
+
+`poker-eval init` scaffolds this JSON contract directly:
+
+```bash
+go run ./cmd/poker-eval init \
+  -out experiments/test-2b-retrieval-throttle.json \
+  -hypothesis "Throttling retrieval should cut tool use and session time." \
+  -control-agent llm-stateless \
+  -control-opponent heuristic \
+  -treatment-agent llm-akg-recent
+```
 
 ---
 
-### Part 2 — Server-side memory export (session artifact)
+### Part 2 — Coverage and execution (`poker-eval ls`, `status`, and `run`)
 
-This is a change to the **match runner**, not an eval tool. At session teardown, after
-agents are closed and `manifest.json` is written, the runner calls `WriteMemoryExport`
-for each agent directory. This produces `memory-export.json` alongside the existing
-`memory.akg`.
+The experiment definition is the source of truth for what should exist. Coverage
+commands inspect the filesystem only to classify whether each planned session is usable.
 
-**`memory.akg` is kept as-is** — it is the authoritative persistent store and stays
-for posterity, reproducibility, and any future tooling that needs to re-open the live
-store (e.g. resumable sessions). `memory-export.json` is a read-only snapshot for
-analysis.
+Useful commands:
 
-#### Teardown hook in `internal/match/runner.go`
-
-```go
-defer func() {
-    for _, agent := range agents {
-        shutdownCtx, cancel := context.WithTimeout(context.Background(), r.config.ShutdownGracePeriod)
-        _ = agent.Close(shutdownCtx)
-        cancel()
-    }
-    manifestErr := writer.WriteManifest(r.buildManifest(...))
-    if runErr == nil && manifestErr != nil {
-        runErr = manifestErr
-    }
-    // Export each agent's memory graph to JSON for offline analysis.
-    // No-op (logged, not fatal) if memory.akg is absent or unreadable.
-    for _, spec := range r.config.AgentSpecs {
-        agentDir, dirErr := writer.AgentDir(spec.Name)
-        if dirErr == nil {
-            _ = sessionlog.WriteMemoryExport(agentDir)
-        }
-    }
-}()
+```bash
+go run ./cmd/poker-eval ls
+go run ./cmd/poker-eval status -experiment experiments/test-2b-retrieval-throttle.json
+go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -dry-run
+go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.json -model anthropic:claude-sonnet-4-6
 ```
 
-#### `sessionlog.WriteMemoryExport`
+Coverage states:
+- `present` — complete `manifest.json` plus matching `hands.jsonl`
+- `missing` — no session directory yet
+- `incomplete` — directory exists but primary artifacts do not match the planned session
 
-Lives in `internal/sessionlog/`. Depends on `github.com/RobertGumeny/akg/sdk/akg-go`.
+Execution semantics:
+- `poker-eval run` skips `present` sessions
+- `poker-eval run` relaunches `missing` and `incomplete` sessions
+- `poker-eval run` delegates each launch to `poker-run`
+- `-model` and `-thinking-level` are runtime-only overrides forwarded into `poker-run`
 
-```go
-// WriteMemoryExport opens memory.akg in agentDir (if present), walks all nodes
-// and edges, and writes memory-export.json alongside it. Errors are non-fatal —
-// a missing or unreadable memory.akg simply produces no export file.
-func WriteMemoryExport(agentDir string) error
+This preserves `poker-run` as the low-level primitive for one real session while
+`poker-eval` handles deterministic multi-session planning and coverage.
+
+---
+
+### Part 3 — Single-session execution artifacts (`poker-run`)
+
+`poker-run` remains the primitive that actually executes one session.
+
+```bash
+go run ./cmd/poker-run \
+  -agent0 llm-akg-recent \
+  -agent1 llm-stateless \
+  -hands 200 \
+  -seed 3 \
+  -session-id akg-recent-vs-stateless-seed3-a \
+  -model anthropic:claude-sonnet-4-6
 ```
 
-Signature notes:
-- Returns an error for the caller to log; the runner never fails a session over it.
-- Does nothing if `memory.akg` does not exist (stateless agents produce none).
-
-#### Output: `sessions/<id>/agents/<name>/memory-export.json`
-
-Full graph dump — all nodes with complete body/meta/tags and all exported outbound edges.
-The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#memory-exportjson).
-
-After this, the session artifact layout for a memory-capable agent is:
+A completed session writes artifacts under `sessions/<id>/`:
 
 ```
 sessions/<id>/
@@ -230,116 +236,91 @@ sessions/<id>/
   hands.jsonl
   report.md
   agents/
-    llm-akg-durable/
-      memory.akg           ← binary store, kept for posterity
-      memory-export.json   ← NEW: full graph dump, human- and machine-readable
-      pi-session.jsonl
-      stderr.log
+    <seat-name>/
       stdout.log
-    llm-stateless/
-      pi-session.jsonl
       stderr.log
-      stdout.log
+      pi-session.jsonl      # when the seat is Pi-backed
+      memory.akg            # when the agent owns durable memory
+      memory-export.json    # optional server-generated teardown export
 ```
+
+Artifact roles:
+- `manifest.json` and `hands.jsonl` are the primary session authority
+- `report.md` is a convenience single-session report
+- `memory.akg` remains the authoritative durable memory store
+- `memory-export.json` is an additive JSON snapshot for offline analysis
 
 ---
 
-### Part 3 — Metrics collector (`poker-eval collect`)
+### Part 4 — Metrics collector (`poker-eval collect`)
 
-A CLI command that reads session artifacts (including `memory-export.json` and agent `stderr.log`) and writes
-a structured `eval.json` into each session directory. Runs post-session, completely
-offline, no LLM, no AKG SDK dependency.
+`collect` reads the session bundle offline and writes `eval.json` into each named
+session directory.
 
+```bash
+go run ./cmd/poker-eval collect sessions/akg-durable-throttle-test-{1..5}
 ```
-poker-eval collect sessions/akg-durable-throttle-test-{1..5}
-```
 
-Because `memory-export.json` is plain JSON, `collect` never needs to touch `memory.akg`
-or the AKG SDK directly.
+Because `memory-export.json` is plain JSON, `collect` never opens `memory.akg` and does
+not depend on the AKG SDK.
 
-Output per session — `sessions/<id>/eval.json`:
+Output per session:
 
-The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#evaljson). The finalized shape is session-level, keeps both seats in one file, and summarizes memory exports generically rather than hard-coding current poker-specific node inventories.
+- `sessions/<id>/eval.json` — deterministic derived summary built from `manifest.json`,
+  `hands.jsonl`, optional `pi-session.jsonl`, optional `memory-export.json`, and
+  optional `stderr.log`
+
+The stable contract now lives in [`session-artifacts.md`](session-artifacts.md#evaljson).
 
 ---
 
-### Part 4 — Comparison report generator (`poker-eval compare`)
+### Part 5 — Comparison report generator (`poker-eval compare`)
 
-Takes an experiment definition and produces a markdown comparison table.
+`compare` reads the checked-in experiment definition plus collected `eval.json` files
+for every planned session and renders markdown to stdout.
 
-```
-poker-eval compare experiments/test-2b-retrieval-throttle.yaml
-```
-
-Output — `experiments/test-2b-retrieval-throttle-report.md`:
-
-```markdown
-# Experiment: test-2b-retrieval-throttle
-
-**Hypothesis:** Throttling memory retrieval to once per hand...
-
-## Summary
-
-| Metric | Control (n=5) | Treatment (n=5) | Δ | Direction |
-|---|---|---|---|---|
-| chips/hand (mean) | +5.12 | +2.24 | -2.88 | ❌ wrong direction |
-| akg_get_opponent/session | 33.4 | 27.2 | -6.2 (−19%) | ✅ |
-| session duration (s) | 465 | 398 | -67 (−14%) | ✅ |
-| preflop-only rate | 46.4% | 53.1% | +6.7pp | ❌ wrong direction |
-
-## Per-Session Results
-...
-
-## Tool Use
-...
-
-## Memory Density
-...
-
-## Memory Graph (Treatment, Session 1)
-
-**Opponent model:** Villain is loose-passive (VPIP 74%, PFR 22%)...
-
-**Patterns identified:**
-- folds-to-cbet: 4/7 cbet opportunities, first observed hand 9
+```bash
+go run ./cmd/poker-eval compare -experiment experiments/test-2b-retrieval-throttle.json
 ```
 
-The `✅` / `❌` direction check comes directly from `expected_direction` in the
-experiment JSON. The "Memory Graph" section is populated directly from
-`memory-export.json` — no parsing required.
+If you want a file, redirect stdout yourself:
+
+```bash
+go run ./cmd/poker-eval compare -experiment experiments/test-2b-retrieval-throttle.json \
+  > reports/test-2b-retrieval-throttle.md
+```
+
+Current report contents include:
+- summary metric table for control vs treatment
+- tool-use table when tool-call metrics were observed
+- warnings for mixed observed group metadata
+- per-session results table
+- `expected_direction` pass/fail checks from the experiment definition
 
 ---
 
 ## Scope and non-goals
 
-This is intentionally minimal for v0. It does not need to:
+This is intentionally minimal for v0. It currently supports the operator loop from
+planned experiment definition through run, collect, and compare, but it does not try to:
 
-- run sessions (that's `poker-server` / `doug`)
-- aggregate across experiments (nice-to-have, not urgent)
-- produce statistical significance tests (sample sizes are too small for that to matter)
-- be a web dashboard
+- replace `poker-run` as the low-level single-session execution primitive
+- aggregate across multiple experiment definitions in one report
+- produce statistical significance tests
+- become a dashboard or long-running service
 
-The whole thing is probably 500–700 lines of Go. The stable `eval.json` and `memory-export.json` contracts now live in [`session-artifacts.md`](session-artifacts.md).
+The stable `eval.json` and `memory-export.json` contracts live in [`session-artifacts.md`](session-artifacts.md).
 
-## Where this fits in the build phasing
+## Build-phasing note
 
-The **server-side memory export** (`WriteMemoryExport`) is a small, self-contained
-change to the match runner and `sessionlog` package. It can land as part of any sprint
-because it only adds an artifact — it does not change session behavior.
+Historically, this area landed in stages:
 
-The **eval CLI** (`poker-eval collect` + `compare`) is a standalone epic. It does not
-block any experiment; the experiments can run without it. But the first time you run a
-3-way comparison across 15 sessions, you'll want it badly.
+1. experiment-definition parsing and planning
+2. additive `memory-export.json` teardown support
+3. `poker-eval run` and `status`
+4. offline `collect`
+5. offline `compare`
+6. `init` and `ls` operator ergonomics
 
-## Suggested epic scope
-
-```
-server change:    sessionlog.WriteMemoryExport     — dumps memory.akg → memory-export.json at session end  (small, land early)
-poker-eval collect — parse session artifacts into eval.json                                                  (core)
-poker-eval compare — diff two session groups from an experiment JSON definition                              (core)
-poker-eval init    — scaffold a new experiment JSON definition from a template                                (nice-to-have)
-poker-eval ls      — list experiments and their session coverage                                              (nice-to-have)
-```
-
-Land `WriteMemoryExport` early so future sessions automatically produce the export.
-Start `collect` and `compare` when the experiment backlog justifies the investment.
+That phased delivery explains why related implementation notes are split across the KB
+articles in [`docs/kb/`](kb/README.md).

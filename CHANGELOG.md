@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add heads-up betting-round progression, legal-action generation, blind rotation, and pot accounting
 
 ### Changed
+- docs: document the end-to-end experiment workflow and command surface
 - docs: define stable session-artifact schemas for memory-export.json and eval.json
 - docs: clarify llm-akg-recent operator references
 - docs: update the spec, wire protocol, KB, and operator docs for the implemented llm-fullhistory baseline and shared Pi runtime seam
