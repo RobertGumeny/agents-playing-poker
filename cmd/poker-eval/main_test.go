@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/RobertGumeny/agent-poker/internal/eval"
 	"github.com/RobertGumeny/agent-poker/internal/experiment"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
@@ -29,6 +31,130 @@ func TestCollectWritesEvalJSON(t *testing.T) {
 	}
 	if !strings.Contains(string(data), `"session_id": "fixture"`) || !strings.Contains(string(data), `"retry_metrics"`) {
 		t.Fatalf("eval.json = %s, want session id and retry metrics", string(data))
+	}
+}
+
+func TestComparePrintsAggregatedReportAndDirectionChecks(t *testing.T) {
+	rootDir := t.TempDir()
+	sessionsDir := filepath.Join(rootDir, "sessions")
+	if err := os.MkdirAll(sessionsDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(sessions) error = %v", err)
+	}
+
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "control-1"), compareSummaryFixture(compareSummaryConfig{SessionID: "control-1", Seed: 1, HandCount: 5, AgentName: "control-agent", OpponentName: "villain", ChipsDelta: 5, DurationS: 100, PreflopOnlyRate: 0.6, ShowdownRate: 0.2, ToolCalls: map[string]int{"akg_get_opponent": 10}, ToolCallsPerHand: map[string]float64{"akg_get_opponent": 2}}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "control-2"), compareSummaryFixture(compareSummaryConfig{SessionID: "control-2", Seed: 2, HandCount: 5, AgentName: "control-agent", OpponentName: "villain", ChipsDelta: 5, DurationS: 120, PreflopOnlyRate: 0.5, ShowdownRate: 0.4, ToolCalls: map[string]int{"akg_get_opponent": 8}, ToolCallsPerHand: map[string]float64{"akg_get_opponent": 1.6}}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "treatment-1"), compareSummaryFixture(compareSummaryConfig{SessionID: "treatment-1", Seed: 1, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain", ChipsDelta: 10, DurationS: 80, PreflopOnlyRate: 0.4, ShowdownRate: 0.2, ToolCalls: map[string]int{"akg_get_opponent": 4}, ToolCallsPerHand: map[string]float64{"akg_get_opponent": 0.8}}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "treatment-2"), compareSummaryFixture(compareSummaryConfig{SessionID: "treatment-2", Seed: 2, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain", ChipsDelta: 10, DurationS: 90, PreflopOnlyRate: 0.3, ShowdownRate: 0.4, ToolCalls: map[string]int{"akg_get_opponent": 6}, ToolCallsPerHand: map[string]float64{"akg_get_opponent": 1.2}}))
+
+	experimentPath := filepath.Join(rootDir, "experiment.json")
+	writeExperimentFixture(t, experimentPath, experiment.Definition{
+		ID:              "exp-compare",
+		Hypothesis:      "Treatment should win more chips with less tool use.",
+		HandsPerSession: 5,
+		Control: experiment.Group{
+			SessionBase:   "control",
+			SessionsCount: 2,
+			Agent:         "control-agent",
+			Opponent:      "villain",
+		},
+		Treatment: experiment.Group{
+			SessionBase:   "treatment",
+			SessionsCount: 2,
+			Agent:         "treatment-agent",
+			Opponent:      "villain",
+		},
+		ExpectedDirection: map[string]experiment.Direction{
+			"chips_per_hand":               experiment.DirectionIncrease,
+			"session_duration_s":           experiment.DirectionDecrease,
+			"preflop_only_rate":            experiment.DirectionDecrease,
+			"akg_get_opponent_per_session": experiment.DirectionDecrease,
+		},
+	})
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	if err := run([]string{"compare", "-experiment", experimentPath, "-sessions-dir", sessionsDir}, &stdout, &stderr, newRunDeps()); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"# Experiment: exp-compare",
+		"| chips/hand | 1.00 | 2.00 | +1.00 | ✅ increase |",
+		"| session duration (s) | 110 | 85 | -25 | ✅ decrease |",
+		"| preflop-only rate | 55.0% | 35.0% | -20.0pp | ✅ decrease |",
+		"| akg_get_opponent/session | 9.00 | 5.00 | -4.00 | ✅ decrease |",
+		"| control | control-1 | 1 | control-agent | villain | +5 | 1.00 | 100 | 60.0% | 20.0% |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("stdout missing %q\nfull output:\n%s", want, got)
+		}
+	}
+}
+
+func TestCompareRejectsMalformedExperiment(t *testing.T) {
+	rootDir := t.TempDir()
+	experimentPath := filepath.Join(rootDir, "bad.json")
+	if err := os.WriteFile(experimentPath, []byte("{not-json\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(bad.json) error = %v", err)
+	}
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	err := run([]string{"compare", "-experiment", experimentPath}, &stdout, &stderr, newRunDeps())
+	if err == nil || !strings.Contains(err.Error(), "parse experiment definition") {
+		t.Fatalf("run() error = %v, want malformed experiment failure", err)
+	}
+}
+
+func TestCompareRejectsIncompleteCoverage(t *testing.T) {
+	rootDir := t.TempDir()
+	sessionsDir := filepath.Join(rootDir, "sessions")
+	if err := os.MkdirAll(filepath.Join(sessionsDir, "control-1"), 0o755); err != nil {
+		t.Fatalf("MkdirAll(control-1) error = %v", err)
+	}
+	experimentPath := filepath.Join(rootDir, "experiment.json")
+	writeExperimentFixture(t, experimentPath, experiment.Definition{
+		ID:              "exp-missing",
+		HandsPerSession: 5,
+		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "control-agent", Opponent: "villain"},
+		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "treatment-agent", Opponent: "villain"},
+	})
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	err := run([]string{"compare", "-experiment", experimentPath, "-sessions-dir", sessionsDir}, &stdout, &stderr, newRunDeps())
+	if err == nil || !strings.Contains(err.Error(), "collected session data missing") {
+		t.Fatalf("run() error = %v, want missing eval.json failure", err)
+	}
+}
+
+func TestCompareWarnsOnInconsistentObservedGroupData(t *testing.T) {
+	rootDir := t.TempDir()
+	sessionsDir := filepath.Join(rootDir, "sessions")
+	if err := os.MkdirAll(sessionsDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(sessions) error = %v", err)
+	}
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "control-1"), compareSummaryFixture(compareSummaryConfig{SessionID: "control-1", Seed: 1, HandCount: 5, AgentName: "control-agent", OpponentName: "villain-a", ChipsDelta: 1, DurationS: 10}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "control-2"), compareSummaryFixture(compareSummaryConfig{SessionID: "control-2", Seed: 2, HandCount: 5, AgentName: "control-agent", OpponentName: "villain-b", ChipsDelta: 1, DurationS: 10}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "treatment-1"), compareSummaryFixture(compareSummaryConfig{SessionID: "treatment-1", Seed: 1, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain-a", ChipsDelta: 2, DurationS: 10}))
+	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "treatment-2"), compareSummaryFixture(compareSummaryConfig{SessionID: "treatment-2", Seed: 2, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain-a", ChipsDelta: 2, DurationS: 10}))
+
+	experimentPath := filepath.Join(rootDir, "experiment.json")
+	writeExperimentFixture(t, experimentPath, experiment.Definition{
+		ID:              "exp-warning",
+		HandsPerSession: 5,
+		Control:         experiment.Group{SessionBase: "control", SessionsCount: 2, Agent: "control-agent"},
+		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 2, Agent: "treatment-agent"},
+	})
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	if err := run([]string{"compare", "-experiment", experimentPath, "-sessions-dir", sessionsDir}, &stdout, &stderr, newRunDeps()); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+	if !strings.Contains(stdout.String(), "group control observed mixed opponents: villain-a, villain-b") {
+		t.Fatalf("stdout = %s, want mixed-opponent warning", stdout.String())
 	}
 }
 
@@ -397,6 +523,87 @@ func createCollectCLIFixture(t *testing.T, rootDir string) string {
 
 func intPtr(v int) *int {
 	return &v
+}
+
+type compareSummaryConfig struct {
+	SessionID        string
+	Seed             int64
+	HandCount        int
+	AgentName        string
+	AgentVersion     string
+	OpponentName     string
+	OpponentVersion  string
+	ChipsDelta       int
+	DurationS        int64
+	PreflopOnlyRate  float64
+	ShowdownRate     float64
+	FallbackActions  int
+	DecisionPrompts  int
+	ToolCalls        map[string]int
+	ToolCallsPerHand map[string]float64
+}
+
+func compareSummaryFixture(cfg compareSummaryConfig) eval.Summary {
+	if cfg.AgentVersion == "" {
+		cfg.AgentVersion = cfg.AgentName
+	}
+	if cfg.OpponentVersion == "" {
+		cfg.OpponentVersion = cfg.OpponentName
+	}
+	return eval.Summary{
+		SchemaVersion: 1,
+		SessionID:     cfg.SessionID,
+		MatchID:       "mat_001",
+		Session: eval.SessionSummary{
+			Seed:      cfg.Seed,
+			DurationS: cfg.DurationS,
+			HandCount: cfg.HandCount,
+			Completed: true,
+		},
+		Metrics: eval.SessionMetrics{
+			PreflopOnlyRate:     cfg.PreflopOnlyRate,
+			ShowdownRate:        cfg.ShowdownRate,
+			FallbackActionCount: cfg.FallbackActions,
+		},
+		Seats: []eval.SeatSummary{
+			{
+				Seat:                0,
+				Name:                cfg.AgentName,
+				Version:             cfg.AgentVersion,
+				ChipsDelta:          cfg.ChipsDelta,
+				DecisionPromptCount: cfg.DecisionPrompts,
+				ToolCalls:           cfg.ToolCalls,
+				ToolCallsPerHand:    cfg.ToolCallsPerHand,
+			},
+			{
+				Seat:       1,
+				Name:       cfg.OpponentName,
+				Version:    cfg.OpponentVersion,
+				ChipsDelta: -cfg.ChipsDelta,
+			},
+		},
+	}
+}
+
+func writeEvalSummaryFixture(t *testing.T, sessionDir string, summary eval.Summary) {
+	t.Helper()
+	if err := os.MkdirAll(sessionDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", sessionDir, err)
+	}
+	if err := eval.WriteSummary(sessionDir, summary); err != nil {
+		t.Fatalf("WriteSummary(%s) error = %v", sessionDir, err)
+	}
+}
+
+func writeExperimentFixture(t *testing.T, path string, def experiment.Definition) {
+	t.Helper()
+	data, err := json.Marshal(def)
+	if err != nil {
+		t.Fatalf("json.Marshal(experiment) error = %v", err)
+	}
+	if err := os.WriteFile(path, append(data, '\n'), 0o644); err != nil {
+		t.Fatalf("WriteFile(%s) error = %v", path, err)
+	}
 }
 
 func createSessionFixture(t *testing.T, rootDir, sessionID string, opts fixtureOptions) {

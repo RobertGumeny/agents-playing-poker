@@ -132,6 +132,21 @@ To inspect experiment coverage without launching anything:
 go run ./cmd/poker-eval status -experiment experiments/test-2b-retrieval-throttle.json
 ```
 
+After sessions finish, collect normalized summaries and compare the planned control/treatment groups:
+
+```bash
+go run ./cmd/poker-eval collect sessions/akg-durable-vs-stateless-test-{1..5} sessions/akg-durable-retrieval-test-{1..5}
+go run ./cmd/poker-eval compare -experiment experiments/test-2b-retrieval-throttle.json
+```
+
+Current `poker-eval compare` behavior:
+
+- loads the checked-in experiment definition and planned session list
+- requires collected `eval.json` data for every planned session
+- prints aggregate control/treatment summaries for session, gameplay, and observed tool-use metrics
+- evaluates `expected_direction` checks from the experiment definition in the rendered markdown report
+- warns when compare-time observed group metadata is mixed, such as inconsistent derived opponents inside a group without explicit `opponent` metadata
+
 ## Generate a benchmark report
 
 Use `poker-report` to create a repeatable Markdown review from explicit session directories. The report is derived from each session's `manifest.json` and `hands.jsonl` artifacts, not from existing per-session `report.md` files.

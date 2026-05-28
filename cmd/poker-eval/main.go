@@ -30,12 +30,14 @@ func main() {
 
 func run(args []string, stdout, stderr io.Writer, deps runDeps) error {
 	if len(args) == 0 {
-		return fmt.Errorf("expected subcommand (supported: collect, run, status)")
+		return fmt.Errorf("expected subcommand (supported: collect, compare, run, status)")
 	}
 
 	switch args[0] {
 	case "collect":
 		return runCollect(args[1:], stdout, stderr)
+	case "compare":
+		return runCompare(args[1:], stdout, stderr, deps)
 	case "run":
 		return runRun(args[1:], stdout, stderr, deps)
 	case "status":
@@ -134,6 +136,11 @@ type collectConfig struct {
 	sessionDirs []string
 }
 
+type compareConfig struct {
+	experimentPath string
+	sessionsDir    string
+}
+
 func runCollect(args []string, stdout, stderr io.Writer) error {
 	cfg, err := parseCollectConfig(args)
 	if err != nil {
@@ -150,6 +157,24 @@ func runCollect(args []string, stdout, stderr io.Writer) error {
 		}
 		_, _ = fmt.Fprintf(stdout, "collected session_id=%s output=%s\n", summary.SessionID, filepath.Join(sessionDir, "eval.json"))
 	}
+	return nil
+}
+
+func runCompare(args []string, stdout, stderr io.Writer, deps runDeps) error {
+	cfg, err := parseCompareConfig(args)
+	if err != nil {
+		return err
+	}
+
+	def, err := deps.loadDefinition(cfg.experimentPath)
+	if err != nil {
+		return err
+	}
+	report, err := eval.Compare(def, cfg.sessionsDir)
+	if err != nil {
+		return err
+	}
+	_, _ = io.WriteString(stdout, eval.RenderComparisonMarkdown(report))
 	return nil
 }
 
@@ -290,6 +315,26 @@ func parseCollectConfig(args []string) (collectConfig, error) {
 		return collectConfig{}, fmt.Errorf("at least one session directory is required")
 	}
 	return collectConfig{sessionDirs: fs.Args()}, nil
+}
+
+func parseCompareConfig(args []string) (compareConfig, error) {
+	fs := flag.NewFlagSet("poker-eval compare", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+
+	cfg := compareConfig{}
+	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+
+	if err := fs.Parse(args); err != nil {
+		return compareConfig{}, err
+	}
+	if fs.NArg() != 0 {
+		return compareConfig{}, fmt.Errorf("unexpected positional arguments: %s", strings.Join(fs.Args(), " "))
+	}
+	if strings.TrimSpace(cfg.experimentPath) == "" {
+		return compareConfig{}, fmt.Errorf("-experiment is required")
+	}
+	return cfg, nil
 }
 
 func parseRunConfig(args []string) (runConfig, error) {
