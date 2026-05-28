@@ -14,12 +14,17 @@ That is exactly the domain where structured memory should matter most. An agent 
 
 ## Memory-strategy framing
 
-Agent memory in this project is the variable under test. The core strategy lineup is:
+Agent memory in this project is the variable under test. The current strategy lineup is:
 
 - **`llm-stateless`** — current hand only; the low-token no-memory baseline.
 - **`llm-fullhistory`** — raw or lightly formatted prior-hand history injected into the prompt; the naive high-token memory baseline.
 - **`llm-akg-recent`** — shallow bounded AKG memory using recent hands plus a growing opponent profile; useful as a wiring and token-efficiency control.
 - **`llm-akg-durable`** — durable structured AKG opponent memory with graph-backed opponent/profile/pattern evidence and decision-time retrieval tools; this is where the core thesis lives.
+
+Planned future strategies that would sharpen the comparison:
+
+- **`llm-md-single`** — a single growing markdown file that the agent rewrites or appends after each hand. The "obvious first thing a developer would build." Honest representation of the simplest possible durable memory.
+- **`llm-md-wiki`** — multiple markdown files organized by topic (`opponent-profile.md`, `patterns.md`, `hand-log.md`), read selectively. Same class as `llm-akg-durable` (selective durable memory, decision-time retrieval) but flat files instead of a typed graph. The most direct apples-to-apples test of whether AKG's structure does work that ad-hoc file organization cannot.
 
 The thesis does not require AKG to win every short match. Poker outcomes are noisy: a few all-in pots, seat/order effects, blind rotation, LLM nondeterminism, invalid-action fallbacks, and ordinary variance can dominate short-run chip results. The target result is that durable AKG memory can match or beat full-history prompting over planned experiment sets while using materially less context growth and producing memory artifacts that can be inspected, queried, and improved.
 
@@ -35,6 +40,18 @@ The experiment is not only "which agent wins the most chips." The stronger claim
 This matters because a raw full-history agent may win some chips simply by stuffing more context into the prompt. That is a useful baseline, but not the thesis. The AKG thesis is that structured memory should preserve or improve decision quality while keeping context bounded and inspectable.
 
 The current operator workflow is experiment-first: define the comparison as JSON under `experiments/`, run it with `poker experiment go <experiment-id>`, and interpret the generated session artifacts plus `reports/<experiment-id>.md`.
+
+## Mirror match: two memory agents against each other
+
+A natural future experiment is to seat two `llm-akg-durable` agents against each other for 500+ hands. Both agents build opponent models simultaneously — each modeling a villain who is also adapting in response to being modeled.
+
+This creates dynamics that a stateless opponent cannot produce:
+
+- **Adaptation arms race.** If one agent builds a `folds-to-cbet` pattern and starts barreling more aggressively, the other agent's fold rate should drop — which should eventually invalidate the pattern. Does the AKG store clean it up? Does the exploiting agent notice and re-adjust?
+- **Convergence or divergence.** Do two agents with identical memory architectures converge toward equilibrium over 500 hands, or does whichever agent builds accurate patterns *faster* in the early window pull ahead and hold that edge?
+- **Dual artifact analysis.** Each agent produces its own `memory.akg` at the end — two models of the same match from opposite seats. Comparing them tests whether the memory captures reality accurately, not just selectively.
+
+The infrastructure is already in place: each seat runs as an independent Pi subprocess with its own `memory_dir`. A mirror match is likely just `poker-run -agent0 llm-akg-durable -agent1 llm-akg-durable` with a small extension to the experiment definition format to express symmetric agent configurations. The first step is a 25-hand sanity run to confirm both memory files diverge correctly.
 
 ## Why AKG and not markdown files
 
