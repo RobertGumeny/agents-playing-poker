@@ -11,6 +11,7 @@ func TestParseValidSessionBaseDefinition(t *testing.T) {
 	def, err := Parse([]byte(`{
 		"id": "test-2b-retrieval-throttle",
 		"hypothesis": "Throttle retrieval to once per hand.",
+		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
 		"control": {
 			"session_base": "akg-durable-vs-stateless-test",
@@ -58,6 +59,7 @@ func TestParseValidSessionBaseDefinition(t *testing.T) {
 func TestParseValidExplicitSessionDefinition(t *testing.T) {
 	def, err := Parse([]byte(`{
 		"id": "retro-benchmark",
+		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 200,
 		"control": {
 			"sessions": ["fullhistory-vs-stateless-a", "fullhistory-vs-stateless-b"],
@@ -86,6 +88,7 @@ func TestParseValidExplicitSessionDefinition(t *testing.T) {
 func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
 	def, err := Parse([]byte(`{
 		"id": "run-benchmark",
+		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
 		"control": {
 			"session_base": "control-group",
@@ -123,6 +126,7 @@ func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
 func TestDefinitionPlanRejectsConflictingSessionIDsAcrossGroups(t *testing.T) {
 	def, err := Parse([]byte(`{
 		"id": "conflict",
+		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
 		"control": {
 			"sessions": ["shared-session"],
@@ -150,6 +154,7 @@ func TestDefinitionPlanRejectsConflictingSessionIDsAcrossGroups(t *testing.T) {
 func TestParseRejectsUnknownField(t *testing.T) {
 	_, err := Parse([]byte(`{
 		"id": "bad",
+		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
 		"control": {"sessions": ["a"], "agent": "x"},
 		"treatment": {"sessions": ["b"], "agent": "y"},
@@ -176,9 +181,20 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 			want: "id is required",
 		},
 		{
+			name: "missing model",
+			json: `{
+				"id": "bad",
+				"hands_per_session": 25,
+				"control": {"sessions": ["a"], "agent": "x"},
+				"treatment": {"sessions": ["b"], "agent": "y"}
+			}`,
+			want: "model is required",
+		},
+		{
 			name: "group uses both modes",
 			json: `{
 				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
 				"control": {"session_base": "group", "sessions_count": 2, "sessions": ["a"], "agent": "x"},
 				"treatment": {"sessions": ["b"], "agent": "y"}
@@ -189,6 +205,7 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 			name: "seed length mismatch for session base",
 			json: `{
 				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
 				"control": {"session_base": "group", "sessions_count": 2, "agent": "x", "seeds": [1]},
 				"treatment": {"sessions": ["b"], "agent": "y"}
@@ -199,6 +216,7 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 			name: "duplicate explicit sessions",
 			json: `{
 				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
 				"control": {"sessions": ["dup", "dup"], "agent": "x"},
 				"treatment": {"sessions": ["b"], "agent": "y"}
@@ -209,6 +227,7 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 			name: "invalid expected direction",
 			json: `{
 				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
 				"control": {"sessions": ["a"], "agent": "x"},
 				"treatment": {"sessions": ["b"], "agent": "y"},

@@ -23,6 +23,7 @@ func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 	expPath := filepath.Join(experimentsDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 2,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
@@ -59,6 +60,7 @@ func TestStatusNextStepIsAnalyzeWhenAllPresent(t *testing.T) {
 	expPath := filepath.Join(experimentsDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 2,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
@@ -90,6 +92,7 @@ func TestAnalyzeWritesReport(t *testing.T) {
 	expPath := filepath.Join(experimentsDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
 		Control: experiment.Group{
 			SessionBase:   "control",
@@ -145,6 +148,7 @@ func TestAnalyzeWritesReportToExplicitDir(t *testing.T) {
 
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "control-agent", Opponent: "villain"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "treatment-agent", Opponent: "villain"},

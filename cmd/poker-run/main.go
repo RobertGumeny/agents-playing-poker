@@ -79,7 +79,7 @@ func run(args []string, stdout io.Writer) error {
 		BigBlind:         defaultBigBlind,
 		DecisionDeadline: defaultDecisionDeadline,
 		AgentSpecs:       []match.AgentSpec{agent0, agent1},
-		ProgressWriter:   os.Stderr,
+		ProgressWriter:   stdout,
 	})
 	if err != nil {
 		return err

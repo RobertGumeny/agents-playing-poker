@@ -20,6 +20,7 @@ const (
 type Definition struct {
 	ID                string               `json:"id"`
 	Hypothesis        string               `json:"hypothesis,omitempty"`
+	Model             string               `json:"model"`
 	HandsPerSession   int                  `json:"hands_per_session"`
 	Control           Group                `json:"control"`
 	Treatment         Group                `json:"treatment"`
@@ -43,6 +44,7 @@ type PlannedSession struct {
 
 type Plan struct {
 	ExperimentID    string
+	Model           string
 	HandsPerSession int
 	SessionsRootDir string
 	PlannedSessions []PlannedRun
@@ -89,6 +91,9 @@ func (d Definition) Validate() error {
 	if strings.TrimSpace(d.ID) == "" {
 		return fmt.Errorf("validate experiment definition: id is required")
 	}
+	if strings.TrimSpace(d.Model) == "" {
+		return fmt.Errorf("validate experiment definition: model is required")
+	}
 	if d.HandsPerSession <= 0 {
 		return fmt.Errorf("validate experiment definition: hands_per_session must be > 0")
 	}
@@ -115,6 +120,7 @@ func (d Definition) Plan(sessionsRootDir string) (Plan, error) {
 	rootDir := filepath.Clean(sessionsRootDir)
 	plan := Plan{
 		ExperimentID:    d.ID,
+		Model:           d.Model,
 		HandsPerSession: d.HandsPerSession,
 		SessionsRootDir: rootDir,
 	}

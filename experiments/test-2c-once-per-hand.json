@@ -1,6 +1,7 @@
 {
   "id": "test-2c-once-per-hand",
   "hypothesis": "Changing the system prompt to instruct the agent to call akg_get_opponent exactly once per hand (rather than 'first' on every decision) should reduce within-hand re-calls without adding retrieval overhead, maintaining or improving chips per hand. Control sessions are existing 25-hand runs; treatment sessions run 100 hands. Per-session counts are not comparable across groups — use per-hand rates only.",
+  "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 100,
   "control": {
     "sessions": [

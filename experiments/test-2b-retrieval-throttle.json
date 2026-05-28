@@ -1,6 +1,7 @@
 {
   "id": "test-2b-retrieval-throttle",
   "hypothesis": "Throttling durable retrieval should reduce tool use and session time without hurting chips per hand.",
+  "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 25,
   "control": {
     "session_base": "akg-durable-vs-stateless-test",

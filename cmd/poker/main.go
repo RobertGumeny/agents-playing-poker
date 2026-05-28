@@ -183,6 +183,11 @@ func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.
 	}
 	executor := evalrun.NewExecutor(repoDir, stdout, stderr)
 
+	effectiveModel := model
+	if effectiveModel == "" {
+		effectiveModel = coverage.Plan.Model
+	}
+
 	var toRun []evalrun.SessionCoverage
 	for _, session := range coverage.Sessions {
 		if session.Inspection.Status == "present" {
@@ -226,7 +231,7 @@ func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.
 				Seed:          s.Planned.Seed,
 				SessionID:     s.Planned.SessionID,
 				SessionsDir:   ef.sessionsDir,
-				Model:         model,
+				Model:         effectiveModel,
 				ThinkingLevel: thinkingLevel,
 				Stdout:        pw,
 				Stderr:        stderr,
