@@ -1,0 +1,29 @@
+{
+  "id": "test-2d-showdown-pattern",
+  "hypothesis": "Adding a 'strong-showdown-caller' pattern to the memory model should reduce tail-risk losses when the villain calls multiple streets. In test-2c we observed that the villain won 82-91% of showdowns (significant variance, but consistent), and the agent had no pattern encoding 'this opponent's calls are value-heavy — do not bluff into them at showdown.' The expected effect is a reduction in large losing hands (>50 chips) driven by missed bluffs at showdown, with a corresponding improvement in chips/hand. Control sessions are test-2c 100-hand runs; treatment sessions run 200 hands to give the new pattern sufficient time to accumulate evidence and influence late-session play. Per-session counts are not comparable across groups — use per-hand rates only.",
+  "model": "anthropic:claude-sonnet-4-6",
+  "hands_per_session": 200,
+  "control": {
+    "sessions": [
+      "akg-durable-once-per-hand-test-1",
+      "akg-durable-once-per-hand-test-2",
+      "akg-durable-once-per-hand-test-3",
+      "akg-durable-once-per-hand-test-4",
+      "akg-durable-once-per-hand-test-5"
+    ],
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless",
+    "seeds": [1, 2, 3, 4, 5]
+  },
+  "treatment": {
+    "session_base": "akg-durable-showdown-pattern-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless",
+    "seeds": [1, 2, 3, 4, 5]
+  },
+  "expected_direction": {
+    "chips_per_hand": "increase",
+    "large_loss_hands": "decrease"
+  }
+}

@@ -144,11 +144,15 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 		for _, spec := range r.config.AgentSpecs {
 			agentDir, err := writer.AgentDir(spec.Name)
 			if err != nil {
-				logNonFatal(r.config.ProgressWriter, "resolve memory export directory for agent %s: %v", spec.Name, err)
+				msg := fmt.Sprintf("resolve memory export directory for agent %s: %v", spec.Name, err)
+				logNonFatal(r.config.ProgressWriter, "%s", msg)
+				_ = sessionlog.AppendRunnerError(writer.SessionDir(), msg)
 				continue
 			}
 			if err := sessionlog.WriteMemoryExport(agentDir); err != nil {
-				logNonFatal(r.config.ProgressWriter, "write memory export for agent %s: %v", spec.Name, err)
+				msg := fmt.Sprintf("write memory export for agent %s: %v", spec.Name, err)
+				logNonFatal(r.config.ProgressWriter, "%s", msg)
+				_ = sessionlog.AppendRunnerError(writer.SessionDir(), msg)
 			}
 		}
 		result.Completed = completed

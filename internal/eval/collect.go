@@ -21,9 +21,10 @@ type Summary struct {
 }
 
 type SourceArtifacts struct {
-	Manifest string                          `json:"manifest"`
-	Hands    string                          `json:"hands"`
-	Agents   map[string]AgentSourceArtifacts `json:"agents"`
+	Manifest     string                          `json:"manifest"`
+	Hands        string                          `json:"hands"`
+	RunnerErrors *string                         `json:"runner_errors"`
+	Agents       map[string]AgentSourceArtifacts `json:"agents"`
 }
 
 type AgentSourceArtifacts struct {
@@ -95,9 +96,10 @@ func CollectSession(sessionDir string) (Summary, error) {
 		SessionID:     artifacts.Manifest.SessionID,
 		MatchID:       match.MatchID,
 		SourceArtifacts: SourceArtifacts{
-			Manifest: "manifest.json",
-			Hands:    "hands.jsonl",
-			Agents:   map[string]AgentSourceArtifacts{},
+			Manifest:     "manifest.json",
+			Hands:        "hands.jsonl",
+			RunnerErrors: existingRelPath(sessionDir, filepath.Join(sessionDir, "runner-errors.log")),
+			Agents:       map[string]AgentSourceArtifacts{},
 		},
 		Session: SessionSummary{
 			Seed:           artifacts.Manifest.Seed,
@@ -216,6 +218,14 @@ func chipsDeltaForSeat(results map[int]sessionlog.ManifestSeatResult, seat int) 
 		return 0
 	}
 	return result.ChipsDelta
+}
+
+// existingRelPath returns a relative path pointer only if the file exists.
+func existingRelPath(sessionDir, path string) *string {
+	if _, err := os.Stat(path); err != nil {
+		return nil
+	}
+	return optionalRelPath(sessionDir, path)
 }
 
 func optionalRelPath(sessionDir, path string) *string {

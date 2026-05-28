@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type BlindLevel struct {
@@ -127,6 +128,22 @@ func (w *Writer) WriteManifest(manifest Manifest) error {
 		return fmt.Errorf("write manifest: %w", err)
 	}
 	return nil
+}
+
+const runnerErrorsFileName = "runner-errors.log"
+
+// AppendRunnerError appends a timestamped error line to runner-errors.log in
+// the session directory. Errors here are non-fatal post-match failures (e.g.
+// memory export) that would otherwise only appear in transient stdout.
+func AppendRunnerError(sessionDir, msg string) error {
+	path := filepath.Join(sessionDir, runnerErrorsFileName)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("append runner error: %w", err)
+	}
+	defer f.Close()
+	_, err = fmt.Fprintf(f, "%s %s\n", time.Now().UTC().Format(time.RFC3339), msg)
+	return err
 }
 
 func (w *Writer) Close() error {
