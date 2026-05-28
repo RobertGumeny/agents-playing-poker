@@ -27,6 +27,7 @@ const (
 	llmStatelessAlias       = "llm-stateless"
 	llmFullhistoryAlias     = "llm-fullhistory"
 	llmAkgAlias             = "llm-akg-recent"
+	llmAkgDurableAlias      = "llm-akg-durable"
 	heuristicAlias          = "heuristic"
 	randomAlias             = "random"
 )
@@ -149,12 +150,14 @@ func (r agentAliasResolver) resolve(alias, model, thinkingLevel string) (match.A
 		return r.resolvePiAgent(llmFullhistoryAlias, model, thinkingLevel)
 	case llmAkgAlias:
 		return r.resolvePiAgent(llmAkgAlias, model, thinkingLevel)
+	case llmAkgDurableAlias:
+		return r.resolvePiAgent(llmAkgDurableAlias, model, thinkingLevel)
 	case heuristicAlias:
 		return r.resolveGoAgent(heuristicAlias, "./cmd/heuristic-agent", binaryName("heuristic-agent"))
 	case randomAlias:
 		return r.resolveGoAgent(randomAlias, "./cmd/random-agent", binaryName("random-agent"))
 	default:
-		return match.AgentSpec{}, fmt.Errorf("unsupported agent alias %q (supported: %s, %s, %s, %s, %s)", alias, llmStatelessAlias, llmFullhistoryAlias, llmAkgAlias, heuristicAlias, randomAlias)
+		return match.AgentSpec{}, fmt.Errorf("unsupported agent alias %q (supported: %s, %s, %s, %s, %s, %s)", alias, llmStatelessAlias, llmFullhistoryAlias, llmAkgAlias, llmAkgDurableAlias, heuristicAlias, randomAlias)
 	}
 }
 

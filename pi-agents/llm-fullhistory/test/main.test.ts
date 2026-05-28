@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 
@@ -42,7 +43,7 @@ describe("llm-fullhistory package wiring", () => {
 
   it("runs as a subprocess, reuses one fake Pi session per hand, and injects prior-hand history into later prompts", async () => {
     const { spawn } = await import("node:child_process");
-    const sessionDir = path.join(repoRoot, "tmp-llm-fullhistory-session-" + Date.now().toString(36));
+    const sessionDir = await mkdtemp(path.join(tmpdir(), "llm-fullhistory-session-"));
     const child = spawn(process.execPath, [entrypoint], {
       cwd: repoRoot,
       env: {

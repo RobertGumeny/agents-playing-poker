@@ -161,7 +161,7 @@ Current automated coverage proves:
 
 ## Constraints to preserve in follow-on work
 
-When extending this agent, preserve these current assumptions unless the focused durable-agent contract changes first:
+When extending this agent, preserve these current assumptions unless the spec changes first:
 - post-hand writes are the only durable graph write point
 - `memory_dir` comes from the server and is reused as the AKG home plus default Pi session-log home
 - hand nodes are the source of truth for rebuilding opponent and pattern state
@@ -171,7 +171,7 @@ When extending this agent, preserve these current assumptions unless the focused
 ## Related references
 
 - [`../llm-akg-durable-spec.md`](../llm-akg-durable-spec.md)
-- [`../research.md`](../research.md)
+- [`../spec.md`](../spec.md)
 - [`llm-fullhistory-baseline.md`](llm-fullhistory-baseline.md)
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)
 - [`repeatable-benchmark-reporting.md`](repeatable-benchmark-reporting.md)
