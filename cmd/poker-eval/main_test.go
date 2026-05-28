@@ -13,6 +13,64 @@ import (
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
 
+func TestInitWritesValidExperimentTemplate(t *testing.T) {
+	rootDir := t.TempDir()
+	outputPath := filepath.Join(rootDir, "experiments", "retrieval-throttle.json")
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	if err := run([]string{"init", "-out", outputPath, "-hypothesis", "Test hypothesis.", "-sessions-count", "3", "-hands-per-session", "50", "-control-opponent", "llm-stateless", "-treatment-agent", "llm-akg-durable"}, &stdout, &stderr, runDeps{}); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+	if !strings.Contains(stdout.String(), "initialized experiment id=retrieval-throttle output="+outputPath+" planned_sessions=6") {
+		t.Fatalf("stdout = %q, want initialized output", stdout.String())
+	}
+
+	def, err := experiment.Load(outputPath)
+	if err != nil {
+		t.Fatalf("experiment.Load() error = %v", err)
+	}
+	if def.ID != "retrieval-throttle" || def.HandsPerSession != 50 || def.Control.SessionBase != "retrieval-throttle-control" || def.Treatment.SessionBase != "retrieval-throttle-treatment" || def.Control.Opponent != "llm-stateless" || def.Treatment.Agent != "llm-akg-durable" || def.Treatment.Opponent != "llm-stateless" {
+		t.Fatalf("loaded definition = %+v, want derived valid template", def)
+	}
+}
+
+func TestListPrintsExperimentCoverageSummaries(t *testing.T) {
+	rootDir := t.TempDir()
+	experimentsDir := filepath.Join(rootDir, "experiments")
+	sessionsDir := filepath.Join(rootDir, "sessions")
+	if err := os.MkdirAll(experimentsDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(experiments) error = %v", err)
+	}
+
+	experimentPath := filepath.Join(experimentsDir, "bench.json")
+	writeExperimentFixture(t, experimentPath, experiment.Definition{
+		ID:              "bench",
+		HandsPerSession: 2,
+		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
+		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
+	})
+	createSessionFixture(t, sessionsDir, "control-1", fixtureOptions{Seed: 1, HandCount: 2, Completed: true, Seats: []string{"llm-stateless", "heuristic"}, HandsWritten: 2})
+
+	var stdout strings.Builder
+	var stderr strings.Builder
+	if err := run([]string{"ls", "-experiments-dir", experimentsDir, "-sessions-dir", sessionsDir}, &stdout, &stderr, newRunDeps()); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"experiments_dir=" + experimentsDir + " count=1",
+		"path=" + experimentPath + " id=bench planned=2 present=1 missing=1 incomplete=0 hands_per_session=2",
+		"group_summary path=" + experimentPath + " group=control planned=1 present=1 missing=0 incomplete=0",
+		"group_summary path=" + experimentPath + " group=treatment planned=1 present=0 missing=1 incomplete=0",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("stdout missing %q\nfull output:\n%s", want, got)
+		}
+	}
+}
+
 func TestCollectWritesEvalJSON(t *testing.T) {
 	rootDir := t.TempDir()
 	sessionDir := createCollectCLIFixture(t, rootDir)

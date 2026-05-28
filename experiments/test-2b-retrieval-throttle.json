@@ -1,0 +1,23 @@
+{
+  "id": "test-2b-retrieval-throttle",
+  "hypothesis": "Throttling durable retrieval should reduce tool use and session time without hurting chips per hand.",
+  "hands_per_session": 25,
+  "control": {
+    "session_base": "akg-durable-vs-stateless-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless"
+  },
+  "treatment": {
+    "session_base": "akg-durable-retrieval-test",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-stateless"
+  },
+  "expected_direction": {
+    "chips_per_hand": "increase",
+    "akg_get_opponent_per_session": "decrease",
+    "session_duration_s": "decrease",
+    "preflop_only_rate": "decrease"
+  }
+}

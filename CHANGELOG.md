@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- feat: add poker-eval init and ls experiment ergonomics
 - feat: add poker-eval compare for experiment treatment/control reporting
 - feat: add poker-eval collect and deterministic eval.json generation
 - feat: add shared offline eval artifact loaders

@@ -105,6 +105,25 @@ ls sessions/ses_demo_random_vs_heuristic/agents
 
 ## Run a planned experiment
 
+Bootstrap a valid experiment definition:
+
+```bash
+go run ./cmd/poker-eval init \
+  -out experiments/my-first-benchmark.json \
+  -hypothesis "Bounded memory should beat stateless play at similar cost." \
+  -control-agent llm-stateless \
+  -control-opponent heuristic \
+  -treatment-agent llm-akg-recent \
+  -sessions-count 5
+```
+
+Discover checked-in experiment definitions and their coverage:
+
+```bash
+go run ./cmd/poker-eval ls
+go run ./cmd/poker-eval ls -experiments-dir experiments -sessions-dir sessions
+```
+
 Use `poker-eval run` when you want deterministic session planning from a checked-in experiment definition instead of manually constructing repeated `poker-run` commands.
 
 ```bash
@@ -117,16 +136,16 @@ go run ./cmd/poker-eval run -experiment experiments/test-2b-retrieval-throttle.j
 
 Current behavior:
 
-- loads the JSON experiment definition from [`docs/experiment-definition.md`](docs/experiment-definition.md)
-- derives control and treatment session ids, seeds, and expected `sessions/<id>` directories deterministically
-- prints the planned execution config (`hands_per_session`, `sessions_dir`, model, thinking level) in dry-run and live modes
-- reports coverage for each planned session as `present`, `missing`, or `incomplete`
-- prints per-group coverage summaries for control and treatment
-- skips already-present session directories on execution
-- launches missing or incomplete planned sessions through `poker-run`
-- requires `opponent` metadata for any missing or incomplete session it needs to launch
+- `poker-eval init` writes a valid JSON template that already satisfies [`docs/experiment-definition.md`](docs/experiment-definition.md)
+- `poker-eval ls` scans `experiments/` for JSON definitions and prints planned/present/missing/incomplete coverage summaries
+- `poker-eval run` loads a checked-in experiment definition and derives control and treatment session ids, seeds, and expected `sessions/<id>` directories deterministically
+- `poker-eval run` prints the planned execution config (`hands_per_session`, `sessions_dir`, model, thinking level) in dry-run and live modes
+- `poker-eval run` reports coverage for each planned session as `present`, `missing`, or `incomplete`
+- `poker-eval run` skips already-present session directories on execution
+- `poker-eval run` launches missing or incomplete planned sessions through `poker-run`
+- `poker-eval run` requires `opponent` metadata for any missing or incomplete session it needs to launch
 
-To inspect experiment coverage without launching anything:
+To inspect one experiment's coverage without launching anything:
 
 ```bash
 go run ./cmd/poker-eval status -experiment experiments/test-2b-retrieval-throttle.json

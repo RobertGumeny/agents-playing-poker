@@ -1,6 +1,6 @@
 # Experiment Execution and Coverage
 
-EPIC-12 added the operator-facing CLI layer that executes a checked-in experiment definition directly and reports coverage from that definition instead of from ad hoc directory inspection.
+EPIC-12 added the operator-facing CLI layer that executes a checked-in experiment definition directly and reports coverage from that definition instead of from ad hoc directory inspection. EPIC-14 extended that surface with experiment bootstrap and discovery ergonomics.
 
 ## Epic delivery summary
 
@@ -17,17 +17,20 @@ The current implementation and operator-facing references live in:
 - `internal/experiment/definition.go`
 - `internal/experiment/definition_test.go`
 - `docs/experiment-definition.md`
+- `experiments/test-2b-retrieval-throttle.json`
 - `README.md`
 
 ## CLI surface
 
-EPIC-12 specifically delivered the experiment-driven execution subcommands:
+The experiment-driven CLI surface now includes:
+- `poker-eval init`
+- `poker-eval ls`
 - `poker-eval run`
 - `poker-eval status`
 
-The binary now also includes `poker-eval collect`, but that offline summary path is covered separately in [`offline-eval-collection.md`](offline-eval-collection.md).
+The binary also includes `poker-eval collect` and `poker-eval compare`, but those offline summary paths are covered separately in [`offline-eval-collection.md`](offline-eval-collection.md).
 
-Shared behavior for the EPIC-12 commands:
+Shared behavior for `run` and `status`:
 - both require `-experiment`
 - both load the JSON definition through `experiment.Load`
 - both expand the experiment through `Definition.Plan(sessionsDir)`
@@ -35,8 +38,12 @@ Shared behavior for the EPIC-12 commands:
 - both print experiment totals, a config line, per-group summaries, and one line per planned session
 
 Current flags:
+- `init`: `-out`, `-id`, `-hypothesis`, `-hands-per-session`, `-sessions-count`, `-control-agent`, `-control-opponent`, `-control-session-base`, `-treatment-agent`, `-treatment-opponent`, `-treatment-session-base`
+- `ls`: `-experiments-dir`, `-sessions-dir`
 - `run`: `-experiment`, `-sessions-dir`, `-dry-run`, `-model`, `-thinking-level`
 - `status`: `-experiment`, `-sessions-dir`
+
+`init` derives `id` from the output filename when omitted, defaults control/treatment session bases to `<id>-control` and `<id>-treatment`, and writes a schema-valid JSON template. `ls` recursively scans an experiments directory for `.json` files and prints either coverage summaries or an invalid-definition error per file.
 
 `run` defaults `thinking_level` to `low` so Pi-backed sessions inherit the repo's normal low-thinking default unless the operator overrides it.
 
