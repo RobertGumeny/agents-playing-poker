@@ -20,7 +20,7 @@ func TestInitWritesValidExperimentTemplate(t *testing.T) {
 
 	var stdout strings.Builder
 	var stderr strings.Builder
-	if err := run([]string{"init", "-out", outputPath, "-hypothesis", "Test hypothesis.", "-sessions-count", "3", "-hands-per-session", "50", "-control-opponent", "llm-stateless", "-treatment-agent", "llm-akg-durable"}, &stdout, &stderr, runDeps{}); err != nil {
+	if err := run([]string{"init", "-out", outputPath, "-hypothesis", "Test hypothesis.", "-model", "anthropic:claude-sonnet-4-6", "-sessions-count", "3", "-hands-per-session", "50", "-control-opponent", "llm-stateless", "-treatment-agent", "llm-akg-durable"}, &stdout, &stderr, runDeps{}); err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
 	if !strings.Contains(stdout.String(), "initialized experiment id=retrieval-throttle output="+outputPath+" planned_sessions=6") {
@@ -31,7 +31,7 @@ func TestInitWritesValidExperimentTemplate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("experiment.Load() error = %v", err)
 	}
-	if def.ID != "retrieval-throttle" || def.HandsPerSession != 50 || def.Control.SessionBase != "retrieval-throttle-control" || def.Treatment.SessionBase != "retrieval-throttle-treatment" || def.Control.Opponent != "llm-stateless" || def.Treatment.Agent != "llm-akg-durable" || def.Treatment.Opponent != "llm-stateless" {
+	if def.ID != "retrieval-throttle" || def.Model != "anthropic:claude-sonnet-4-6" || def.HandsPerSession != 50 || def.Control.SessionBase != "retrieval-throttle-control" || def.Treatment.SessionBase != "retrieval-throttle-treatment" || def.Control.Opponent != "llm-stateless" || def.Treatment.Agent != "llm-akg-durable" || def.Treatment.Opponent != "llm-stateless" {
 		t.Fatalf("loaded definition = %+v, want derived valid template", def)
 	}
 }
@@ -47,6 +47,7 @@ func TestListPrintsExperimentCoverageSummaries(t *testing.T) {
 	experimentPath := filepath.Join(experimentsDir, "bench.json")
 	writeExperimentFixture(t, experimentPath, experiment.Definition{
 		ID:              "bench",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 2,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
@@ -109,6 +110,7 @@ func TestComparePrintsAggregatedReportAndDirectionChecks(t *testing.T) {
 	writeExperimentFixture(t, experimentPath, experiment.Definition{
 		ID:              "exp-compare",
 		Hypothesis:      "Treatment should win more chips with less tool use.",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
 		Control: experiment.Group{
 			SessionBase:   "control",
@@ -175,6 +177,7 @@ func TestCompareRejectsIncompleteCoverage(t *testing.T) {
 	experimentPath := filepath.Join(rootDir, "experiment.json")
 	writeExperimentFixture(t, experimentPath, experiment.Definition{
 		ID:              "exp-missing",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "control-agent", Opponent: "villain"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "treatment-agent", Opponent: "villain"},
@@ -202,6 +205,7 @@ func TestCompareWarnsOnInconsistentObservedGroupData(t *testing.T) {
 	experimentPath := filepath.Join(rootDir, "experiment.json")
 	writeExperimentFixture(t, experimentPath, experiment.Definition{
 		ID:              "exp-warning",
+		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
 		Control:         experiment.Group{SessionBase: "control", SessionsCount: 2, Agent: "control-agent"},
 		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 2, Agent: "treatment-agent"},
@@ -435,6 +439,33 @@ func TestInspectExistingSession(t *testing.T) {
 	}
 	if inspection != (evalrun.SessionInspection{Status: "present"}) {
 		t.Fatalf("evalrun.InspectExistingSession() = %+v, want present", inspection)
+	}
+}
+
+func TestInspectExistingSessionExplicitSkipsHandCountCheck(t *testing.T) {
+	rootDir := t.TempDir()
+	planned := experiment.PlannedRun{
+		GroupLabel:      "control",
+		SessionID:       "session-25h",
+		SessionDir:      filepath.Join(rootDir, "session-25h"),
+		Seed:            17,
+		Agent:           "llm-stateless",
+		Opponent:        "heuristic",
+		ExplicitSession: true,
+	}
+	createSessionFixture(t, rootDir, planned.SessionID, fixtureOptions{
+		Seed:         planned.Seed,
+		HandCount:    25,
+		Completed:    true,
+		Seats:        []string{planned.Agent, planned.Opponent},
+		HandsWritten: 25,
+	})
+	inspection, err := evalrun.InspectExistingSession(planned, 100)
+	if err != nil {
+		t.Fatalf("evalrun.InspectExistingSession() error = %v", err)
+	}
+	if inspection != (evalrun.SessionInspection{Status: "present"}) {
+		t.Fatalf("evalrun.InspectExistingSession() = %+v, want present (explicit session should skip hand count check)", inspection)
 	}
 }
 

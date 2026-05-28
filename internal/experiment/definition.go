@@ -51,12 +51,13 @@ type Plan struct {
 }
 
 type PlannedRun struct {
-	GroupLabel string
-	SessionID  string
-	SessionDir string
-	Seed       int64
-	Agent      string
-	Opponent   string
+	GroupLabel      string
+	SessionID       string
+	SessionDir      string
+	Seed            int64
+	Agent           string
+	Opponent        string
+	ExplicitSession bool // true when session was named explicitly rather than generated from session_base
 }
 
 func Load(path string) (Definition, error) {
@@ -135,12 +136,13 @@ func (d Definition) Plan(sessionsRootDir string) (Plan, error) {
 	} {
 		for _, planned := range group.spec.PlannedSessions(group.label) {
 			run := PlannedRun{
-				GroupLabel: group.label,
-				SessionID:  planned.SessionID,
-				SessionDir: filepath.Join(rootDir, planned.SessionID),
-				Seed:       planned.Seed,
-				Agent:      group.spec.Agent,
-				Opponent:   group.spec.Opponent,
+				GroupLabel:      group.label,
+				SessionID:       planned.SessionID,
+				SessionDir:      filepath.Join(rootDir, planned.SessionID),
+				Seed:            planned.Seed,
+				Agent:           group.spec.Agent,
+				Opponent:        group.spec.Opponent,
+				ExplicitSession: len(group.spec.Sessions) > 0,
 			}
 			if prior, ok := seen[run.SessionID]; ok {
 				if prior == run {

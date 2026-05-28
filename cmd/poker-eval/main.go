@@ -103,6 +103,7 @@ type initConfig struct {
 	outputPath           string
 	id                   string
 	hypothesis           string
+	model                string
 	handsPerSession      int
 	sessionsCount        int
 	controlAgent         string
@@ -164,6 +165,7 @@ func runInit(args []string, stdout, stderr io.Writer) error {
 	def := experiment.Definition{
 		ID:              cfg.id,
 		Hypothesis:      cfg.hypothesis,
+		Model:           cfg.model,
 		HandsPerSession: cfg.handsPerSession,
 		Control: experiment.Group{
 			SessionBase:   cfg.controlSessionBase,
@@ -351,6 +353,7 @@ func parseInitConfig(args []string) (initConfig, error) {
 	fs.StringVar(&cfg.outputPath, "out", "", "path to write experiment definition JSON")
 	fs.StringVar(&cfg.id, "id", "", "experiment id (defaults to output filename without .json)")
 	fs.StringVar(&cfg.hypothesis, "hypothesis", "", "optional hypothesis text")
+	fs.StringVar(&cfg.model, "model", "", "model identifier (e.g. anthropic:claude-sonnet-4-6)")
 	fs.IntVar(&cfg.handsPerSession, "hands-per-session", 25, "expected hand count for each session")
 	fs.IntVar(&cfg.sessionsCount, "sessions-count", 5, "number of sessions to plan per group")
 	fs.StringVar(&cfg.controlAgent, "control-agent", "llm-stateless", "control group agent identifier")

@@ -113,10 +113,10 @@ func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
 	}
 
 	want := []PlannedRun{
-		{GroupLabel: "control", SessionID: "control-group-1", SessionDir: filepath.Join("sessions", "control-group-1"), Seed: 1, Agent: "llm-stateless", Opponent: "heuristic"},
-		{GroupLabel: "control", SessionID: "control-group-2", SessionDir: filepath.Join("sessions", "control-group-2"), Seed: 2, Agent: "llm-stateless", Opponent: "heuristic"},
-		{GroupLabel: "treatment", SessionID: "treatment-a", SessionDir: filepath.Join("sessions", "treatment-a"), Seed: 17, Agent: "llm-akg-recent", Opponent: "heuristic"},
-		{GroupLabel: "treatment", SessionID: "treatment-b", SessionDir: filepath.Join("sessions", "treatment-b"), Seed: 23, Agent: "llm-akg-recent", Opponent: "heuristic"},
+		{GroupLabel: "control", SessionID: "control-group-1", SessionDir: filepath.Join("sessions", "control-group-1"), Seed: 1, Agent: "llm-stateless", Opponent: "heuristic", ExplicitSession: false},
+		{GroupLabel: "control", SessionID: "control-group-2", SessionDir: filepath.Join("sessions", "control-group-2"), Seed: 2, Agent: "llm-stateless", Opponent: "heuristic", ExplicitSession: false},
+		{GroupLabel: "treatment", SessionID: "treatment-a", SessionDir: filepath.Join("sessions", "treatment-a"), Seed: 17, Agent: "llm-akg-recent", Opponent: "heuristic", ExplicitSession: true},
+		{GroupLabel: "treatment", SessionID: "treatment-b", SessionDir: filepath.Join("sessions", "treatment-b"), Seed: 23, Agent: "llm-akg-recent", Opponent: "heuristic", ExplicitSession: true},
 	}
 	if !reflect.DeepEqual(plan.PlannedSessions, want) {
 		t.Fatalf("plan.PlannedSessions = %#v, want %#v", plan.PlannedSessions, want)

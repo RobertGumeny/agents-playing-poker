@@ -128,7 +128,7 @@ func InspectExistingSession(planned experiment.PlannedRun, handsPerSession int) 
 	if manifest.Seed != planned.Seed {
 		return SessionInspection{Status: "incomplete", Reason: "seed_mismatch"}, nil
 	}
-	if manifest.HandCount != handsPerSession {
+	if !planned.ExplicitSession && manifest.HandCount != handsPerSession {
 		return SessionInspection{Status: "incomplete", Reason: "hand_count_mismatch"}, nil
 	}
 	if len(manifest.Matches) == 0 {
@@ -151,7 +151,7 @@ func InspectExistingSession(planned experiment.PlannedRun, handsPerSession int) 
 		}
 		return SessionInspection{Status: "incomplete", Reason: "hands_unreadable"}, nil
 	}
-	if len(hands) != handsPerSession {
+	if !planned.ExplicitSession && len(hands) != handsPerSession {
 		return SessionInspection{Status: "incomplete", Reason: "hands_count_mismatch"}, nil
 	}
 
