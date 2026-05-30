@@ -1,4 +1,4 @@
-package reporting
+package benchreport
 
 import (
 	"encoding/json"
