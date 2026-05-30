@@ -6,8 +6,8 @@ Agents Playing Poker is a research harness, inspired by the classic painting "Do
 
 The main workflow is experiment-first:
 
-1. Write an experiment JSON file under `experiments/`.
-2. Run it with `poker experiment go <experiment-id>`.
+1. Write an experiment JSON file under `research/experiments/`.
+2. Run it with `poker experiment go <experiment-id>` (from the `engine/` directory).
 3. Inspect the generated session artifacts and Markdown report.
 
 ## What is being compared?
@@ -26,15 +26,16 @@ For the full framing, read [`docs/vision.md`](docs/vision.md) and [`docs/researc
 
 ## Quick start: run an experiment
 
-Experiment definitions live in [`experiments/`](experiments/). Each file is a JSON plan for a control-vs-treatment comparison.
+Experiment definitions live in [`research/experiments/`](research/experiments/). Each file is a JSON plan for a control-vs-treatment comparison.
 
-Example:
+All Go commands run from the `engine/` directory:
 
 ```bash
+cd engine
 go run ./cmd/poker experiment go test-2b-retrieval-throttle
 ```
 
-If you have built the root `poker` binary, the same command is:
+If you have built the `poker` binary (`go build -o poker ./cmd/poker` from `engine/`), the same command is:
 
 ```bash
 ./poker experiment go test-2b-retrieval-throttle
@@ -89,10 +90,10 @@ A minimal experiment compares a `control` group against a `treatment` group:
 Save it as:
 
 ```text
-experiments/my-memory-test.json
+research/experiments/my-memory-test.json
 ```
 
-Then run:
+Then run from `engine/`:
 
 ```bash
 go run ./cmd/poker experiment go my-memory-test
@@ -111,7 +112,7 @@ The root CLI is organized around `poker experiment`:
 | `poker experiment analyze <id>` | Collect `eval.json` files and write the comparison report. |
 | `poker experiment go <id>` | Run missing work, collect summaries, and write the report. |
 
-When using `go run`, prefix commands with `go run ./cmd/poker`, for example:
+When using `go run` (from `engine/`), prefix commands with `go run ./cmd/poker`, for example:
 
 ```bash
 go run ./cmd/poker experiment status test-2b-retrieval-throttle
@@ -119,7 +120,7 @@ go run ./cmd/poker experiment status test-2b-retrieval-throttle
 
 ## Outputs
 
-Each session writes a bundle under `sessions/<session-id>/`:
+Each session writes a bundle under `research/sessions/<session-id>/`:
 
 - `manifest.json` — match metadata, agent names, chip totals, and completion status.
 - `hands.jsonl` — server-authoritative hand log.
@@ -133,7 +134,7 @@ Each session writes a bundle under `sessions/<session-id>/`:
 Experiment comparison reports are written to:
 
 ```text
-reports/<experiment-id>.md
+research/reports/<experiment-id>.md
 ```
 
 Artifact contracts are documented in [`docs/session-artifacts.md`](docs/session-artifacts.md).
@@ -142,19 +143,19 @@ Artifact contracts are documented in [`docs/session-artifacts.md`](docs/session-
 
 The experiment workflow is the normal path. These commands are still useful when debugging.
 
-Run a no-LLM scripted smoke test:
+Run a no-LLM scripted smoke test (from `engine/`):
 
 ```bash
 go run ./cmd/poker-demo
 ```
 
-Run one ad hoc match directly:
+Run one ad hoc match directly (from `engine/`):
 
 ```bash
 go run ./cmd/poker-run -agent0 heuristic -agent1 random -hands 200 -seed 17
 ```
 
-Run one LLM match directly:
+Run one LLM match directly (from `engine/`):
 
 ```bash
 go run ./cmd/poker-run \

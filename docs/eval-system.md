@@ -6,7 +6,8 @@ This document describes the current experiment-first evaluation workflow.
 
 The normal workflow is:
 
-1. Write a JSON experiment definition under `experiments/`.
+1. Create a slug subdirectory under `research/experiments/` and place the JSON experiment definition inside it:
+   `research/experiments/<slug>/<slug>.json`
 2. Run:
 
    ```bash
@@ -14,10 +15,10 @@ The normal workflow is:
    ```
 
 3. Review:
-   - `reports/<experiment-id>.md`
-   - `sessions/<session-id>/manifest.json`
-   - `sessions/<session-id>/hands.jsonl`
-   - `sessions/<session-id>/eval.json`
+   - `research/experiments/<slug>/reports/<experiment-id>.md`
+   - `research/experiments/<slug>/sessions/<session-id>/manifest.json`
+   - `research/experiments/<slug>/sessions/<session-id>/hands.jsonl`
+   - `research/experiments/<slug>/sessions/<session-id>/eval.json`
    - per-agent logs and memory artifacts
 
 The experiment definition is the planning authority. The filesystem answers which planned sessions are present, missing, or incomplete.
@@ -28,12 +29,14 @@ The canonical CLI is `poker experiment` from `cmd/poker`.
 
 | Command | Purpose |
 | --- | --- |
-| `poker experiment status <id>` | Load `experiments/<id>.json` and print planned coverage. |
+| `poker experiment status <id>` | Load `research/experiments/<id>/<id>.json` and print planned coverage. |
 | `poker experiment run <id>` | Run only missing or incomplete planned sessions. |
-| `poker experiment analyze <id>` | Collect missing `eval.json` summaries and write `reports/<id>.md`. |
+| `poker experiment analyze <id>` | Collect missing `eval.json` summaries and write the report into the experiment's `reports/` dir. |
 | `poker experiment go <id>` | Run missing/incomplete sessions, collect summaries, and write the report. |
 
-All commands accept `-experiments-dir`, `-sessions-dir`, and `-experiment` for explicit path overrides. `run` and `go` also accept runtime model controls such as `-model` and `-thinking-level`.
+All commands accept `-experiments-dir` and `-experiment` for explicit path overrides. `run` and `go` also accept runtime model controls such as `-model` and `-thinking-level`.
+
+Sessions and reports are derived from the experiment file location: sessions live at `<experiment-dir>/sessions/` and reports at `<experiment-dir>/reports/`.
 
 When `-model` is omitted, the runner uses the required `model` field from the experiment JSON.
 
@@ -80,7 +83,7 @@ Experiment planning is deterministic:
 - `control` sessions are planned before `treatment` sessions.
 - A group either derives sessions from `session_base` + `sessions_count` or lists explicit `sessions`.
 - Omitted seeds default positionally to `1..N`.
-- Planned session directories are under the selected `sessions/` root.
+- Planned session directories are under the experiment's `sessions/` subdirectory (e.g. `research/experiments/<slug>/sessions/`).
 
 Coverage inspection classifies each planned session as:
 
@@ -105,7 +108,7 @@ Runtime-only settings such as `-model` and `-thinking-level` do not mutate the c
 `poker experiment analyze` performs two additive analysis steps:
 
 1. For every present planned session missing `eval.json`, collect a deterministic summary from session artifacts.
-2. Compare control and treatment summaries and write `reports/<experiment-id>.md`.
+2. Compare control and treatment summaries and write `<experiment-dir>/reports/<experiment-id>.md`.
 
 `eval.json` is derived from:
 

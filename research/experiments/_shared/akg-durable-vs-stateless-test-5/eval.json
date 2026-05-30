@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "session_id": "akg-durable-vs-stateless-test-5",
+  "match_id": "mat_001",
+  "source_artifacts": {
+    "manifest": "manifest.json",
+    "hands": "hands.jsonl",
+    "agents": {
+      "llm-akg-durable": {
+        "pi_session": "agents/llm-akg-durable/pi-session.jsonl",
+        "memory_export": null,
+        "stderr": "agents/llm-akg-durable/stderr.log"
+      },
+      "llm-stateless": {
+        "pi_session": "agents/llm-stateless/pi-session.jsonl",
+        "memory_export": null,
+        "stderr": "agents/llm-stateless/stderr.log"
+      }
+    }
+  },
+  "session": {
+    "seed": 5,
+    "duration_s": 390,
+    "hand_count": 25,
+    "variant": "heads-up-nlhe",
+    "info_realism": "showdown-only",
+    "starting_stack": 200,
+    "blinds": {
+      "sb": 1,
+      "bb": 2
+    },
+    "completed": true,
+    "server_version": "dev",
+    "akg_spec_version": "v1-draft-2"
+  },
+  "metrics": {
+    "preflop_only_hands": 12,
+    "preflop_only_rate": 0.48,
+    "showdown_hands": 0,
+    "showdown_rate": 0,
+    "biggest_swing_hand": {
+      "hand_number": 23,
+      "chips": 58
+    },
+    "fallback_action_count": 0
+  },
+  "seats": [
+    {
+      "seat": 0,
+      "name": "llm-akg-durable",
+      "version": "llm-akg-durable/0.1.0",
+      "chips_delta": 162,
+      "pi_session_present": true,
+      "decision_prompt_count": 56,
+      "tool_calls": {
+        "akg_get_opponent": 31,
+        "akg_list_patterns": 2
+      },
+      "tool_calls_per_hand": {
+        "akg_get_opponent": 1.24,
+        "akg_list_patterns": 0.08
+      },
+      "retry_metrics": {
+        "attempt_failures": 11,
+        "malformed_action_retries": 11,
+        "exhausted_count": 1,
+        "max_attempts_observed": 2
+      },
+      "memory_export": null
+    },
+    {
+      "seat": 1,
+      "name": "llm-stateless",
+      "version": "llm-stateless/0.1.0",
+      "chips_delta": -162,
+      "pi_session_present": true,
+      "decision_prompt_count": 57,
+      "tool_calls": {},
+      "tool_calls_per_hand": {},
+      "retry_metrics": {
+        "attempt_failures": 0,
+        "malformed_action_retries": 0,
+        "exhausted_count": 0,
+        "max_attempts_observed": 0
+      },
+      "memory_export": null
+    }
+  ]
+}

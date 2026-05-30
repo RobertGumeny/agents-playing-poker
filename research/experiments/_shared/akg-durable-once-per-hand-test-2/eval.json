@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "session_id": "akg-durable-once-per-hand-test-2",
+  "match_id": "mat_001",
+  "source_artifacts": {
+    "manifest": "manifest.json",
+    "hands": "hands.jsonl",
+    "agents": {
+      "llm-akg-durable": {
+        "pi_session": "agents/llm-akg-durable/pi-session.jsonl",
+        "memory_export": "agents/llm-akg-durable/memory-export.json",
+        "stderr": "agents/llm-akg-durable/stderr.log"
+      },
+      "llm-stateless": {
+        "pi_session": "agents/llm-stateless/pi-session.jsonl",
+        "memory_export": null,
+        "stderr": "agents/llm-stateless/stderr.log"
+      }
+    }
+  },
+  "session": {
+    "seed": 2,
+    "duration_s": 1635,
+    "hand_count": 100,
+    "variant": "heads-up-nlhe",
+    "info_realism": "showdown-only",
+    "starting_stack": 200,
+    "blinds": {
+      "sb": 1,
+      "bb": 2
+    },
+    "completed": true,
+    "server_version": "dev",
+    "akg_spec_version": "v1-draft-2"
+  },
+  "metrics": {
+    "preflop_only_hands": 46,
+    "preflop_only_rate": 0.46,
+    "showdown_hands": 11,
+    "showdown_rate": 0.11,
+    "biggest_swing_hand": {
+      "hand_number": 16,
+      "chips": 143
+    },
+    "fallback_action_count": 0
+  },
+  "seats": [
+    {
+      "seat": 0,
+      "name": "llm-akg-durable",
+      "version": "llm-akg-durable/0.1.0",
+      "chips_delta": -208,
+      "pi_session_present": true,
+      "decision_prompt_count": 260,
+      "tool_calls": {
+        "akg_get_opponent": 108,
+        "akg_get_pattern": 1,
+        "akg_list_patterns": 19
+      },
+      "tool_calls_per_hand": {
+        "akg_get_opponent": 1.08,
+        "akg_get_pattern": 0.01,
+        "akg_list_patterns": 0.19
+      },
+      "retry_metrics": {
+        "attempt_failures": 36,
+        "malformed_action_retries": 36,
+        "exhausted_count": 8,
+        "max_attempts_observed": 2
+      },
+      "memory_export": {
+        "NodeCount": 105,
+        "EdgeCount": 26,
+        "NodesByType": {
+          "hand": 100,
+          "opponent": 1,
+          "pattern": 4
+        },
+        "EdgesByRelation": {
+          "shows_pattern": 4,
+          "supported_by": 22
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "name": "llm-stateless",
+      "version": "llm-stateless/0.1.0",
+      "chips_delta": 208,
+      "pi_session_present": true,
+      "decision_prompt_count": 247,
+      "tool_calls": {},
+      "tool_calls_per_hand": {},
+      "retry_metrics": {
+        "attempt_failures": 1,
+        "malformed_action_retries": 1,
+        "exhausted_count": 0,
+        "max_attempts_observed": 2
+      },
+      "memory_export": null
+    }
+  ]
+}

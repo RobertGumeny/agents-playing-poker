@@ -284,7 +284,7 @@ async function createPiSession(options: ResolvedPiSessionOptions): Promise<PiSes
   return session;
 }
 
-function resolveModel(spec: string | undefined, modelRegistry: ModelRegistry): CreateAgentSessionOptions["model"] {
+export function resolveModel(spec: string | undefined, modelRegistry: ModelRegistry): CreateAgentSessionOptions["model"] {
   if (!spec) return undefined;
 
   const colonIndex = spec.indexOf(":");
@@ -331,4 +331,80 @@ export function parsePiThinkingLevel(value: string | undefined): PiThinkingLevel
     return value as PiThinkingLevel;
   }
   throw new Error(`invalid Pi thinking level ${JSON.stringify(value)}`);
+}
+
+export function parsePositiveInteger(value: string | undefined): number | undefined {
+  if (value === undefined || value.length === 0) return undefined;
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`invalid positive integer ${JSON.stringify(value)}`);
+  }
+
+  return parsed;
+}
+
+export function parseFakeDecisions(value: string | undefined): ActionPayload[] | undefined {
+  if (value === undefined || value.length === 0) return undefined;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch (error) {
+    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("invalid PI_POKER_FAKE_DECISIONS_JSON: expected JSON array");
+  }
+
+  return parsed.map((entry, index) => parseFakeDecision(entry, index));
+}
+
+function parseFakeDecision(entry: unknown, index: number): ActionPayload {
+  if (!isRecord(entry)) {
+    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}]: expected object`);
+  }
+  const action = entry.action;
+  if (action !== "fold" && action !== "check" && action !== "call" && action !== "bet" && action !== "raise") {
+    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}].action`);
+  }
+  const rawAmount = entry.amount;
+  if (rawAmount === undefined) {
+    return { action };
+  }
+  if (typeof rawAmount !== "number" || !Number.isInteger(rawAmount) || rawAmount < 0) {
+    throw new Error(`invalid PI_POKER_FAKE_DECISIONS_JSON[${index}].amount`);
+  }
+  return { action, amount: rawAmount };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export interface CreateStandardDecisionEngineOptions {
+  sessionScope: PiSessionScope;
+  memoryDirProvider: () => string | undefined;
+}
+
+export function createStandardDecisionEngine(options: CreateStandardDecisionEngineOptions): DecisionEngine {
+  const explicitSessionDir = process.env.PI_POKER_PI_SESSION_DIR;
+  const sessionDirProvider = () => explicitSessionDir ?? options.memoryDirProvider();
+  const fakeDecisions = parseFakeDecisions(process.env.PI_POKER_FAKE_DECISIONS_JSON);
+  if (fakeDecisions) {
+    return new ScriptedDecisionEngine({
+      decisions: fakeDecisions,
+      sessionDirProvider,
+      sessionScope: options.sessionScope,
+    });
+  }
+
+  return new PiDecisionEngine({
+    cwd: process.cwd(),
+    sessionDirProvider,
+    model: process.env.PI_POKER_MODEL,
+    thinkingLevel: parsePiThinkingLevel(process.env.PI_POKER_THINKING_LEVEL),
+    sessionScope: options.sessionScope,
+  });
 }

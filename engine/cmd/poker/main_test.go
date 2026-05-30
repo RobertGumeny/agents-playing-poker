@@ -15,12 +15,13 @@ import (
 func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 	rootDir := t.TempDir()
 	experimentsDir := filepath.Join(rootDir, "experiments")
-	sessionsDir := filepath.Join(rootDir, "sessions")
-	if err := os.MkdirAll(experimentsDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll experiments: %v", err)
+	expSlugDir := filepath.Join(experimentsDir, "bench")
+	sessionsDir := filepath.Join(expSlugDir, "sessions")
+	if err := os.MkdirAll(expSlugDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll experiments slug: %v", err)
 	}
 
-	expPath := filepath.Join(experimentsDir, "bench.json")
+	expPath := filepath.Join(expSlugDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
@@ -32,7 +33,7 @@ func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 
 	var stdout strings.Builder
 	var stderr strings.Builder
-	if err := run([]string{"experiment", "status", "-experiments-dir", experimentsDir, "-sessions-dir", sessionsDir, "bench"}, &stdout, &stderr); err != nil {
+	if err := run([]string{"experiment", "status", "-experiments-dir", experimentsDir, "bench"}, &stdout, &stderr); err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
 
@@ -52,12 +53,13 @@ func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 func TestStatusNextStepIsAnalyzeWhenAllPresent(t *testing.T) {
 	rootDir := t.TempDir()
 	experimentsDir := filepath.Join(rootDir, "experiments")
-	sessionsDir := filepath.Join(rootDir, "sessions")
-	if err := os.MkdirAll(experimentsDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll experiments: %v", err)
+	expSlugDir := filepath.Join(experimentsDir, "bench")
+	sessionsDir := filepath.Join(expSlugDir, "sessions")
+	if err := os.MkdirAll(expSlugDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll experiments slug: %v", err)
 	}
 
-	expPath := filepath.Join(experimentsDir, "bench.json")
+	expPath := filepath.Join(expSlugDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
@@ -70,7 +72,7 @@ func TestStatusNextStepIsAnalyzeWhenAllPresent(t *testing.T) {
 
 	var stdout strings.Builder
 	var stderr strings.Builder
-	if err := run([]string{"experiment", "status", "-experiments-dir", experimentsDir, "-sessions-dir", sessionsDir, "bench"}, &stdout, &stderr); err != nil {
+	if err := run([]string{"experiment", "status", "-experiments-dir", experimentsDir, "bench"}, &stdout, &stderr); err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
 
@@ -82,14 +84,14 @@ func TestStatusNextStepIsAnalyzeWhenAllPresent(t *testing.T) {
 func TestAnalyzeWritesReport(t *testing.T) {
 	rootDir := t.TempDir()
 	experimentsDir := filepath.Join(rootDir, "experiments")
-	sessionsDir := filepath.Join(rootDir, "sessions")
-	reportsDir := filepath.Join(rootDir, "reports")
+	expSlugDir := filepath.Join(experimentsDir, "bench")
+	sessionsDir := filepath.Join(expSlugDir, "sessions")
 
-	if err := os.MkdirAll(experimentsDir, 0o755); err != nil {
-		t.Fatalf("MkdirAll experiments: %v", err)
+	if err := os.MkdirAll(expSlugDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll experiments slug: %v", err)
 	}
 
-	expPath := filepath.Join(experimentsDir, "bench.json")
+	expPath := filepath.Join(expSlugDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
@@ -115,37 +117,39 @@ func TestAnalyzeWritesReport(t *testing.T) {
 		SessionID: "treatment-1", Seed: 1, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain", ChipsDelta: 10,
 	}))
 
-	// run analyze with custom dirs via -experiment flag
 	var stdout strings.Builder
 	var stderr strings.Builder
 	if err := run([]string{
 		"experiment", "analyze",
-		"-experiment", expPath,
-		"-sessions-dir", sessionsDir,
-		// redirect report output by temporarily setting working dir isn't possible here,
-		// so we'll check the default reports/ path relative to cwd
+		"-experiments-dir", experimentsDir,
+		"bench",
 	}, &stdout, &stderr); err != nil {
-		// if reports/ can't be created in cwd, skip — this test validates path logic
-		t.Logf("run() error = %v (may be expected if cwd not writable)", err)
+		t.Fatalf("run() error = %v", err)
 	}
 
-	// if report was written, validate it's Markdown
-	reportPath := filepath.Join(reportsDir, "bench.md")
-	_ = reportPath // used by integration-style check below if run from rootDir
-
-	// verify stdout contains report= line when run succeeds with explicit paths
-	if !strings.Contains(stdout.String()+stderr.String(), "report=") && !strings.Contains(stdout.String()+stderr.String(), "bench.md") {
-		// report line or path present in some output stream indicates success
-		_ = stdout.String() // informational only if dirs not set up
+	reportPath := filepath.Join(expSlugDir, "reports", "bench.md")
+	data, err := os.ReadFile(reportPath)
+	if err != nil {
+		t.Fatalf("ReadFile(%s) error = %v", reportPath, err)
 	}
-	_ = reportsDir
+	if !strings.Contains(string(data), "# Experiment: bench") {
+		t.Fatalf("report missing experiment heading, got:\n%s", string(data))
+	}
+	if !strings.Contains(stdout.String(), "report=") {
+		t.Fatalf("stdout missing report= line, got:\n%s", stdout.String())
+	}
 }
 
 func TestAnalyzeWritesReportToExplicitDir(t *testing.T) {
 	rootDir := t.TempDir()
-	sessionsDir := filepath.Join(rootDir, "sessions")
-	expPath := filepath.Join(rootDir, "bench.json")
+	expSlugDir := filepath.Join(rootDir, "bench")
+	sessionsDir := filepath.Join(expSlugDir, "sessions")
 
+	if err := os.MkdirAll(expSlugDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll slug dir: %v", err)
+	}
+
+	expPath := filepath.Join(expSlugDir, "bench.json")
 	writeExperimentFixture(t, expPath, experiment.Definition{
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
@@ -161,24 +165,16 @@ func TestAnalyzeWritesReportToExplicitDir(t *testing.T) {
 		SessionID: "treatment-1", Seed: 1, HandCount: 5, AgentName: "treatment-agent", OpponentName: "villain", ChipsDelta: 10,
 	}))
 
-	// Temporarily change working directory so reports/ is created inside rootDir
-	orig, _ := os.Getwd()
-	if err := os.Chdir(rootDir); err != nil {
-		t.Fatalf("Chdir: %v", err)
-	}
-	defer func() { _ = os.Chdir(orig) }()
-
 	var stdout strings.Builder
 	var stderr strings.Builder
 	if err := run([]string{
 		"experiment", "analyze",
 		"-experiment", expPath,
-		"-sessions-dir", sessionsDir,
 	}, &stdout, &stderr); err != nil {
 		t.Fatalf("run() error = %v", err)
 	}
 
-	reportPath := filepath.Join(rootDir, "reports", "bench.md")
+	reportPath := filepath.Join(expSlugDir, "reports", "bench.md")
 	data, err := os.ReadFile(reportPath)
 	if err != nil {
 		t.Fatalf("ReadFile(%s) error = %v", reportPath, err)
@@ -193,7 +189,11 @@ func TestAnalyzeWritesReportToExplicitDir(t *testing.T) {
 
 func TestResolveExperimentFindsFile(t *testing.T) {
 	rootDir := t.TempDir()
-	expPath := filepath.Join(rootDir, "test-2b.json")
+	slugDir := filepath.Join(rootDir, "test-2b")
+	if err := os.MkdirAll(slugDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	expPath := filepath.Join(slugDir, "test-2b.json")
 	if err := os.WriteFile(expPath, []byte("{}"), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}

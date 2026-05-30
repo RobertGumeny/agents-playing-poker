@@ -65,8 +65,7 @@ type experimentFlags struct {
 
 func parseExperimentFlags(fs *flag.FlagSet, args []string) (experimentFlags, error) {
 	var ef experimentFlags
-	fs.StringVar(&ef.experimentsDir, "experiments-dir", "experiments", "directory containing experiment definition JSON files")
-	fs.StringVar(&ef.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&ef.experimentsDir, "experiments-dir", "research/experiments", "directory containing experiment slug subdirectories")
 	fs.StringVar(&ef.experimentPath, "experiment", "", "explicit path to experiment definition JSON (overrides positional id)")
 
 	if err := fs.Parse(args); err != nil {
@@ -85,11 +84,12 @@ func parseExperimentFlags(fs *flag.FlagSet, args []string) (experimentFlags, err
 		}
 		ef.experimentPath = resolved
 	}
+	ef.sessionsDir = filepath.Join(filepath.Dir(ef.experimentPath), "sessions")
 	return ef, nil
 }
 
 func resolveExperiment(id, experimentsDir string) (string, error) {
-	candidate := filepath.Join(experimentsDir, id+".json")
+	candidate := filepath.Join(experimentsDir, id, id+".json")
 	if _, err := os.Stat(candidate); err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("experiment %q not found at %s", id, candidate)
@@ -441,7 +441,7 @@ func execAnalyze(ef experimentFlags, stdout io.Writer) error {
 		return err
 	}
 
-	reportDir := "reports"
+	reportDir := filepath.Join(filepath.Dir(ef.experimentPath), "reports")
 	if err := os.MkdirAll(reportDir, 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", reportDir, err)
 	}

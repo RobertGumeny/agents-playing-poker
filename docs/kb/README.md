@@ -32,6 +32,8 @@ Do not duplicate the normative sources:
 
 ### Agents
 
+- [`adding-a-memory-strategy.md`](adding-a-memory-strategy.md)
+  - Step-by-step guide to creating a new memory strategy: MemoryPolicy contract, main.ts wiring, package setup, and custom Pi tool escape hatch.
 - [`scripted-baseline-agents.md`](scripted-baseline-agents.md)
   - `random` and `heuristic` scripted sanity-check baselines.
 - [`llm-stateless-pi-baseline.md`](llm-stateless-pi-baseline.md)

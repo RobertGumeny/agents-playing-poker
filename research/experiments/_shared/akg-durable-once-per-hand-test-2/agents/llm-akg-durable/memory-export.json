@@ -1,0 +1,4067 @@
+{
+  "nodes": [
+    {
+      "type": "hand",
+      "id": "01966ed0f7bf2446",
+      "title": "Hand 91",
+      "body": "Hand 91: hero sb, hole [2s As], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 6, villain raise 20, hero fold. Reached preflop. Net: -6.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 29,
+        "fold_to_bet": false,
+        "hand_number": 91,
+        "hero_fold": true,
+        "hero_net": -6,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": true,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold",
+        "3bet_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "01e725bae585a39d",
+      "title": "Hand 3",
+      "body": "Hand 3: hero sb, hole [7s Kh], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 6, villain raise 28, hero fold. Reached preflop. Net: -6.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 37,
+        "fold_to_bet": false,
+        "hand_number": 3,
+        "hero_fold": true,
+        "hero_net": -6,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": true,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold",
+        "3bet_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "0378be2e815f128e",
+      "title": "Hand 67",
+      "body": "Hand 67: hero sb, hole [6c 3d], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 67,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "0bfb5859e84af41e",
+      "title": "Hand 86",
+      "body": "Hand 86: hero bb, hole [2h 2c], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 86,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "0dfca4d23ab1a903",
+      "title": "Hand 25",
+      "body": "Hand 25: hero sb, hole [7d Ks], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 18, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 22,
+        "fold_to_bet": false,
+        "hand_number": 25,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "0ed1efc7b4a7ac01",
+      "title": "Hand 16",
+      "body": "Hand 16: hero bb, hole [5h 4h], board [2s 6c Ad 5s 8s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 6, villain call 4. flop: hero bet 6, villain call 6. turn: hero bet 12, villain raise 80, hero call 68. river: hero bet 51, villain call 51. Reached showdown. Net: -143.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 5,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 288,
+        "fold_to_bet": false,
+        "hand_number": 16,
+        "hero_fold": false,
+        "hero_net": -143,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": true,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown",
+        "big_pot",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "149a03c0d2dc259d",
+      "title": "Hand 43",
+      "body": "Hand 43: hero sb, hole [2s 7c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 43,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "14b141158cc46010",
+      "title": "Hand 89",
+      "body": "Hand 89: hero sb, hole [4d Ks], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": false,
+        "hand_number": 89,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "14fd2a74fdc11cec",
+      "title": "Hand 98",
+      "body": "Hand 98: hero bb, hole [Qd Ad], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 12, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 16,
+        "fold_to_bet": true,
+        "hand_number": 98,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "167af29054ee915b",
+      "title": "Hand 53",
+      "body": "Hand 53: hero sb, hole [6c Qc], board [Tc 8h 7c 6s Ks]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain call 3. turn: villain bet 8, hero call 8. river: villain bet 20, hero fold. Reached river. Net: -13.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": true,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 46,
+        "fold_to_bet": false,
+        "hand_number": 53,
+        "hero_fold": true,
+        "hero_net": -13,
+        "hero_position": "sb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "1713cb7716bb44e4",
+      "title": "Hand 76",
+      "body": "Hand 76: hero bb, hole [As Kh], board [Js 3h 7c Th 7h]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 10, villain call 8. flop: hero bet 13, villain call 13. turn: hero bet 28, villain call 28. river: hero check, villain bet 50, hero fold. Reached river. Net: -51.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": true,
+        "aggr_turn": false,
+        "aggressive_action_count": 4,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 154,
+        "fold_to_bet": false,
+        "hand_number": 76,
+        "hero_fold": true,
+        "hero_net": -51,
+        "hero_position": "bb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "big_pot",
+        "hero_fold",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "22d5204a53eb91cd",
+      "title": "Hand 56",
+      "body": "Hand 56: hero bb, hole [7h 2h], board [3c 4d 6d]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain bet 3, hero fold. Reached flop. Net: -2.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": false,
+        "hand_number": 56,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "283cab47b7a76957",
+      "title": "Hand 54",
+      "body": "Hand 54: hero bb, hole [7h 2s], board [9c 8s 6c]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain bet 3, hero fold. Reached flop. Net: -2.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": false,
+        "hand_number": 54,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "3030313418cd07ca",
+      "title": "Hand 90",
+      "body": "Hand 90: hero bb, hole [4c Kh], board [2h 6s 7h Tc]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain call 6. flop: hero bet 9, villain call 9. turn: hero check, villain bet 20, hero fold. Reached turn. Net: -17.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 56,
+        "fold_to_bet": false,
+        "hand_number": 90,
+        "hero_fold": true,
+        "hero_net": -17,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "32d3cae8217cca8c",
+      "title": "Hand 4",
+      "body": "Hand 4: hero bb, hole [Kd Ad], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": true,
+        "hand_number": 4,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "33e75b9bfa0b40a7",
+      "title": "Hand 73",
+      "body": "Hand 73: hero sb, hole [Jh Ad], board [4s Ah 8c]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 10, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 27,
+        "fold_to_bet": true,
+        "hand_number": 73,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "379839cafdefb4ea",
+      "title": "Hand 23",
+      "body": "Hand 23: hero sb, hole [5s Ad], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": true,
+        "hand_number": 23,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "390209d9612cb3f2",
+      "title": "Hand 19",
+      "body": "Hand 19: hero sb, hole [2h 5c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 19,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "3933ffa637eb9ec8",
+      "title": "Hand 31",
+      "body": "Hand 31: hero sb, hole [Kd 9h], board [7d 4s 5c]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain bet 3, hero fold. Reached flop. Net: -2.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": false,
+        "hand_number": 31,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "4120439b894258f2",
+      "title": "Hand 29",
+      "body": "Hand 29: hero sb, hole [9c Jh], board [Ts 4c 7d 7h]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain bet 3, hero call 3. turn: villain bet 7, hero fold. Reached turn. Net: -5.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 17,
+        "fold_to_bet": false,
+        "hand_number": 29,
+        "hero_fold": true,
+        "hero_net": -5,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "450dc546871433ca",
+      "title": "Hand 41",
+      "body": "Hand 41: hero sb, hole [4h 7s], board [9c 7h 3c]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 41,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "494bd3119d78c278",
+      "title": "Hand 69",
+      "body": "Hand 69: hero sb, hole [3s 8c], board [Qs Kh Jd 7c As]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero check. turn: villain check, hero check. river: villain check, hero check. Reached showdown. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 4,
+        "fold_to_bet": false,
+        "hand_number": 69,
+        "hero_fold": false,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "4c6f8afcc1345c42",
+      "title": "Hand 48",
+      "body": "Hand 48: hero bb, hole [3c 4c], board [Qs Qc Ts 5c 4s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain check. turn: hero check, villain check. river: hero bet 2, villain fold. Reached river. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 6,
+        "fold_to_bet": true,
+        "hand_number": 48,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": true,
+        "river_bet_opportunity": true,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "4f9c9c06b15bc483",
+      "title": "Hand 78",
+      "body": "Hand 78: hero bb, hole [As Jd], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 12, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 16,
+        "fold_to_bet": true,
+        "hand_number": 78,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "5089b1c90073d6f3",
+      "title": "Hand 81",
+      "body": "Hand 81: hero sb, hole [9h 8d], board [9d Tc 6c 5c Ts]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain call 3. turn: villain bet 10, hero call 10. river: villain bet 30, hero fold. Reached river. Net: -15.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": true,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 60,
+        "fold_to_bet": false,
+        "hand_number": 81,
+        "hero_fold": true,
+        "hero_net": -15,
+        "hero_position": "sb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "521aad8f59b995b8",
+      "title": "Hand 39",
+      "body": "Hand 39: hero sb, hole [6c Kc], board [Td Jh 9s]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain bet 10, hero fold. Reached flop. Net: -8.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 27,
+        "fold_to_bet": false,
+        "hand_number": 39,
+        "hero_fold": true,
+        "hero_net": -8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "5817847acf1477e7",
+      "title": "Hand 77",
+      "body": "Hand 77: hero sb, hole [Qs Jh], board [6s 7d 8s 6d]. preflop: hero post_blind 1, villain post_blind 2, hero raise 6, villain call 4. flop: villain bet 8, hero call 8. turn: villain check, hero bet 14, villain fold. Reached turn. Net: +14.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 43,
+        "fold_to_bet": true,
+        "hand_number": 77,
+        "hero_fold": false,
+        "hero_net": 14,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "5f984f12f7dcf33e",
+      "title": "Hand 30",
+      "body": "Hand 30: hero bb, hole [3h 5c], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 30,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "625fe99f5a79fe2e",
+      "title": "Hand 26",
+      "body": "Hand 26: hero bb, hole [Kd 5h], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 10, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 14,
+        "fold_to_bet": true,
+        "hand_number": 26,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "66f5b417bbe2ee36",
+      "title": "Hand 62",
+      "body": "Hand 62: hero bb, hole [4h 9h], board [3d Jc Ad 7d 5c]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain check. turn: hero check, villain check. river: hero check, villain check. Reached showdown. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 4,
+        "fold_to_bet": false,
+        "hand_number": 62,
+        "hero_fold": false,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "67b68ebd56f49656",
+      "title": "Hand 52",
+      "body": "Hand 52: hero bb, hole [3c 3h], board [5d 3d 4c 2h 7d]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain call 3. turn: hero bet 7, villain call 7. river: hero bet 16, villain call 16. Reached showdown. Net: +28.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 56,
+        "fold_to_bet": false,
+        "hand_number": 52,
+        "hero_fold": false,
+        "hero_net": 28,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": true,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": false,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "686ed4e397007a88",
+      "title": "Hand 33",
+      "body": "Hand 33: hero sb, hole [4c Qh], board [Jd 3h Kh]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 33,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "6e4a02d9cca07011",
+      "title": "Hand 75",
+      "body": "Hand 75: hero sb, hole [8s Kc], board [7s 4s 6h]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 10, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 27,
+        "fold_to_bet": true,
+        "hand_number": 75,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "6eb1e1fb2a99d1e2",
+      "title": "Hand 10",
+      "body": "Hand 10: hero bb, hole [9s 7d], board [Qs Kd 8s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 10,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "71bab092ec836b9d",
+      "title": "Hand 58",
+      "body": "Hand 58: hero bb, hole [3c Ah], board [Tc 9s 3s 5c]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 12, villain call 10. flop: hero check, villain bet 16, hero call 16. turn: hero check, villain bet 36, hero fold. Reached turn. Net: -28.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 94,
+        "fold_to_bet": false,
+        "hand_number": 58,
+        "hero_fold": true,
+        "hero_net": -28,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "7318e16f689c89ab",
+      "title": "Hand 38",
+      "body": "Hand 38: hero bb, hole [Kc As], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 38,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "76e0cdb5d2ce853c",
+      "title": "Hand 24",
+      "body": "Hand 24: hero bb, hole [5h 4c], board [Td 8s 6h 3h 2d]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain call 3. turn: hero bet 7, villain call 7. river: hero bet 18, villain fold. Reached river. Net: +12.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 42,
+        "fold_to_bet": true,
+        "hand_number": 24,
+        "hero_fold": false,
+        "hero_net": 12,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": true,
+        "river_bet_opportunity": true,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "7774869354d4948d",
+      "title": "Hand 88",
+      "body": "Hand 88: hero bb, hole [2s 2d], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": false,
+        "hand_number": 88,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "78fdaaa48e2f1582",
+      "title": "Hand 37",
+      "body": "Hand 37: hero sb, hole [8d Jd], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 37,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "7c4c8cc299a5e780",
+      "title": "Hand 35",
+      "body": "Hand 35: hero sb, hole [5h 2s], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 35,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "7e537dc372a56aed",
+      "title": "Hand 84",
+      "body": "Hand 84: hero bb, hole [9s Tc], board [Kc 7s 8s]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero call 6. flop: hero bet 11, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 28,
+        "fold_to_bet": true,
+        "hand_number": 84,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "8012324a6d46ddb5",
+      "title": "Hand 2",
+      "body": "Hand 2: hero bb, hole [7c 7d], board [6h 4s 9d 2c Kd]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain call 3. turn: hero bet 7, villain call 7. river: hero check, villain check. Reached showdown. Net: +12.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 24,
+        "fold_to_bet": false,
+        "hand_number": 2,
+        "hero_fold": false,
+        "hero_net": 12,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": false,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "8129a83eeeec5eac",
+      "title": "Hand 80",
+      "body": "Hand 80: hero bb, hole [Ad 4d], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": true,
+        "hand_number": 80,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "82b679ce7a533ef4",
+      "title": "Hand 49",
+      "body": "Hand 49: hero sb, hole [2s Kc], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": false,
+        "hand_number": 49,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "83b84851b2d96ee1",
+      "title": "Hand 44",
+      "body": "Hand 44: hero bb, hole [Js 4c], board [2s 5d 2d 9d 3c]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain check. turn: hero check, villain check. river: hero check, villain check. Reached showdown. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 4,
+        "fold_to_bet": false,
+        "hand_number": 44,
+        "hero_fold": false,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "8679059cdd1d8aaf",
+      "title": "Hand 45",
+      "body": "Hand 45: hero sb, hole [9d 6h], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 45,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "8818a96b4e663caa",
+      "title": "Hand 68",
+      "body": "Hand 68: hero bb, hole [Ts 6d], board [5s 6s Kh Qs Th]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain call 3. turn: hero check, villain check. river: hero bet 7, villain fold. Reached river. Net: +5.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 17,
+        "fold_to_bet": true,
+        "hand_number": 68,
+        "hero_fold": false,
+        "hero_net": 5,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": true,
+        "river_bet_opportunity": true,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "929eb9648e857470",
+      "title": "Hand 94",
+      "body": "Hand 94: hero bb, hole [9s Ts], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": true,
+        "hand_number": 94,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "9520a4a2d0e1785a",
+      "title": "Hand 72",
+      "body": "Hand 72: hero bb, hole [8h Tc], board [5s Th Qs]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 72,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "958005384d56b43c",
+      "title": "Hand 59",
+      "body": "Hand 59: hero sb, hole [Qh Tc], board [4d 5h Td]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 10, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 27,
+        "fold_to_bet": true,
+        "hand_number": 59,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "96d81f42a88b2e44",
+      "title": "Hand 6",
+      "body": "Hand 6: hero bb, hole [Ac 3d], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 10, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 14,
+        "fold_to_bet": true,
+        "hand_number": 6,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "99972918515ca626",
+      "title": "Hand 1",
+      "body": "Hand 1: hero sb, hole [8h Th], board [2c Ks 6d]. preflop: hero post_blind 1, villain post_blind 2, hero raise 6, villain call 4. flop: villain check, hero bet 8, villain fold. Reached flop. Net: +6.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 21,
+        "fold_to_bet": true,
+        "hand_number": 1,
+        "hero_fold": false,
+        "hero_net": 6,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "9a9ecf412e4d4d01",
+      "title": "Hand 21",
+      "body": "Hand 21: hero sb, hole [7s 6h], board [4s 7c Jd]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 21,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "9af5b4f6300818f5",
+      "title": "Hand 11",
+      "body": "Hand 11: hero sb, hole [Ks 3d], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": true,
+        "hand_number": 11,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "9bf5c2e3da0ad329",
+      "title": "Hand 27",
+      "body": "Hand 27: hero sb, hole [8d 2d], board [9c 8s 5s 7c]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain bet 3, hero call 3. turn: villain bet 8, hero fold. Reached turn. Net: -5.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 18,
+        "fold_to_bet": false,
+        "hand_number": 27,
+        "hero_fold": true,
+        "hero_net": -5,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "a5292642cb6f12b8",
+      "title": "Hand 57",
+      "body": "Hand 57: hero sb, hole [6d 3h], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 57,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "a57b86ebbdf6f900",
+      "title": "Hand 66",
+      "body": "Hand 66: hero bb, hole [Jh 7c], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 66,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "a82119e3d61eae37",
+      "title": "Hand 9",
+      "body": "Hand 9: hero sb, hole [As 8c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 9,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "a8f0d7a7da2a0758",
+      "title": "Hand 15",
+      "body": "Hand 15: hero sb, hole [3s 6c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": false,
+        "hand_number": 15,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "aafc837759c25a15",
+      "title": "Hand 96",
+      "body": "Hand 96: hero bb, hole [6d 9c], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 96,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ab63248ca977548f",
+      "title": "Hand 13",
+      "body": "Hand 13: hero sb, hole [Ts As], board [9d 4c 6c Ks]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 11, villain call 11. turn: villain check, hero bet 26, villain fold. Reached turn. Net: +19.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 65,
+        "fold_to_bet": true,
+        "hand_number": 13,
+        "hero_fold": false,
+        "hero_net": 19,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "af2d49c69f1f939c",
+      "title": "Hand 60",
+      "body": "Hand 60: hero bb, hole [As 7c], board [6d Ah 9c 3d 8d]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero call 6. flop: hero bet 10, villain call 10. turn: hero bet 22, villain call 22. river: hero check, villain bet 40, hero fold. Reached river. Net: -40.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": true,
+        "aggr_turn": false,
+        "aggressive_action_count": 4,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 121,
+        "fold_to_bet": false,
+        "hand_number": 60,
+        "hero_fold": true,
+        "hero_net": -40,
+        "hero_position": "bb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "big_pot",
+        "hero_fold",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "af5f1a820489be23",
+      "title": "Hand 82",
+      "body": "Hand 82: hero bb, hole [Kc 5d], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 82,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "b2238906fa8ad2ce",
+      "title": "Hand 17",
+      "body": "Hand 17: hero sb, hole [3s 6h], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 17,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "b311e871a0229d97",
+      "title": "Hand 79",
+      "body": "Hand 79: hero sb, hole [2s 5c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 79,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "b992b6f5e4e1e737",
+      "title": "Hand 71",
+      "body": "Hand 71: hero sb, hole [6h 3s], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 71,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "b9aab802e0dabf68",
+      "title": "Hand 65",
+      "body": "Hand 65: hero sb, hole [Ac 6c], board [6s 3h 2s]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 10, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 27,
+        "fold_to_bet": true,
+        "hand_number": 65,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "c09d96c14b5911cf",
+      "title": "Hand 83",
+      "body": "Hand 83: hero sb, hole [Jc Jd], board [Td 3d 9h]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 11, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 28,
+        "fold_to_bet": true,
+        "hand_number": 83,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "c21b660b1c8226f0",
+      "title": "Hand 64",
+      "body": "Hand 64: hero bb, hole [3h 4d], board [6d Th Qd]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain bet 3, hero fold. Reached flop. Net: -2.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": false,
+        "hand_number": 64,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "c2d4e821d2dcaa4a",
+      "title": "Hand 47",
+      "body": "Hand 47: hero sb, hole [Ah 4d], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero fold. Reached preflop. Net: -1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 47,
+        "hero_fold": true,
+        "hero_net": -1,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "c381e87f959dad81",
+      "title": "Hand 74",
+      "body": "Hand 74: hero bb, hole [Qh Tc], board [6d 2h Ah]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero call 6. flop: hero check, villain bet 10, hero fold. Reached flop. Net: -8.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 27,
+        "fold_to_bet": false,
+        "hand_number": 74,
+        "hero_fold": true,
+        "hero_net": -8,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "c5778186377f4284",
+      "title": "Hand 93",
+      "body": "Hand 93: hero sb, hole [Ac 8c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": true,
+        "hand_number": 93,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ca52aec6610608a1",
+      "title": "Hand 18",
+      "body": "Hand 18: hero bb, hole [5s 9h], board [Ts 8s 3c]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain bet 3, hero fold. Reached flop. Net: -2.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": false,
+        "hand_number": 18,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "cbd17c23002ce8e2",
+      "title": "Hand 63",
+      "body": "Hand 63: hero sb, hole [8c 7d], board [Th Qc Kc 3h 6s]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 6, hero call 4. flop: villain check, hero check. turn: villain check, hero check. river: villain check, hero check. Reached showdown. Net: +0.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 14,
+        "fold_to_bet": false,
+        "hand_number": 63,
+        "hero_fold": false,
+        "hero_net": 0,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": false,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "cf734fc7ce0736e0",
+      "title": "Hand 14",
+      "body": "Hand 14: hero bb, hole [Qd Jd], board [9h Td Kc]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero call 6. flop: hero bet 12, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 29,
+        "fold_to_bet": true,
+        "hand_number": 14,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "d0767065cd92962c",
+      "title": "Hand 12",
+      "body": "Hand 12: hero bb, hole [Td Qc], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 12,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "d4ea52bda7e618e0",
+      "title": "Hand 20",
+      "body": "Hand 20: hero bb, hole [Ad 4s], board [Td 9s 6h]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 2, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 6,
+        "fold_to_bet": true,
+        "hand_number": 20,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "d5bf5d4d57bd0bf9",
+      "title": "Hand 100",
+      "body": "Hand 100: hero bb, hole [5h Ac], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain fold. Reached preflop. Net: +1.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 3,
+        "fold_to_bet": false,
+        "hand_number": 100,
+        "hero_fold": false,
+        "hero_net": 1,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "d75f4900bc5f399e",
+      "title": "Hand 34",
+      "body": "Hand 34: hero bb, hole [Kc 5s], board [Qd 6c 4h Qs 6s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 3, villain call 3. turn: hero check, villain check. river: hero check, villain bet 80, hero fold. Reached river. Net: -5.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": true,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 90,
+        "fold_to_bet": false,
+        "hand_number": 34,
+        "hero_fold": true,
+        "hero_net": -5,
+        "hero_position": "bb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "d8c75bd71db02ec1",
+      "title": "Hand 40",
+      "body": "Hand 40: hero bb, hole [Js Jd], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 10, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 14,
+        "fold_to_bet": true,
+        "hand_number": 40,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "dbfa5ff3e30c0405",
+      "title": "Hand 55",
+      "body": "Hand 55: hero sb, hole [Tc 2s], board [9s 7s Ah Jh Ks]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero check. turn: villain check, hero check. river: villain check, hero check. Reached showdown. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 4,
+        "fold_to_bet": false,
+        "hand_number": 55,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": false,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e0f650b184ced77e",
+      "title": "Hand 7",
+      "body": "Hand 7: hero sb, hole [Ad Tc], board [Qh 7c 5d]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain check, hero bet 10, villain fold. Reached flop. Net: +8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 27,
+        "fold_to_bet": true,
+        "hand_number": 7,
+        "hero_fold": false,
+        "hero_net": 8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e1160a9581aea406",
+      "title": "Hand 8",
+      "body": "Hand 8: hero bb, hole [Qd Jc], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 10, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 14,
+        "fold_to_bet": true,
+        "hand_number": 8,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e17a79474454bfee",
+      "title": "Hand 51",
+      "body": "Hand 51: hero sb, hole [7c Td], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": false,
+        "hand_number": 51,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e1a22901f9fd0c5b",
+      "title": "Hand 70",
+      "body": "Hand 70: hero bb, hole [5d 2c], board [Qs Td As 4s 7s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero check, villain check. turn: hero check, villain check. river: hero check, villain check. Reached showdown. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 0,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 4,
+        "fold_to_bet": false,
+        "hand_number": 70,
+        "hero_fold": false,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e57c3e0739379cf5",
+      "title": "Hand 22",
+      "body": "Hand 22: hero bb, hole [Td Th], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain raise 12, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 15,
+        "fold_to_bet": false,
+        "hand_number": 22,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "e8c73e44f92ff7f5",
+      "title": "Hand 99",
+      "body": "Hand 99: hero sb, hole [5s Ac], board [Th Jc 7s]. preflop: hero post_blind 1, villain post_blind 2, hero raise 6, villain call 4. flop: villain check, hero bet 8, villain fold. Reached flop. Net: +6.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": true,
+        "cbet_opportunity": true,
+        "final_pot": 21,
+        "fold_to_bet": true,
+        "hand_number": 99,
+        "hero_fold": false,
+        "hero_net": 6,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ee23243420e77965",
+      "title": "Hand 97",
+      "body": "Hand 97: hero sb, hole [8s 7s], board [9h Ac 3d Kc]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain bet 10, hero call 10. turn: villain bet 24, hero fold. Reached turn. Net: -18.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 61,
+        "fold_to_bet": false,
+        "hand_number": 97,
+        "hero_fold": true,
+        "hero_net": -18,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ee87af5d1b05d3da",
+      "title": "Hand 42",
+      "body": "Hand 42: hero bb, hole [6c 8c], board [Kh 5s 7c 9d Ks]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero check. flop: hero bet 2, villain call 2. turn: hero bet 6, villain call 6. river: hero bet 14, villain fold. Reached river. Net: +10.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 34,
+        "fold_to_bet": true,
+        "hand_number": 42,
+        "hero_fold": false,
+        "hero_net": 10,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": true,
+        "river_bet_opportunity": true,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "eeadcd1d3bb56f42",
+      "title": "Hand 28",
+      "body": "Hand 28: hero bb, hole [8s 9c], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain raise 8, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": false,
+        "hand_number": 28,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ef93291e53809029",
+      "title": "Hand 5",
+      "body": "Hand 5: hero sb, hole [Tc Ah], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 11,
+        "fold_to_bet": true,
+        "hand_number": 5,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f0b531bc07e7a84f",
+      "title": "Hand 61",
+      "body": "Hand 61: hero sb, hole [3c 5c], board [3s Qh Kh 3d]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero check. turn: villain check, hero bet 3, villain fold. Reached turn. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 61,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f3657c31c83fa42c",
+      "title": "Hand 92",
+      "body": "Hand 92: hero bb, hole [9h Th], board [Td As Tc 9s 7h]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain call 6. flop: hero bet 10, villain raise 32, hero raise 42, villain raise 200. Reached showdown. Net: +50.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 5,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 302,
+        "fold_to_bet": false,
+        "hand_number": 92,
+        "hero_fold": false,
+        "hero_net": 50,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": false,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown",
+        "big_pot",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f64a680c4c09441a",
+      "title": "Hand 87",
+      "body": "Hand 87: hero sb, hole [5h Qd], board [3c 7d 8h]. preflop: hero post_blind 1, villain post_blind 2, hero call 1, villain check. flop: villain check, hero bet 3, villain fold. Reached flop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 7,
+        "fold_to_bet": true,
+        "hand_number": 87,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "flop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": false
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f7e94dfc68fd567c",
+      "title": "Hand 36",
+      "body": "Hand 36: hero bb, hole [Ad 6c], board [3c 9d 7s 3s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain call 6. flop: hero bet 10, villain call 10. turn: hero check, villain bet 24, hero fold. Reached turn. Net: -18.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": true,
+        "aggressive_action_count": 3,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 62,
+        "fold_to_bet": false,
+        "hand_number": 36,
+        "hero_fold": true,
+        "hero_net": -18,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "turn",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f84d603814bf8429",
+      "title": "Hand 50",
+      "body": "Hand 50: hero bb, hole [9c Ac], board [3d 8s Ad 2c 5s]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 12, villain call 10. flop: hero bet 16, villain call 16. turn: hero bet 28, villain call 28. river: hero bet 36, villain fold. Reached river. Net: +56.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 4,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 150,
+        "fold_to_bet": true,
+        "hand_number": 50,
+        "hero_fold": false,
+        "hero_net": 56,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": true,
+        "river_bet_opportunity": true,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "river",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "big_pot",
+        "villain_fold",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "f85d9035576bb54d",
+      "title": "Hand 32",
+      "body": "Hand 32: hero bb, hole [3d Ah], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain call 1, hero raise 8, villain fold. Reached preflop. Net: +2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": false,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 12,
+        "fold_to_bet": true,
+        "hand_number": 32,
+        "hero_fold": false,
+        "hero_net": 2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": false,
+        "showdown_win": false,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": true,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "fca31ca9057bee78",
+      "title": "Hand 46",
+      "body": "Hand 46: hero bb, hole [2c Tc], board [-]. preflop: villain post_blind 1, hero post_blind 2, villain raise 20, hero fold. Reached preflop. Net: -2.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 1,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 23,
+        "fold_to_bet": false,
+        "hand_number": 46,
+        "hero_fold": true,
+        "hero_net": -2,
+        "hero_position": "bb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "fccd3236c8232410",
+      "title": "Hand 85",
+      "body": "Hand 85: hero sb, hole [Js 9c], board [-]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain raise 28, hero fold. Reached preflop. Net: -8.",
+      "meta": {
+        "aggr_flop": false,
+        "aggr_preflop": true,
+        "aggr_river": false,
+        "aggr_turn": false,
+        "aggressive_action_count": 2,
+        "cbet_fold": false,
+        "cbet_opportunity": false,
+        "final_pot": 39,
+        "fold_to_bet": false,
+        "hand_number": 85,
+        "hero_fold": true,
+        "hero_net": -8,
+        "hero_position": "sb",
+        "river_bet": false,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": false,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "preflop",
+        "three_bet": true,
+        "villain_fold": false,
+        "villain_pfr": true,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "hero_fold",
+        "3bet_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "ff4a72a86babe4dc",
+      "title": "Hand 95",
+      "body": "Hand 95: hero sb, hole [Kh Qs], board [2d 9h Qd 3h 9s]. preflop: hero post_blind 1, villain post_blind 2, hero raise 8, villain call 6. flop: villain bet 10, hero raise 30, villain call 20. turn: villain check, hero bet 46, villain call 46. river: villain bet 20, hero call 20. Reached showdown. Net: -104.",
+      "meta": {
+        "aggr_flop": true,
+        "aggr_preflop": false,
+        "aggr_river": true,
+        "aggr_turn": false,
+        "aggressive_action_count": 5,
+        "cbet_fold": false,
+        "cbet_opportunity": true,
+        "final_pot": 209,
+        "fold_to_bet": false,
+        "hand_number": 95,
+        "hero_fold": false,
+        "hero_net": -104,
+        "hero_position": "sb",
+        "river_bet": true,
+        "river_bet_fold": false,
+        "river_bet_opportunity": false,
+        "showdown": true,
+        "showdown_villain": true,
+        "showdown_win": true,
+        "street_reached": "showdown",
+        "three_bet": false,
+        "villain_fold": false,
+        "villain_pfr": false,
+        "villain_vpip": true
+      },
+      "tags": [
+        "hand",
+        "showdown",
+        "big_pot",
+        "aggressive_hand"
+      ]
+    },
+    {
+      "type": "opponent",
+      "id": "villain",
+      "title": "villain",
+      "body": "Villain is loose-passive (VPIP 64%, PFR 17%) and folds to hero flop c-bets 8/16 times (50%). River aggression shows up in 6/100 hands (6%). Villain has won 48 of 53 showdowns.",
+      "meta": {
+        "aggr_flop": 14,
+        "aggr_preflop": 17,
+        "aggr_river": 6,
+        "aggr_turn": 9,
+        "cbet_folds": 8,
+        "cbet_opportunities": 16,
+        "fold_to_bet": 39,
+        "hands_played": 100,
+        "pfr": 17,
+        "river_bet_count": 6,
+        "river_bet_folds": 5,
+        "showdown_count": 53,
+        "showdown_win": 48,
+        "three_bet_count": 3,
+        "vpip": 64
+      },
+      "tags": [
+        "opponent"
+      ]
+    },
+    {
+      "type": "pattern",
+      "id": "3bet-tendency",
+      "title": "Frequent preflop 3-bettor",
+      "body": "Villain has 3-bet preflop in 3 completed hands.",
+      "meta": {
+        "count": 3,
+        "opportunities": 100
+      },
+      "tags": [
+        "pattern"
+      ]
+    },
+    {
+      "type": "pattern",
+      "id": "folds-to-cbet",
+      "title": "Folds to flop c-bets",
+      "body": "Villain has folded to hero flop c-bet 8 times across 16 c-bet opportunities.",
+      "meta": {
+        "count": 8,
+        "opportunities": 16
+      },
+      "tags": [
+        "pattern"
+      ]
+    },
+    {
+      "type": "pattern",
+      "id": "folds-to-river-bet",
+      "title": "Folds to river bets",
+      "body": "Villain has folded to hero river bets 5 times across 7 river bet opportunities.",
+      "meta": {
+        "count": 5,
+        "opportunities": 7
+      },
+      "tags": [
+        "pattern"
+      ]
+    },
+    {
+      "type": "pattern",
+      "id": "river-aggressor",
+      "title": "River aggressor",
+      "body": "Villain has bet or raised the river in 6 completed hands.",
+      "meta": {
+        "count": 6,
+        "opportunities": 100
+      },
+      "tags": [
+        "pattern"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_pattern",
+      "to": {
+        "type": "pattern",
+        "id": "3bet-tendency"
+      },
+      "meta": {
+        "count": 3,
+        "opportunities": 100
+      }
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_pattern",
+      "to": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "meta": {
+        "count": 8,
+        "opportunities": 16
+      }
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_pattern",
+      "to": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "meta": {
+        "count": 5,
+        "opportunities": 7
+      }
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_pattern",
+      "to": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "meta": {
+        "count": 6,
+        "opportunities": 100
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "3bet-tendency"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "01966ed0f7bf2446"
+      },
+      "meta": {
+        "hand_number": 91
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "3bet-tendency"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "01e725bae585a39d"
+      },
+      "meta": {
+        "hand_number": 3
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "3bet-tendency"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "fccd3236c8232410"
+      },
+      "meta": {
+        "hand_number": 85
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "33e75b9bfa0b40a7"
+      },
+      "meta": {
+        "hand_number": 73
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "6e4a02d9cca07011"
+      },
+      "meta": {
+        "hand_number": 75
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "958005384d56b43c"
+      },
+      "meta": {
+        "hand_number": 59
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "99972918515ca626"
+      },
+      "meta": {
+        "hand_number": 1
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "b9aab802e0dabf68"
+      },
+      "meta": {
+        "hand_number": 65
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "c09d96c14b5911cf"
+      },
+      "meta": {
+        "hand_number": 83
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "e0f650b184ced77e"
+      },
+      "meta": {
+        "hand_number": 7
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-cbet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "e8c73e44f92ff7f5"
+      },
+      "meta": {
+        "hand_number": 99
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "4c6f8afcc1345c42"
+      },
+      "meta": {
+        "hand_number": 48
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "76e0cdb5d2ce853c"
+      },
+      "meta": {
+        "hand_number": 24
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "8818a96b4e663caa"
+      },
+      "meta": {
+        "hand_number": 68
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "ee87af5d1b05d3da"
+      },
+      "meta": {
+        "hand_number": 42
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "folds-to-river-bet"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "f84d603814bf8429"
+      },
+      "meta": {
+        "hand_number": 50
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "167af29054ee915b"
+      },
+      "meta": {
+        "hand_number": 53
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "1713cb7716bb44e4"
+      },
+      "meta": {
+        "hand_number": 76
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "5089b1c90073d6f3"
+      },
+      "meta": {
+        "hand_number": 81
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "af2d49c69f1f939c"
+      },
+      "meta": {
+        "hand_number": 60
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "d75f4900bc5f399e"
+      },
+      "meta": {
+        "hand_number": 34
+      }
+    },
+    {
+      "from": {
+        "type": "pattern",
+        "id": "river-aggressor"
+      },
+      "relation": "supported_by",
+      "to": {
+        "type": "hand",
+        "id": "ff4a72a86babe4dc"
+      },
+      "meta": {
+        "hand_number": 95
+      }
+    }
+  ]
+}

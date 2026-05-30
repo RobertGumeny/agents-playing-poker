@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/RobertGumeny/agent-poker/internal/match"
-	"github.com/RobertGumeny/agent-poker/internal/report"
+	"github.com/RobertGumeny/agent-poker/internal/sessionreport"
 )
 
 const (
@@ -90,7 +90,7 @@ func run(args []string, stdout io.Writer) error {
 		return err
 	}
 	if result.Completed {
-		if reportErr := report.Generate(result.SessionDir); reportErr != nil {
+		if reportErr := sessionreport.Generate(result.SessionDir); reportErr != nil {
 			fmt.Fprintf(os.Stderr, "warning: report generation failed: %v\n", reportErr)
 		}
 	}
@@ -119,7 +119,7 @@ func parseConfig(args []string) (config, error) {
 	fs.IntVar(&cfg.hands, "hands", 200, "number of hands to play")
 	fs.Int64Var(&cfg.seed, "seed", 1, "deterministic match seed")
 	fs.StringVar(&cfg.sessionID, "session-id", defaultSessionID(), "session id")
-	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
 	fs.StringVar(&cfg.model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&cfg.thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
 

@@ -79,7 +79,7 @@ func TestCollectSessionFromFixtureArtifacts(t *testing.T) {
 }
 
 func TestCollectSessionRealFixtureShape(t *testing.T) {
-	summary, err := CollectSession(filepath.Join("..", "..", "sessions", "akg-durable-prompt-test-1"))
+	summary, err := CollectSession(filepath.Join("..", "..", "..", "research", "sessions", "akg-durable-prompt-test-1"))
 	if err != nil {
 		t.Fatalf("CollectSession() error = %v", err)
 	}

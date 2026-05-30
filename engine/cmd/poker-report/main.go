@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/RobertGumeny/agent-poker/internal/reporting"
+	"github.com/RobertGumeny/agent-poker/internal/benchreport"
 )
 
 func main() {
@@ -40,11 +40,11 @@ func run(args []string) error {
 		return fmt.Errorf("-out is required")
 	}
 
-	sessions, err := reporting.LoadSessions(sessionDirs)
+	sessions, err := benchreport.LoadSessions(sessionDirs)
 	if err != nil {
 		return err
 	}
-	markdown := reporting.RenderMarkdown(label, reporting.ComputeAggregate(sessions))
+	markdown := benchreport.RenderMarkdown(label, benchreport.ComputeAggregate(sessions))
 	if dir := filepath.Dir(outPath); dir != "." && dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("create output directory: %w", err)

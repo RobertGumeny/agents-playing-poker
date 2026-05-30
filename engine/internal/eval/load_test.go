@@ -10,7 +10,7 @@ import (
 )
 
 func TestLoadSessionReadsRealPiSessionShapes(t *testing.T) {
-	sessionDir := filepath.Join("..", "..", "sessions", "akg-durable-prompt-test-1")
+	sessionDir := filepath.Join("..", "..", "..", "research", "sessions", "akg-durable-prompt-test-1")
 
 	artifacts, err := LoadSession(sessionDir)
 	if err != nil {
@@ -59,7 +59,7 @@ func TestLoadSessionReadsRealPiSessionShapes(t *testing.T) {
 }
 
 func TestLoadSessionReadsHistoricalRealPiSessionShape(t *testing.T) {
-	sessionDir := filepath.Join("..", "..", "sessions", "akg-recent-vs-stateless-seed1-a")
+	sessionDir := filepath.Join("..", "..", "..", "research", "sessions", "akg-recent-vs-stateless-seed1-a")
 
 	artifacts, err := LoadSession(sessionDir)
 	if err != nil {

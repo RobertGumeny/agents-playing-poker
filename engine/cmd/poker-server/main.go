@@ -23,7 +23,7 @@ func run() error {
 	var agent1Args multiFlag
 
 	sessionID := flag.String("session-id", defaultSessionID(), "session id")
-	sessionsDir := flag.String("sessions-dir", "sessions", "session output root directory")
+	sessionsDir := flag.String("sessions-dir", "research/sessions", "session output root directory")
 	matchID := flag.String("match-id", "mat_001", "match id")
 	seed := flag.Int64("seed", 1, "deterministic match seed")
 	handCount := flag.Int("hand-count", 200, "number of hands to play")

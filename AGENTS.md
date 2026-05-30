@@ -86,6 +86,22 @@ LLM-agent behavior is not unit-tested (nondeterministic); validate it by running
 - One logical change per commit. A "wire up the rules engine" commit is fine; "wire up rules engine + rename a thing in match + fix a typo" is three commits.
 - Never `git commit` without an explicit ask from the user.
 
+## Repo layout
+
+```
+engine/        — all implementation code (Go + TypeScript)
+  cmd/         — CLI binaries
+  internal/    — Go packages
+  pi-agents/   — TypeScript LLM agent implementations
+  go.mod       — Go module root (run all go commands from engine/)
+docs/          — project and domain documentation
+research/      — experiment definitions, session artifacts, comparison reports
+  experiments/ — one subdir per experiment slug; each contains the JSON manifest, sessions/, and reports/
+  sessions/    — unclaimed session outputs not yet linked to an experiment (gitignored)
+```
+
+All `go run`, `go build`, and `go test` commands must be run from `engine/`.
+
 ## How to start
 
 The original v0 build phasing is complete through the non-LLM demo and LLM baseline layers. For new work:

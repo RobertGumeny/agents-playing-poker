@@ -24,9 +24,10 @@ The canonical operator surface is the root experiment command:
 
 Shared flags:
 
-- `-experiments-dir` — defaults to `experiments`
-- `-sessions-dir` — defaults to `sessions`
-- `-experiment` — explicit path override instead of positional id
+- `-experiments-dir` — defaults to `research/experiments`; expects slug subdirectories containing `<slug>.json`
+- `-experiment` — explicit path to an experiment JSON (overrides positional id)
+
+Sessions and reports are derived from the experiment file location rather than separate flags. Given an experiment at `<experiments-dir>/<slug>/<slug>.json`, sessions live at `<experiments-dir>/<slug>/sessions/` and reports at `<experiments-dir>/<slug>/reports/`.
 
 Execution flags for `run` and `go`:
 

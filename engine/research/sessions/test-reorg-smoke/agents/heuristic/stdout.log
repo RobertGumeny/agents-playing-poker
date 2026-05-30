@@ -1,0 +1,17 @@
+{"v":1,"type":"session_ready","id":"heuristic-1","in_reply_to":"msg-1","payload":{"version":"heuristic/0.1.0"}}
+{"v":1,"type":"action","id":"heuristic-2","in_reply_to":"msg-3","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-3","in_reply_to":"msg-4","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-4","in_reply_to":"msg-5","payload":{"action":"call","amount":3}}
+{"v":1,"type":"action","id":"heuristic-5","in_reply_to":"msg-6","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-6","in_reply_to":"msg-7","payload":{"action":"call","amount":7}}
+{"v":1,"type":"action","id":"heuristic-7","in_reply_to":"msg-8","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-8","in_reply_to":"msg-9","payload":{"action":"call","amount":14}}
+{"v":1,"type":"action","id":"heuristic-9","in_reply_to":"msg-12","payload":{"action":"call","amount":1}}
+{"v":1,"type":"action","id":"heuristic-10","in_reply_to":"msg-13","payload":{"action":"call","amount":3}}
+{"v":1,"type":"action","id":"heuristic-11","in_reply_to":"msg-14","payload":{"action":"call","amount":75}}
+{"v":1,"type":"action","id":"heuristic-12","in_reply_to":"msg-15","payload":{"action":"raise","amount":94}}
+{"v":1,"type":"action","id":"heuristic-13","in_reply_to":"msg-18","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-14","in_reply_to":"msg-19","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"heuristic-15","in_reply_to":"msg-20","payload":{"action":"call","amount":3}}
+{"v":1,"type":"action","id":"heuristic-16","in_reply_to":"msg-21","payload":{"action":"bet","amount":2}}
+{"v":1,"type":"action","id":"heuristic-17","in_reply_to":"msg-22","payload":{"action":"bet","amount":2}}

@@ -331,7 +331,7 @@ func parseCompareConfig(args []string) (compareConfig, error) {
 
 	cfg := compareConfig{}
 	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
-	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
 
 	if err := fs.Parse(args); err != nil {
 		return compareConfig{}, err
@@ -395,8 +395,8 @@ func parseListConfig(args []string) (listConfig, error) {
 	fs.SetOutput(io.Discard)
 
 	cfg := listConfig{}
-	fs.StringVar(&cfg.experimentsDir, "experiments-dir", "experiments", "directory containing experiment definition JSON files")
-	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&cfg.experimentsDir, "experiments-dir", "research/experiments", "directory containing experiment definition JSON files")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
 
 	if err := fs.Parse(args); err != nil {
 		return listConfig{}, err
@@ -413,7 +413,7 @@ func parseRunConfig(args []string) (runConfig, error) {
 
 	cfg := runConfig{}
 	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
-	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
 	fs.BoolVar(&cfg.dryRun, "dry-run", false, "print the deterministic session plan without launching missing or incomplete sessions")
 	fs.StringVar(&cfg.model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&cfg.thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
@@ -436,7 +436,7 @@ func parseStatusConfig(args []string) (statusConfig, error) {
 
 	cfg := statusConfig{}
 	fs.StringVar(&cfg.experimentPath, "experiment", "", "path to experiment definition JSON")
-	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "sessions", "session output root directory")
+	fs.StringVar(&cfg.sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
 
 	if err := fs.Parse(args); err != nil {
 		return statusConfig{}, err

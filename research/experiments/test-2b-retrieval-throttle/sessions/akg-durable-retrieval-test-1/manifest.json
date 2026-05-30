@@ -1,0 +1,42 @@
+{
+  "session_id": "akg-durable-retrieval-test-1",
+  "started_at": "2026-05-27T17:42:28Z",
+  "ended_at": "2026-05-27T17:54:33Z",
+  "seed": 1,
+  "hand_count": 25,
+  "variant": "heads-up-nlhe",
+  "info_realism": "showdown-only",
+  "starting_stack": 200,
+  "blinds": {
+    "sb": 1,
+    "bb": 2
+  },
+  "matches": [
+    {
+      "match_id": "mat_001",
+      "seats": [
+        {
+          "seat": 0,
+          "name": "llm-akg-durable",
+          "version": "llm-akg-durable@exp-0.1.3-throttle"
+        },
+        {
+          "seat": 1,
+          "name": "llm-stateless",
+          "version": "llm-stateless/0.1.0"
+        }
+      ],
+      "result": {
+        "0": {
+          "chips_delta": 11
+        },
+        "1": {
+          "chips_delta": -11
+        }
+      },
+      "completed": true
+    }
+  ],
+  "server_version": "dev",
+  "akg_spec_version": "v1-draft-2"
+}

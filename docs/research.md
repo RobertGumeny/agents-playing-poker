@@ -18,7 +18,7 @@ Poker is a good thesis vehicle because it demands two things that memory directl
 
 Research runs are experiment-first.
 
-1. Create or edit a JSON experiment definition under [`experiments/`](../experiments/).
+1. Create or edit a JSON experiment definition under [`research/experiments/`](../experiments/).
 2. Run it with:
 
    ```bash
@@ -26,9 +26,9 @@ Research runs are experiment-first.
    ```
 
 3. Inspect:
-   - `reports/<experiment-id>.md` for the treatment/control comparison
-   - `sessions/<session-id>/manifest.json` and `hands.jsonl` for primary session truth
-   - `sessions/<session-id>/eval.json` for derived per-session metrics
+   - `research/research/reports/<experiment-id>.md` for the treatment/control comparison
+   - `research/sessions/<session-id>/manifest.json` and `hands.jsonl` for primary session truth
+   - `research/sessions/<session-id>/eval.json` for derived per-session metrics
    - agent artifacts such as `pi-session.jsonl`, `memory.akg`, and `memory-export.json`
 
 The root experiment command exposes the same artifact chain as smaller steps:
@@ -37,7 +37,7 @@ The root experiment command exposes the same artifact chain as smaller steps:
 | --- | --- |
 | `poker experiment status <id>` | Show planned, present, missing, and incomplete sessions. |
 | `poker experiment run <id>` | Run only missing or incomplete planned sessions. |
-| `poker experiment analyze <id>` | Collect missing `eval.json` files and write `reports/<id>.md`. |
+| `poker experiment analyze <id>` | Collect missing `eval.json` files and write `research/research/reports/<id>.md`. |
 | `poker experiment go <id>` | Run missing work and then analyze it. |
 
 The experiment JSON contract is defined in [`experiment-definition.md`](experiment-definition.md). Session artifact schemas are defined in [`session-artifacts.md`](session-artifacts.md).
@@ -118,7 +118,7 @@ The main interpretive question is not whether AKG wins one short match. It is wh
 
 ## Current artifact model
 
-A completed planned session writes under `sessions/<session-id>/`.
+A completed planned session writes under `research/sessions/<session-id>/`.
 
 Authoritative session records:
 

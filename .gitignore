@@ -9,7 +9,7 @@
 vendor/
 
 # Sessions are runtime output, not source
-sessions/
+research/sessions/
 
 # Env / secrets
 .env
@@ -26,13 +26,12 @@ sessions/
 node_modules/
 
 # Build artifacts
-bin/
-dist/
-.tmp/
-/poker
-/poker-eval
-/poker-run
-/poker-server
+engine/bin/
+engine/.tmp/
+/engine/poker
+/engine/poker-eval
+/engine/poker-run
+/engine/poker-server
 
 .doug/
 
