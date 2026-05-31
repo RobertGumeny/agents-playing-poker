@@ -1,5 +1,15 @@
 # Adding a Memory Strategy
 
+## Quickstart
+
+```bash
+poker strategy new llm-my-strategy
+```
+
+This scaffolds the TypeScript package, registers the key in `pi-agents/registry.json`, and prints next steps. The manual sections below explain the implementation details; you can skip Step 3 (wiring the package) since the scaffold handles it.
+
+---
+
 ## Overview
 
 A memory strategy is one agent package under `engine/pi-agents/`. It consists of two things:
@@ -71,24 +81,44 @@ export class YourMemoryPolicy implements MemoryPolicy {
 }
 ```
 
-### What `CompletedHandContext` gives you
+### What `DecisionContext` gives you
+
+Available inside `beforeDecision`. Sourced from the live `your_turn` protocol message.
 
 | Field | Type | Notes |
 |---|---|---|
-| `handNumber` | `number` | monotonically increasing |
+| `handNumber` | `number` | monotonically increasing hand counter |
+| `street` | `"preflop" \| "flop" \| "turn" \| "river"` | current betting street |
+| `board` | `string[]` | community cards dealt so far (0 on preflop) |
+| `pot` | `number` | total chips in the pot |
+| `toCall` | `number` | chips required to call; 0 when checking is free |
+| `stacks` | `Record<string, number>` | remaining stacks keyed by seat name |
+| `actionHistory` | `ActionHistoryEntry[]` | all actions taken this hand up to this turn |
+| `legalActions` | `LegalActionOption[]` | server-authoritative list of valid moves |
+| `state.session?.memoryDir` | `string \| undefined` | server-scoped directory for durable storage |
+
+`ActionHistoryEntry` fields: `seat` (number), `action` (PlayerAction), `amount?` (number), `street` (Street), `forced_reason?` (string for blinds).
+
+`LegalActionOption` fields: `action` (DecisionAction), `amount?` (exact amount for call), `min?` / `max?` (raise range).
+
+### What `CompletedHandContext` gives you
+
+Available inside `afterHandEnd`. Server-authoritative final state for the completed hand.
+
+| Field | Type | Notes |
+|---|---|---|
+| `handNumber` | `number` | matches the hand that just ended |
 | `heroSeat` | `number` | your seat number |
+| `dealerSeat` | `number` | dealer / small blind seat |
 | `seats` | `Array<{seat, name}>` | all players |
 | `heroHoleCards` | `string[]` | e.g. `["As", "Kd"]` |
-| `board` | `string[]` | community cards dealt so far |
-| `actionHistory` | `ActionHistoryEntry[]` | server-authoritative action log |
-| `showdownReached` | `boolean` | |
-| `showdown` | `Record<string, ShowdownEntry>` | only present when true |
-| `result` | `Array<{seat, chips_delta}>` | final chip deltas |
-| `dealerSeat` | `number` | dealer/small blind seat |
+| `board` | `string[]` | final community cards (up to 5) |
+| `actionHistory` | `ActionHistoryEntry[]` | complete server-authoritative action log |
+| `showdownReached` | `boolean` | true when hands were revealed |
+| `showdown` | `Record<string, ShowdownEntry>` \| undefined | keyed by seat number string; only present when `showdownReached` is true |
+| `result` | `Array<{seat, chips_delta}>` | final chip deltas for all seats |
 
-### What `DecisionContext` gives you
-
-The same fields from the live `your_turn` message: `handNumber`, `street`, `board`, `pot`, `toCall`, `stacks`, `actionHistory`, `legalActions`. Plus `context.state.session?.memoryDir` for the server-scoped storage path.
+`ShowdownEntry` fields: `hole_cards` (string[]), `rank` (string, e.g. `"straight flush"`).
 
 ---
 
@@ -168,16 +198,33 @@ Add the package to the `workspaces` array in `engine/pi-agents/package.json`.
 
 ## Step 4 — Register as an experiment agent
 
-In your experiment definition JSON (`research/experiments/<slug>/experiment.json`), add the strategy to the `agents` array:
+Create or edit an experiment definition JSON at `research/experiments/<slug>/<slug>.json`. Set `"agent"` in the relevant group to your strategy key:
 
 ```json
 {
-  "agent_tag": "your-strategy",
-  "binary": "poker-agent-llm-your-strategy",
-  "model": "anthropic:claude-sonnet-4-5",
-  "thinking_level": "low"
+  "id": "my-memory-test",
+  "hypothesis": "...",
+  "model": "anthropic:claude-sonnet-4-6",
+  "hands_per_session": 100,
+  "control": {
+    "session_base": "baseline-control",
+    "sessions_count": 5,
+    "agent": "llm-stateless",
+    "opponent": "heuristic"
+  },
+  "treatment": {
+    "session_base": "my-strategy-treatment",
+    "sessions_count": 5,
+    "agent": "llm-my-strategy",
+    "opponent": "heuristic"
+  },
+  "expected_direction": {
+    "chips_per_hand": "increase"
+  }
 }
 ```
+
+The full schema is documented in [`../experiment-definition.md`](../experiment-definition.md).
 
 Build first so the binary exists:
 ```sh
@@ -233,7 +280,10 @@ See `llm-akg-durable/src/runtime.ts` (`createDurableSessionFactory`) for a compl
    ```
    Feed it a valid `session_init` + `hand_start` + `your_turn` JSONL sequence on stdin.
 3. Unit tests: `npm test` from the strategy package dir.
-4. Integration: run a short match via `poker run` and inspect `hands.jsonl` and `eval.json`.
+4. Integration: run a short match and inspect `hands.jsonl` and `eval.json`:
+   ```sh
+   poker match run --agent0 llm-my-strategy --agent1 heuristic --hands 25
+   ```
 
 ---
 

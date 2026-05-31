@@ -11,7 +11,7 @@ The normal workflow is:
 2. Run:
 
    ```bash
-   go run ./cmd/poker experiment go <experiment-id>
+   poker experiment go <experiment-id>
    ```
 
 3. Review:

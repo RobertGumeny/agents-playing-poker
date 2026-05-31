@@ -43,8 +43,6 @@ If implementation requires a poker rule that is not clearly stated in these docs
 
 ## Documents in this directory
 
-- [`docs/domain/README.md`](README.md)
-  - Index for domain docs and the project/domain split.
 - [`docs/domain/texas-holdem.md`](texas-holdem.md)
   - Canonical rules reference for generic Texas Hold'em.
   - Covers cards, streets, betting-round flow, legal action vocabulary, hand rankings, and showdown.
