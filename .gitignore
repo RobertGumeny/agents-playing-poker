@@ -11,6 +11,15 @@ vendor/
 # Sessions are runtime output, not source
 research/sessions/
 
+# Heavy session artifacts: keep the lightweight authoritative + analysis records
+# (hands.jsonl, manifest.json, report.md, eval.json, memory-export.json) tracked,
+# but ignore the large/regenerable ones. Force-add (git add -f) a specific file
+# when an individual run is worth archiving whole.
+research/experiments/**/memory.akg
+research/experiments/**/pi-session.jsonl
+research/experiments/**/stdout.log
+research/experiments/**/stderr.log
+
 # Env / secrets
 .env
 .env.*
