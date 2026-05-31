@@ -74,3 +74,14 @@ func repoRoot() (string, error) {
 	// filename is engine/cmd/poker/main.go; three levels up is the repo root.
 	return filepath.Clean(filepath.Join(filepath.Dir(filename), "..", "..", "..")), nil
 }
+
+// engineDir is the Go module root (engine/), where go.mod, pi-agents/, and the
+// .tmp build cache live. Go builds must run here, and pi-agent scripts resolve
+// against it. Distinct from repoRoot, which roots research/ output.
+func engineDir() (string, error) {
+	root, err := repoRoot()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, "engine"), nil
+}

@@ -254,11 +254,11 @@ func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.
 
 	printCoverage(stdout, coverage)
 
-	repoDir, err := repoRoot()
+	engDir, err := engineDir()
 	if err != nil {
 		return err
 	}
-	executor := evalrun.NewExecutor(repoDir, stdout, stderr)
+	executor := evalrun.NewExecutor(engDir, stdout, stderr)
 
 	effectiveModel := model
 	if effectiveModel == "" {

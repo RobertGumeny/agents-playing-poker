@@ -14,9 +14,9 @@ import (
 )
 
 type Executor struct {
-	RepoDir     string
+	EngineDir   string
 	GoBinary    string
-	BuildBinary func(repoDir, goBinary, pkg, outputPath string) error
+	BuildBinary func(engineDir, goBinary, pkg, outputPath string) error
 	RunCommand  func(*exec.Cmd) error
 	Stdout      io.Writer
 	Stderr      io.Writer
@@ -25,9 +25,9 @@ type Executor struct {
 	buildErr    error
 }
 
-func NewExecutor(repoDir string, stdout, stderr io.Writer) *Executor {
+func NewExecutor(engineDir string, stdout, stderr io.Writer) *Executor {
 	return &Executor{
-		RepoDir:     repoDir,
+		EngineDir:   engineDir,
 		GoBinary:    "go",
 		BuildBinary: BuildGoBinary,
 		RunCommand:  func(cmd *exec.Cmd) error { return cmd.Run() },
@@ -66,7 +66,7 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 	}
 
 	cmd := exec.CommandContext(ctx, binaryPath, args...)
-	cmd.Dir = e.RepoDir
+	cmd.Dir = e.EngineDir
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	if err := e.RunCommand(cmd); err != nil {
@@ -82,9 +82,9 @@ func (e *Executor) PrepareBinary() (string, error) {
 }
 
 func (e *Executor) ensureBinary() (string, error) {
-	outputPath := filepath.Join(e.RepoDir, ".tmp", "bin", BinaryName("poker"))
+	outputPath := filepath.Join(e.EngineDir, ".tmp", "bin", BinaryName("poker"))
 	e.buildOnce.Do(func() {
-		if err := e.BuildBinary(e.RepoDir, e.GoBinary, "./cmd/poker", outputPath); err != nil {
+		if err := e.BuildBinary(e.EngineDir, e.GoBinary, "./cmd/poker", outputPath); err != nil {
 			e.buildErr = err
 			return
 		}
@@ -93,13 +93,13 @@ func (e *Executor) ensureBinary() (string, error) {
 	return e.binaryPath, e.buildErr
 }
 
-func BuildGoBinary(repoDir, goBinary, pkg, outputPath string) error {
+func BuildGoBinary(engineDir, goBinary, pkg, outputPath string) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", filepath.Dir(outputPath), err)
 	}
 
 	cmd := exec.Command(goBinary, "build", "-o", outputPath, pkg)
-	cmd.Dir = repoDir
+	cmd.Dir = engineDir
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer

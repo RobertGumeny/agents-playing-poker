@@ -20,6 +20,10 @@ func runDemo(args []string, stdout, _ io.Writer) error {
 	if err != nil {
 		return err
 	}
+	engDir, err := engineDir()
+	if err != nil {
+		return err
+	}
 
 	sessionID := fs.String("session-id", defaultDemoSessionID(), "session id")
 	sessionsDir := fs.String("sessions-dir", filepath.Join(repoDir, "research/sessions"), "session output root directory")
@@ -45,7 +49,7 @@ func runDemo(args []string, stdout, _ io.Writer) error {
 		{"./cmd/random-agent", randomBin},
 		{"./cmd/heuristic-agent", heuristicBin},
 	} {
-		if err := buildDemoBinary(repoDir, target.pkg, target.bin); err != nil {
+		if err := buildDemoBinary(engDir, target.pkg, target.bin); err != nil {
 			return err
 		}
 	}
@@ -89,12 +93,12 @@ func runDemo(args []string, stdout, _ io.Writer) error {
 	return nil
 }
 
-func buildDemoBinary(repoDir, pkg, outputPath string) error {
+func buildDemoBinary(engineDir, pkg, outputPath string) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", filepath.Dir(outputPath), err)
 	}
 	cmd := exec.Command("go", "build", "-o", outputPath, pkg)
-	cmd.Dir = repoDir
+	cmd.Dir = engineDir
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

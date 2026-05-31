@@ -31,12 +31,12 @@ func runStrategyList(args []string, stdout io.Writer) error {
 		return err
 	}
 
-	repoDir, err := repoRoot()
+	engDir, err := engineDir()
 	if err != nil {
 		return err
 	}
 
-	entries, err := (&agentResolver{repoDir: repoDir}).loadRegistry()
+	entries, err := (&agentResolver{engineDir: engDir}).loadRegistry()
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func runStrategyList(args []string, stdout io.Writer) error {
 	for _, e := range entries {
 		built := "-"
 		if e.Type == "pi-agent" {
-			scriptPath := filepath.Join(repoDir, "pi-agents", e.Key, "dist", "main.js")
+			scriptPath := filepath.Join(engDir, "pi-agents", e.Key, "dist", "main.js")
 			if _, err := os.Stat(scriptPath); err == nil {
 				built = "yes"
 			} else {
@@ -73,12 +73,12 @@ func runStrategyNew(args []string, stdout io.Writer) error {
 		return fmt.Errorf("strategy key must not be empty")
 	}
 
-	repoDir, err := repoRoot()
+	engDir, err := engineDir()
 	if err != nil {
 		return err
 	}
 
-	resolver := &agentResolver{repoDir: repoDir}
+	resolver := &agentResolver{engineDir: engDir}
 	entries, err := resolver.loadRegistry()
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func runStrategyNew(args []string, stdout io.Writer) error {
 		}
 	}
 
-	piAgentsDir := filepath.Join(repoDir, "pi-agents")
+	piAgentsDir := filepath.Join(engDir, "pi-agents")
 	agentDir := filepath.Join(piAgentsDir, key)
 	srcDir := filepath.Join(agentDir, "src")
 

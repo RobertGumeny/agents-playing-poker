@@ -37,6 +37,10 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	if err != nil {
 		return err
 	}
+	engDir, err := engineDir()
+	if err != nil {
+		return err
+	}
 
 	var agent0, agent1, sessionID, sessionsDir, model, thinkingLevel string
 	var hands int
@@ -62,8 +66,8 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	}
 
 	resolver := &agentResolver{
-		repoDir:  repoDir,
-		lookPath: exec.LookPath,
+		engineDir: engDir,
+		lookPath:  exec.LookPath,
 	}
 
 	spec0, err := resolver.resolve(agent0, model, thinkingLevel)
@@ -107,8 +111,8 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 
 // agentResolver resolves a strategy key to a match.AgentSpec using pi-agents/registry.json.
 type agentResolver struct {
-	repoDir  string
-	lookPath func(string) (string, error)
+	engineDir string
+	lookPath  func(string) (string, error)
 }
 
 type registryFile struct {
@@ -122,7 +126,7 @@ type registryEntry struct {
 }
 
 func (r *agentResolver) loadRegistry() ([]registryEntry, error) {
-	path := filepath.Join(r.repoDir, "pi-agents", "registry.json")
+	path := filepath.Join(r.engineDir, "pi-agents", "registry.json")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read registry %s: %w", path, err)
@@ -171,9 +175,9 @@ func (r *agentResolver) resolvePiAgent(key, model, thinkingLevel string) (match.
 		return match.AgentSpec{}, fmt.Errorf("absolute node path: %w", err)
 	}
 
-	scriptPath := filepath.Join(r.repoDir, "pi-agents", key, "dist", "main.js")
+	scriptPath := filepath.Join(r.engineDir, "pi-agents", key, "dist", "main.js")
 	if _, err := os.Stat(scriptPath); err != nil {
-		return match.AgentSpec{}, fmt.Errorf("stat %s: %w\nhint: build with: cd %s && npm run build", scriptPath, err, filepath.Join(r.repoDir, "pi-agents"))
+		return match.AgentSpec{}, fmt.Errorf("stat %s: %w\nhint: build with: cd %s && npm run build", scriptPath, err, filepath.Join(r.engineDir, "pi-agents"))
 	}
 
 	env := []string{
@@ -193,19 +197,19 @@ func (r *agentResolver) resolvePiAgent(key, model, thinkingLevel string) (match.
 }
 
 func (r *agentResolver) resolveGoAgent(name, pkg, binary string) (match.AgentSpec, error) {
-	outputPath := filepath.Join(r.repoDir, ".tmp", "bin", binary)
-	if err := buildGoAgentBinary(r.repoDir, pkg, outputPath); err != nil {
+	outputPath := filepath.Join(r.engineDir, ".tmp", "bin", binary)
+	if err := buildGoAgentBinary(r.engineDir, pkg, outputPath); err != nil {
 		return match.AgentSpec{}, err
 	}
 	return match.AgentSpec{Name: name, Command: outputPath}, nil
 }
 
-func buildGoAgentBinary(repoDir, pkg, outputPath string) error {
+func buildGoAgentBinary(engineDir, pkg, outputPath string) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", filepath.Dir(outputPath), err)
 	}
 	cmd := exec.Command("go", "build", "-o", outputPath, pkg)
-	cmd.Dir = repoDir
+	cmd.Dir = engineDir
 
 	var outBuf, errBuf []byte
 	outWriter := &byteWriter{b: &outBuf}
