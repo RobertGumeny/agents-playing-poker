@@ -1,0 +1,10 @@
+{
+  "strategies": [
+    {"key": "llm-stateless", "type": "pi-agent"},
+    {"key": "llm-fullhistory", "type": "pi-agent"},
+    {"key": "llm-akg-recent", "type": "pi-agent"},
+    {"key": "llm-akg-durable", "type": "pi-agent"},
+    {"key": "heuristic", "type": "go-agent", "pkg": "./cmd/heuristic-agent"},
+    {"key": "random", "type": "go-agent", "pkg": "./cmd/random-agent"}
+  ]
+}

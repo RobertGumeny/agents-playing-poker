@@ -4,15 +4,92 @@
 
 Agents Playing Poker is a research harness, inspired by the classic painting "Dogs Playing Poker", for testing agentic memory strategies and patterns. The project runs deterministic heads-up no-limit Texas Hold'em matches between agents, coordinated by a Go game server. The cards, blinds, and rules are fixed by seed; the variable under test is the agent strategy, especially its memory strategy.
 
-The main workflow is experiment-first:
+## Setup
 
-1. Write an experiment JSON file under `research/experiments/`.
-2. Run it with `poker experiment go <experiment-id>` (from the `engine/` directory).
-3. Inspect the generated session artifacts and Markdown report.
+Install the `poker` CLI once from the `engine/` directory:
+
+```bash
+cd engine && make install
+```
+
+This builds and places `poker` in `~/go/bin/` (which should already be on your PATH). All further commands use `poker` directly from the repo root.
+
+## Quick start: no API key needed
+
+```bash
+poker demo
+```
+
+Plays a no-LLM random-vs-heuristic match and prints the session artifact paths. No API key or Node required.
+
+## Quick start: run an experiment
+
+Experiment definitions live in [`research/experiments/`](research/experiments/). Each file is a JSON plan for a control-vs-treatment comparison. Run from the repo root:
+
+```bash
+poker experiment go test-2b-retrieval-throttle
+```
+
+`poker experiment go` does the full operator loop:
+
+1. Loads `research/experiments/<id>/<id>.json`.
+2. Checks which planned sessions are already present.
+3. Runs missing or incomplete sessions.
+4. Collects per-session `eval.json` summaries.
+5. Writes a comparison report to `research/experiments/<id>/reports/<id>.md`.
+
+Use `--model` to override the model for Pi-backed LLM agents:
+
+```bash
+poker experiment go test-2b-retrieval-throttle --model anthropic:claude-sonnet-4-6
+```
+
+## Draft a new experiment
+
+```bash
+poker experiment new my-memory-test
+```
+
+Scaffolds `research/experiments/my-memory-test/my-memory-test.json` with sensible defaults. Edit the hypothesis, agent keys, and `expected_direction`, then run `poker experiment go my-memory-test`.
+
+The normative schema is documented in [`docs/experiment-definition.md`](docs/experiment-definition.md).
+
+## Experiment commands
+
+| Command | Purpose |
+| --- | --- |
+| `poker experiment ls` | List all experiments and their session coverage. |
+| `poker experiment status <id>` | Show planned, present, missing, and incomplete sessions. |
+| `poker experiment new <id>` | Scaffold a new experiment definition for editing. |
+| `poker experiment run <id>` | Run only the missing/incomplete sessions. |
+| `poker experiment analyze <id>` | Collect `eval.json` files and write the comparison report. |
+| `poker experiment go <id>` | Run + analyze in one shot. |
+
+## Add a new memory strategy
+
+```bash
+poker strategy new llm-md-single
+```
+
+Scaffolds a typed TypeScript `MemoryPolicy` stub under `engine/pi-agents/llm-md-single/` and registers it in the strategy registry. Follow the printed next-steps to implement, build, and run it.
+
+| Command | Purpose |
+| --- | --- |
+| `poker strategy ls` | List known strategies and whether they are built. |
+| `poker strategy new <key>` | Scaffold a new TypeScript memory strategy. |
+
+## Ad-hoc matches
+
+```bash
+poker match run --agent0 heuristic --agent1 random --hands 200 --seed 17
+poker match run --agent0 llm-akg-durable --agent1 llm-stateless --hands 25 --model anthropic:claude-sonnet-4-6
+```
+
+Use these when you need a single non-repeatable match outside of an experiment plan.
 
 ## What is being compared?
 
-Current agent strategies include:
+Current agent strategies:
 
 - `llm-stateless` — sees only the current hand.
 - `llm-fullhistory` — injects prior hand history into the prompt. This grows with each hand.
@@ -20,107 +97,13 @@ Current agent strategies include:
 - `llm-akg-durable` — durable structured AKG opponent memory.
 - `heuristic` and `random` — scripted non-LLM baselines.
 
-The research claim is not just “which agent wins more chips.” It is whether structured memory can improve or preserve poker performance while keeping context growth bounded and inspectable.
+The research claim is not just "which agent wins more chips." It is whether structured memory can improve or preserve poker performance while keeping context growth bounded and inspectable.
 
 For the full framing, read [`docs/vision.md`](docs/vision.md) and [`docs/research.md`](docs/research.md).
 
-## Quick start: run an experiment
-
-Experiment definitions live in [`research/experiments/`](research/experiments/). Each file is a JSON plan for a control-vs-treatment comparison.
-
-All Go commands run from the `engine/` directory:
-
-```bash
-cd engine
-go run ./cmd/poker experiment go test-2b-retrieval-throttle
-```
-
-If you have built the `poker` binary (`go build -o poker ./cmd/poker` from `engine/`), the same command is:
-
-```bash
-./poker experiment go test-2b-retrieval-throttle
-```
-
-`poker experiment go` does the full operator loop:
-
-1. Loads `experiments/<experiment-id>.json`.
-2. Checks which planned sessions are already present under `sessions/`.
-3. Runs missing or incomplete sessions.
-4. Collects per-session `eval.json` summaries.
-5. Writes a comparison report under `reports/<experiment-id>.md`.
-
-Use `-model` to override the model for Pi-backed LLM agents:
-
-```bash
-go run ./cmd/poker experiment go test-2b-retrieval-throttle \
-  -model anthropic:claude-sonnet-4-6
-```
-
-If the experiment file already has a `model` field, that model is used unless overridden on the command line.
-
-## Experiment file shape
-
-A minimal experiment compares a `control` group against a `treatment` group:
-
-```json
-{
-  "id": "my-memory-test",
-  "hypothesis": "Durable AKG memory should improve chip efficiency against stateless play.",
-  "model": "anthropic:claude-sonnet-4-6",
-  "hands_per_session": 25,
-  "control": {
-    "session_base": "stateless-control",
-    "sessions_count": 5,
-    "agent": "llm-stateless",
-    "opponent": "heuristic"
-  },
-  "treatment": {
-    "session_base": "akg-durable-treatment",
-    "sessions_count": 5,
-    "agent": "llm-akg-durable",
-    "opponent": "heuristic"
-  },
-  "expected_direction": {
-    "chips_per_hand": "increase",
-    "tokens_per_hand": "decrease"
-  }
-}
-```
-
-Save it as:
-
-```text
-research/experiments/my-memory-test.json
-```
-
-Then run from `engine/`:
-
-```bash
-go run ./cmd/poker experiment go my-memory-test
-```
-
-The normative schema is documented in [`docs/experiment-definition.md`](docs/experiment-definition.md).
-
-## Experiment commands
-
-The root CLI is organized around `poker experiment`:
-
-| Command | Purpose |
-| --- | --- |
-| `poker experiment status <id>` | Show planned, present, missing, and incomplete sessions. |
-| `poker experiment run <id>` | Run only the missing/incomplete sessions. |
-| `poker experiment analyze <id>` | Collect `eval.json` files and write the comparison report. |
-| `poker experiment go <id>` | Run missing work, collect summaries, and write the report. |
-
-When using `go run` (from `engine/`), prefix commands with `go run ./cmd/poker`, for example:
-
-```bash
-go run ./cmd/poker experiment status test-2b-retrieval-throttle
-```
-
 ## Outputs
 
-Each session writes a bundle under `research/sessions/<session-id>/`:
+Each session writes a bundle under `research/experiments/<id>/sessions/<session-id>/`:
 
 - `manifest.json` — match metadata, agent names, chip totals, and completion status.
 - `hands.jsonl` — server-authoritative hand log.
@@ -131,41 +114,7 @@ Each session writes a bundle under `research/sessions/<session-id>/`:
 - `agents/<name>/memory.akg` — durable AKG memory file for memory-capable agents.
 - `agents/<name>/memory-export.json` — optional JSON export of memory artifacts.
 
-Experiment comparison reports are written to:
-
-```text
-research/reports/<experiment-id>.md
-```
-
 Artifact contracts are documented in [`docs/session-artifacts.md`](docs/session-artifacts.md).
-
-## Smoke tests and lower-level commands
-
-The experiment workflow is the normal path. These commands are still useful when debugging.
-
-Run a no-LLM scripted smoke test (from `engine/`):
-
-```bash
-go run ./cmd/poker-demo
-```
-
-Run one ad hoc match directly (from `engine/`):
-
-```bash
-go run ./cmd/poker-run -agent0 heuristic -agent1 random -hands 200 -seed 17
-```
-
-Run one LLM match directly (from `engine/`):
-
-```bash
-go run ./cmd/poker-run \
-  -agent0 llm-akg-durable \
-  -agent1 llm-stateless \
-  -hands 25 \
-  -model anthropic:claude-sonnet-4-6
-```
-
-Use these direct commands only when you do not need a planned, repeatable experiment.
 
 ## Important docs
 

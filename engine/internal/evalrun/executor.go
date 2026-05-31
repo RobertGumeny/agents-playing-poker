@@ -43,6 +43,7 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 	}
 
 	args := []string{
+		"match", "run",
 		"-agent0", cfg.Agent0,
 		"-agent1", cfg.Agent1,
 		"-hands", strconv.Itoa(cfg.Hands),
@@ -69,7 +70,7 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	if err := e.RunCommand(cmd); err != nil {
-		return fmt.Errorf("execute poker-run: %w", err)
+		return fmt.Errorf("execute poker match run: %w", err)
 	}
 	return nil
 }
@@ -81,9 +82,9 @@ func (e *Executor) PrepareBinary() (string, error) {
 }
 
 func (e *Executor) ensureBinary() (string, error) {
-	outputPath := filepath.Join(e.RepoDir, ".tmp", "bin", BinaryName("poker-run"))
+	outputPath := filepath.Join(e.RepoDir, ".tmp", "bin", BinaryName("poker"))
 	e.buildOnce.Do(func() {
-		if err := e.BuildBinary(e.RepoDir, e.GoBinary, "./cmd/poker-run", outputPath); err != nil {
+		if err := e.BuildBinary(e.RepoDir, e.GoBinary, "./cmd/poker", outputPath); err != nil {
 			e.buildErr = err
 			return
 		}
