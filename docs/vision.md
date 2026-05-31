@@ -10,62 +10,57 @@ Retrieval is necessary but not sufficient. An agent that can fetch a few relevan
 
 Poker is a controlled, adversarial, multi-session environment with a clean ground truth: chips. It produces a measurable outcome for every decision, every hand, every session. It requires modeling an opponent over time, updating beliefs as new evidence arrives, and acting under uncertainty.
 
-That is exactly the domain where structured memory should matter most. An agent that remembers "villain 3-bet light three times from the button last session" should outperform one that does not. Whether it actually does, and by how much, is a question this project can answer precisely.
+It also gives us something rarer: a **verifiable memory**. Because the engine logs every hole card and action, we can take whatever an agent *claims* to remember about its opponent and check it against what actually happened. That turns "did the memory work" from a vibe into a measurement.
 
-## Memory-strategy framing
+## The ladder of memory representations
 
-Agent memory in this project is the variable under test. The current strategy lineup is:
+Memory is the variable under test. The right way to see the lineup is as a ladder of increasing structure, where each rung is expected to **fail in a different, predictable way**. Naming the failure mode up front is what tells us *what to measure* — not just who won.
 
-- **`llm-stateless`** — current hand only; the low-token no-memory baseline.
-- **`llm-fullhistory`** — raw or lightly formatted prior-hand history injected into the prompt; the naive high-token memory baseline.
-- **`llm-akg-recent`** — shallow bounded AKG memory using recent hands plus a growing opponent profile; useful as a wiring and token-efficiency control.
-- **`llm-akg-durable`** — durable structured AKG opponent memory with graph-backed opponent/profile/pattern evidence and decision-time retrieval tools; this is where the core thesis lives.
+| Strategy | Structure | Predicted failure mode |
+|---|---|---|
+| `llm-stateless` | none — current hand only | No opponent model at all. The floor. |
+| `llm-fullhistory` | raw transcript in context | **Context ceiling + O(N) cost.** Tokens grow every hand; it cannot reach long sessions before it blows the window or the budget. The "stuff it all in" baseline on the cost axis. |
+| `llm-md-single` | one freeform markdown file the agent rewrites | **Maintenance fidelity + rewrite cost.** No addressability: to update, the agent re-reads and re-writes the whole file. Facts get silently dropped, contradicted, or bloated; rewrites get expensive and lossy as the file grows. |
+| `llm-md-wiki` | linked markdown pages (`[[wiki links]]`) — a knowledge graph faked in prose | **Query/aggregation + link integrity.** Better than one file: addressable, traversable. But it is still text. It cannot *compute* "folds to c-bet 39/77"; it has to re-read and re-tally in-context, and links rot at scale. This is the true head-to-head rival to AKG — same structural ambition, no typed or queryable substrate. |
+| `llm-akg-durable` | typed, queryable graph with computed aggregates | The thesis strategy. A decision-time query returns a *precomputed* opponent profile, so per-decision cost stays roughly flat regardless of session length. |
 
-Planned future strategies that would sharpen the comparison:
+Two supporting strategies sit off the ladder: `llm-akg-recent` is a shallow bounded-AKG wiring/efficiency control (honestly a weak baseline, not proof of anything), and `random`/`heuristic` are non-LLM scripted agents for validating protocol, rules, and artifacts without model calls.
 
-- **`llm-md-single`** — a single growing markdown file that the agent rewrites or appends after each hand. The "obvious first thing a developer would build." Honest representation of the simplest possible durable memory.
-- **`llm-md-wiki`** — multiple markdown files organized by topic (`opponent-profile.md`, `patterns.md`, `hand-log.md`), read selectively. Same class as `llm-akg-durable` (selective durable memory, decision-time retrieval) but flat files instead of a typed graph. The most direct apples-to-apples test of whether AKG's structure does work that ad-hoc file organization cannot.
+The point of the ladder is that `llm-md-wiki` vs `llm-akg-durable` is the experiment that actually matters. If a linked pile of markdown can do everything AKG does, AKG is overhead. The thesis is that it cannot — that somewhere up the ladder, *holding an accurate, cheap-to-query model of a 200-hand opponent* stops being something you can fake in prose.
 
-The thesis does not require AKG to win every short match. Poker outcomes are noisy: a few all-in pots, seat/order effects, blind rotation, LLM nondeterminism, invalid-action fallbacks, and ordinary variance can dominate short-run chip results. The target result is that durable AKG memory can match or beat full-history prompting over planned experiment sets while using materially less context growth and producing memory artifacts that can be inspected, queried, and improved.
+## The shape of the claim: a fidelity-vs-cost frontier
 
-A recent-hand AKG snapshot should therefore be labeled honestly. It can show that bounded recency changes behavior at lower token cost than full-history prompting, but it is not by itself proof that durable structured memory gives an agent a strategic edge.
+The experiment is **not** primarily "which agent wins the most chips." Chip outcomes are noisy — a few all-in pots, seat and blind-rotation effects, LLM nondeterminism, and ordinary variance dominate short runs, and in near-mirror matchups they need enormous sample sizes to mean anything. Chips are a diagnostic, not the thesis.
 
-## Experimental framing
+The thesis lives on two lower-variance curves, both measurable from artifacts the harness already produces:
 
-The experiment is not only "which agent wins the most chips." The stronger claim is two-dimensional:
+1. **Profile fidelity vs. hand count.** Take what the agent *states* it knows about the opponent and cross-validate it against engine ground truth (`hands.jsonl`). For `llm-akg-durable` this already matches to the digit at 500 hands. Run the same check up the ladder and watch the error grow. **Where each curve peels away from zero is, literally, "where the patterns fall apart."**
+2. **Tokens per decision vs. hand count.** `pi-session.jsonl` carries every prompt, so this is directly extractable. AKG should be roughly flat; full-history climbs linearly; markdown-rewrite climbs with file size.
 
-1. **Poker performance:** net chips, chips per hand / BB per hand, matchup results, and confidence intervals where enough samples exist.
-2. **Context efficiency:** prompt/completion tokens per hand, tokens per decision, token-growth slope, cost per hand, and chips or BB won per token budget.
+The result we are hunting is a frontier: **AKG holds fidelity flat while keeping per-decision cost flat, and the unstructured strategies are forced to trade one for the other.** If that is true, the fidelity-vs-cost picture shows it far more convincingly — and more honestly — than a chip count ever could. A win can be a *performance* win, a *cost* win, or both; the frontier captures all three.
 
-This matters because a raw full-history agent may win some chips simply by stuffing more context into the prompt. That is a useful baseline, but not the thesis. The AKG thesis is that structured memory should preserve or improve decision quality while keeping context bounded and inspectable.
-
-The current operator workflow is experiment-first: define the comparison as JSON under `experiments/`, run it with `poker experiment go <experiment-id>`, and interpret the generated session artifacts plus `reports/<experiment-id>.md`.
-
-## Mirror match: two memory agents against each other
-
-A natural future experiment is to seat two `llm-akg-durable` agents against each other for 500+ hands. Both agents build opponent models simultaneously — each modeling a villain who is also adapting in response to being modeled.
-
-This creates dynamics that a stateless opponent cannot produce:
-
-- **Adaptation arms race.** If one agent builds a `folds-to-cbet` pattern and starts barreling more aggressively, the other agent's fold rate should drop — which should eventually invalidate the pattern. Does the AKG store clean it up? Does the exploiting agent notice and re-adjust?
-- **Convergence or divergence.** Do two agents with identical memory architectures converge toward equilibrium over 500 hands, or does whichever agent builds accurate patterns *faster* in the early window pull ahead and hold that edge?
-- **Dual artifact analysis.** Each agent produces its own `memory.akg` at the end — two models of the same match from opposite seats. Comparing them tests whether the memory captures reality accurately, not just selectively.
-
-The infrastructure is already in place: each seat runs as an independent Pi subprocess with its own `memory_dir`. A mirror match is likely just `poker-run -agent0 llm-akg-durable -agent1 llm-akg-durable` with a small extension to the experiment definition format to express symmetric agent configurations. The first step is a 25-hand sanity run to confirm both memory files diverge correctly.
+A corollary on experiment design: the strategies should run to **different hand counts on purpose**. Full-history failing early is a finding, not a problem — "it broke at hand ~N" is exactly the kind of result we want. There is no need for a common N; we want each representation's breaking point.
 
 ## Why AKG and not markdown files
 
-Markdown works. It is readable, writable, and easy to produce. It is also fragile: it grows noisy, lacks queryable structure, resists deterministic retrieval, and degrades as a reasoning substrate as it scales.
+Markdown works. It is readable, writable, and easy to produce. It is also fragile: it grows noisy, lacks queryable structure, resists deterministic retrieval, and degrades as a reasoning substrate as it scales. The `llm-md-*` rungs exist precisely to measure *how* fragile, and at what scale.
 
-AKG is a compact graph format designed to be stored anywhere, queried deterministically, and extended cleanly. It is not a document format that happens to contain facts — it is a fact store that happens to be readable. That distinction matters when the agent's task is to reason over a knowledge structure rather than summarize a document.
+AKG is a compact graph format designed to be stored anywhere, queried deterministically, and extended cleanly. It is not a document format that happens to contain facts — it is a fact store that happens to be readable.
 
-The choice is not about elegance. It is about building a substrate that can scale from "inject a few opponent stats" to "traverse a multi-session knowledge graph and reason about patterns" without a rewrite at each step.
+Crucially, AKG has **headroom the current strategy barely uses**. Today's `llm-akg-durable` keeps an aggregate, all-time opponent profile — which is why it cannot window observations or notice an opponent changing gears. Those are limits of the *strategy*, not the *format*: AKG's node types and edge relations are an open vocabulary, `meta` is unconstrained, and a temporal index is built in. Richer profiling — windowed/recency-weighted reads, board-texture or sizing "spot" nodes, `contradicts`/`superseded_by` edges for invalidation — is all additive on top of the existing architecture, no rewrite at each step. The constraint going forward is not "can AKG represent this." It is "does feeding the LLM this richer structure make it play better, at acceptable cost" — a question only experiments answer, and one we have already seen cut the wrong way once (see `research.md`).
+
+## Mirror match: a settled durability result
+
+We seated two `llm-akg-durable` agents against each other for 500 hands (`mirror-match-500/mirror-sanity-1`). It was a **durability and instrumentation sanity check**, and it delivered:
+
+- The agent maintained a multi-megabyte `.akg` file across all 500 hands with **full node coverage, no gaps, zero lost decisions, and no degradation as the file grew** — the durable strategy scales to long sessions.
+- Both agents queried their opponent model nearly every hand and cited concrete tendencies in their reasoning, and the two memory files told a **mutually consistent story** of the same match from opposite seats, cross-validating to the digit on unambiguous stats.
+
+What it explicitly did **not** show is a memory *edge*: in a mirror, both sides have identical memory by construction, so the chip result (one seat +4857) is variance plus emergent style divergence, not evidence that memory helps. Measuring lift requires a non-mirror matchup against the lower rungs of the ladder. And testing whether memory can detect *adaptation* requires a scripted opponent that changes gears at a known hand — mirror self-play, with both sides drifting at once, cannot attribute that cleanly.
 
 ## Multiplayer and concurrent agents
 
-The current design is heads-up: one agent against one opponent in each session. AKG-backed agents write to the server-provided `memory_dir`, so simultaneous sessions use isolated memory files and do not share or conflict with one another.
-
-Future multiplayer work would need explicit product and protocol design. It is not part of the current experiment-first v0 scope.
+The current design is heads-up: one agent against one opponent per session. AKG-backed agents write to the server-provided `memory_dir`, so simultaneous sessions use isolated memory files and do not conflict. Future multiplayer work would need explicit product and protocol design and is not part of the current experiment-first v0 scope.
 
 ## The broader claim
 

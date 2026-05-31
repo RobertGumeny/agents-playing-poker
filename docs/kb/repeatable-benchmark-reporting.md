@@ -4,6 +4,8 @@ This document describes how to turn a set of poker session artifacts into a repe
 
 The goal is not to claim AKG superiority from early runs. Current `llm-akg-recent` should be reported as a shallow baseline: a deliberately naive bounded-memory baseline that injects an opponent profile plus the last 5 completed hands. The report makes that framing explicit so later, richer AKG memory strategies can be compared against this baseline, and eventually against `llm-fullhistory` on both skill and cost.
 
+**Scope relative to the primary lens.** Per [`../research.md`](../research.md), the thesis now lives on the **fidelity-vs-cost frontier** — (1) profile fidelity vs hand count and (2) tokens per decision vs hand count — and chip outcomes are a *diagnostic*, not proof. This report is the **chip / behavior / cost-diagnostic surface**: it characterizes who won, how they played, and (when usage data exists) what it cost. The profile-fidelity curve is a separate analysis (cross-validating an agent's stated opponent read against `hands.jsonl` ground truth) and is not computed by `cmd/poker-report`. Read this report's chip aggregates as diagnostics that sit *under* the frontier, not as the headline result.
+
 `cmd/poker-report` plus `internal/reporting` implement this surface. The command accepts explicit session directories, loads server-authoritative artifacts, canonicalizes historical `llm-akg` labels to `llm-akg-recent` in memory, computes mirror-aware metrics, and renders a conservative Markdown review.
 
 ## Why this report exists
@@ -96,7 +98,7 @@ Across all selected sessions:
 - number of sessions won by each strategy
 - number of mirror pairs won by each strategy
 
-Do not treat individual session wins as the primary evidence when mirror pairs are available.
+Do not treat individual session wins as the primary evidence when mirror pairs are available. And do not treat even mirror-corrected chip aggregates as the *thesis* result: they are the strongest chip diagnostic, but the headline claim is made on the fidelity-vs-cost frontier (see Framing).
 
 ### Seat-bias check
 
@@ -317,21 +319,13 @@ Deterministic Go coverage includes:
 
 ## Future comparison ladder
 
-Use this same report format across strategy generations:
+The current strategy ladder and the headline matchup live in [`../research.md`](../research.md) and [`../vision.md`](../vision.md): `llm-stateless` → `llm-fullhistory` → `llm-md-single` → `llm-md-wiki` (linked markdown graph) → `llm-akg-durable`, with `llm-md-wiki` vs `llm-akg-durable` as the experiment that matters. Each rung is expected to fail differently (context ceiling, rewrite cost, query/aggregation, link integrity), and strategies may run to *different* hand counts on purpose — a rung breaking early is itself a result.
 
-1. `llm-akg-recent` vs `llm-stateless`
-   - Purpose: low-cost shallow-memory baseline; behavior and cost characterization.
-2. richer AKG candidate(s) vs `llm-akg-recent`
-   - Purpose: prove new memory retrieval improves over the naive last-5-hands baseline.
-3. best AKG candidate vs `llm-stateless`
-   - Purpose: confirm improvement over no memory.
-4. best efficient AKG candidate vs `llm-fullhistory`
-   - Purpose: final skill/cost comparison against naive high-context memory.
+Use this report format for the **chip/behavior/cost-diagnostic** slice of any of those matchups. The thesis result, however, is read on the frontier:
 
-The final report should compare both:
-
-- **skill:** chips/hand, BB/100, mirror-pair wins, confidence intervals when enough hands exist
-- **efficiency:** tokens/hand, cost/hand, context-growth slope, BB per token budget
+- **fidelity (primary):** stated opponent read vs `hands.jsonl` ground truth, as a function of hand count — where each representation's accuracy decays
+- **cost (primary):** tokens/decision and context-growth slope, as a function of hand count
+- **skill (diagnostic):** chips/hand, BB/100, mirror-pair wins, confidence intervals when enough hands exist
 
 ## Example headline for the current baseline
 
