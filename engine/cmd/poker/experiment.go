@@ -22,19 +22,24 @@ func runExperiment(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
 		return fmt.Errorf("expected subcommand (supported: analyze, go, ls, new, run, status)")
 	}
+	repoDir, err := repoRoot()
+	if err != nil {
+		return err
+	}
+	defaultExperimentsDir := filepath.Join(repoDir, "research/experiments")
 	switch args[0] {
 	case "analyze":
-		return runExperimentAnalyze(args[1:], stdout, stderr)
+		return runExperimentAnalyze(args[1:], defaultExperimentsDir, stdout, stderr)
 	case "go":
-		return runExperimentGo(args[1:], stdout, stderr)
+		return runExperimentGo(args[1:], defaultExperimentsDir, stdout, stderr)
 	case "ls":
-		return runExperimentList(args[1:], stdout, stderr)
+		return runExperimentList(args[1:], defaultExperimentsDir, stdout, stderr)
 	case "new":
-		return runExperimentNew(args[1:], stdout, stderr)
+		return runExperimentNew(args[1:], defaultExperimentsDir, stdout, stderr)
 	case "run":
-		return runExperimentRun(args[1:], stdout, stderr)
+		return runExperimentRun(args[1:], defaultExperimentsDir, stdout, stderr)
 	case "status":
-		return runExperimentStatus(args[1:], stdout, stderr)
+		return runExperimentStatus(args[1:], defaultExperimentsDir, stdout, stderr)
 	default:
 		return fmt.Errorf("unsupported experiment subcommand %q", args[0])
 	}
@@ -47,9 +52,9 @@ type experimentFlags struct {
 	experimentPath string // resolved from id
 }
 
-func parseExperimentFlags(fs *flag.FlagSet, args []string) (experimentFlags, error) {
+func parseExperimentFlags(fs *flag.FlagSet, args []string, defaultExperimentsDir string) (experimentFlags, error) {
 	var ef experimentFlags
-	fs.StringVar(&ef.experimentsDir, "experiments-dir", "research/experiments", "directory containing experiment slug subdirectories")
+	fs.StringVar(&ef.experimentsDir, "experiments-dir", defaultExperimentsDir, "directory containing experiment slug subdirectories")
 	fs.StringVar(&ef.experimentPath, "experiment", "", "explicit path to experiment definition JSON (overrides positional id)")
 
 	if err := fs.Parse(args); err != nil {
@@ -83,11 +88,11 @@ func resolveExperiment(id, experimentsDir string) (string, error) {
 	return candidate, nil
 }
 
-func runExperimentStatus(args []string, stdout, stderr io.Writer) error {
+func runExperimentStatus(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment status", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
-	ef, err := parseExperimentFlags(fs, args)
+	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
@@ -104,7 +109,7 @@ func runExperimentStatus(args []string, stdout, stderr io.Writer) error {
 	return nil
 }
 
-func runExperimentRun(args []string, stdout, stderr io.Writer) error {
+func runExperimentRun(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment run", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
@@ -113,7 +118,7 @@ func runExperimentRun(args []string, stdout, stderr io.Writer) error {
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
 
-	ef, err := parseExperimentFlags(fs, args)
+	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
@@ -121,11 +126,11 @@ func runExperimentRun(args []string, stdout, stderr io.Writer) error {
 	return execRun(ef, model, thinkingLevel, stdout, stderr)
 }
 
-func runExperimentAnalyze(args []string, stdout, stderr io.Writer) error {
+func runExperimentAnalyze(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment analyze", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
-	ef, err := parseExperimentFlags(fs, args)
+	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
@@ -133,7 +138,7 @@ func runExperimentAnalyze(args []string, stdout, stderr io.Writer) error {
 	return execAnalyze(ef, stdout)
 }
 
-func runExperimentGo(args []string, stdout, stderr io.Writer) error {
+func runExperimentGo(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment go", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
@@ -142,7 +147,7 @@ func runExperimentGo(args []string, stdout, stderr io.Writer) error {
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
 
-	ef, err := parseExperimentFlags(fs, args)
+	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
@@ -153,12 +158,12 @@ func runExperimentGo(args []string, stdout, stderr io.Writer) error {
 	return execAnalyze(ef, stdout)
 }
 
-func runExperimentNew(args []string, stdout, stderr io.Writer) error {
+func runExperimentNew(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment new", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
 	var experimentsDir string
-	fs.StringVar(&experimentsDir, "experiments-dir", "research/experiments", "directory containing experiment slug subdirectories")
+	fs.StringVar(&experimentsDir, "experiments-dir", defaultExperimentsDir, "directory containing experiment slug subdirectories")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -208,12 +213,12 @@ func runExperimentNew(args []string, stdout, stderr io.Writer) error {
 	return nil
 }
 
-func runExperimentList(args []string, stdout, stderr io.Writer) error {
+func runExperimentList(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker experiment ls", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
 	var experimentsDir string
-	fs.StringVar(&experimentsDir, "experiments-dir", "research/experiments", "directory containing experiment slug subdirectories")
+	fs.StringVar(&experimentsDir, "experiments-dir", defaultExperimentsDir, "directory containing experiment slug subdirectories")
 
 	if err := fs.Parse(args); err != nil {
 		return err

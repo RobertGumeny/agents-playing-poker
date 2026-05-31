@@ -16,17 +16,17 @@ func runDemo(args []string, stdout, _ io.Writer) error {
 	fs := flag.NewFlagSet("poker demo", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
+	repoDir, err := repoRoot()
+	if err != nil {
+		return err
+	}
+
 	sessionID := fs.String("session-id", defaultDemoSessionID(), "session id")
-	sessionsDir := fs.String("sessions-dir", "research/sessions", "session output root directory")
+	sessionsDir := fs.String("sessions-dir", filepath.Join(repoDir, "research/sessions"), "session output root directory")
 	seed := fs.Int64("seed", 17, "deterministic match seed")
 	handCount := fs.Int("hand-count", 200, "number of hands to play")
 
 	if err := fs.Parse(args); err != nil {
-		return err
-	}
-
-	repoDir, err := repoRoot()
-	if err != nil {
 		return err
 	}
 

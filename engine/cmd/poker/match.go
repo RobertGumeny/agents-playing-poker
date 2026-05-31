@@ -33,6 +33,11 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	fs := flag.NewFlagSet("poker match run", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
+	repoDir, err := repoRoot()
+	if err != nil {
+		return err
+	}
+
 	var agent0, agent1, sessionID, sessionsDir, model, thinkingLevel string
 	var hands int
 	var seed int64
@@ -42,7 +47,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	fs.IntVar(&hands, "hands", 200, "number of hands to play")
 	fs.Int64Var(&seed, "seed", 1, "deterministic match seed")
 	fs.StringVar(&sessionID, "session-id", defaultMatchSessionID(), "session id")
-	fs.StringVar(&sessionsDir, "sessions-dir", "research/sessions", "session output root directory")
+	fs.StringVar(&sessionsDir, "sessions-dir", filepath.Join(repoDir, "research/sessions"), "session output root directory")
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", "low", "PI_POKER_THINKING_LEVEL for Pi agents")
 
@@ -54,11 +59,6 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	}
 	if agent0 == "" || agent1 == "" {
 		return fmt.Errorf("both --agent0 and --agent1 are required")
-	}
-
-	repoDir, err := repoRoot()
-	if err != nil {
-		return err
 	}
 
 	resolver := &agentResolver{

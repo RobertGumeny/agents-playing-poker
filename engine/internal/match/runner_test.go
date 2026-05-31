@@ -459,3 +459,40 @@ func readLines(t *testing.T, path string) []string {
 	}
 	return strings.Split(trimmed, "\n")
 }
+
+func TestBuildAgentDirKeys(t *testing.T) {
+	tests := []struct {
+		name  string
+		specs []AgentSpec
+		want  []string
+	}{
+		{
+			name:  "unique names unchanged",
+			specs: []AgentSpec{{Name: "llm-akg-durable"}, {Name: "llm-stateless"}},
+			want:  []string{"llm-akg-durable", "llm-stateless"},
+		},
+		{
+			name:  "duplicate names get seat suffix",
+			specs: []AgentSpec{{Name: "llm-akg-durable"}, {Name: "llm-akg-durable"}},
+			want:  []string{"llm-akg-durable-0", "llm-akg-durable-1"},
+		},
+		{
+			name:  "single agent unchanged",
+			specs: []AgentSpec{{Name: "heuristic"}},
+			want:  []string{"heuristic"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := buildAgentDirKeys(tt.specs)
+			if len(got) != len(tt.want) {
+				t.Fatalf("len = %d, want %d", len(got), len(tt.want))
+			}
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("keys[%d] = %q, want %q", i, got[i], tt.want[i])
+				}
+			}
+		})
+	}
+}

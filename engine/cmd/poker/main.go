@@ -71,5 +71,6 @@ func repoRoot() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("runtime.Caller(0) failed")
 	}
-	return filepath.Clean(filepath.Join(filepath.Dir(filename), "..", "..")), nil
+	// filename is engine/cmd/poker/main.go; three levels up is the repo root.
+	return filepath.Clean(filepath.Join(filepath.Dir(filename), "..", "..", "..")), nil
 }

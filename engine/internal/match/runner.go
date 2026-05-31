@@ -130,6 +130,8 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 		seats[seat] = wire.Seat{Seat: seat, Name: spec.Name}
 	}
 
+	agentDirKey := buildAgentDirKeys(r.config.AgentSpecs)
+
 	agents := make([]*agentProcess, 0, len(r.config.AgentSpecs))
 	defer func() {
 		for _, agent := range agents {
@@ -141,8 +143,8 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 		if runErr == nil && manifestErr != nil {
 			runErr = manifestErr
 		}
-		for _, spec := range r.config.AgentSpecs {
-			agentDir, err := writer.AgentDir(spec.Name)
+		for seat, spec := range r.config.AgentSpecs {
+			agentDir, err := writer.AgentDir(agentDirKey[seat])
 			if err != nil {
 				msg := fmt.Sprintf("resolve memory export directory for agent %s: %v", spec.Name, err)
 				logNonFatal(r.config.ProgressWriter, "%s", msg)
@@ -159,7 +161,7 @@ func (r *Runner) Run(ctx context.Context) (result RunResult, runErr error) {
 	}()
 
 	for seat, spec := range r.config.AgentSpecs {
-		agentDir, err := writer.AgentDir(spec.Name)
+		agentDir, err := writer.AgentDir(agentDirKey[seat])
 		if err != nil {
 			return result, err
 		}
@@ -743,4 +745,24 @@ func (a *agentProcess) Close(ctx context.Context) error {
 		return errors.New(errs.String())
 	}
 	return nil
+}
+
+// buildAgentDirKeys returns a per-seat directory key. When two seats share a
+// name (e.g. a mirror match), all seats with that name get a "-<seat>" suffix
+// so their artifact directories don't collide. Unique names are used as-is to
+// preserve existing artifact paths.
+func buildAgentDirKeys(specs []AgentSpec) []string {
+	nameCounts := make(map[string]int, len(specs))
+	for _, s := range specs {
+		nameCounts[s.Name]++
+	}
+	keys := make([]string, len(specs))
+	for seat, s := range specs {
+		if nameCounts[s.Name] > 1 {
+			keys[seat] = fmt.Sprintf("%s-%d", s.Name, seat)
+		} else {
+			keys[seat] = s.Name
+		}
+	}
+	return keys
 }
