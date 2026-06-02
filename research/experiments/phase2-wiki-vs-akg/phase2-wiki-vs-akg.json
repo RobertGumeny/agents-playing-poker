@@ -1,0 +1,24 @@
+{
+  "id": "phase2-wiki-vs-akg",
+  "hypothesis": "Phase 2 headline matchup: a knowledge graph faked in linked markdown (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror. Seat-mirrored across seeds (control runs AKG in seat 0 vs wiki in seat 1; treatment swaps them) so positional and blind-rotation effects cancel and each strategy produces a memory artifact from both seats on identical deals. The thesis is reported on the FIDELITY-VS-COST FRONTIER, not chips: (1) cross-validate each agent's stated opponent stats against engine ground truth in hands.jsonl - AKG matches to the digit, the wiki is expected to drift as prose tallies go stale; (2) tokens per decision vs hand count - AKG's precomputed profile reads stay roughly flat, the wiki's active page retrieval plus in-context re-tallying climbs; plus wiki-specific link-integrity decay (dangling/duplicate/orphaned [[links]]) which has no analog in the typed store. Chip outcomes here are DIAGNOSTIC ONLY - high variance, not proof. Both sides may run to different effective horizons; a rung breaking earlier is a result. This is the frontier baseline Phase 3 must beat.",
+  "model": "anthropic:claude-sonnet-4-6",
+  "hands_per_session": 200,
+  "control": {
+    "session_base": "akg-vs-wiki",
+    "sessions_count": 5,
+    "agent": "llm-akg-durable",
+    "opponent": "llm-md-wiki",
+    "seeds": [1, 2, 3, 4, 5]
+  },
+  "treatment": {
+    "session_base": "wiki-vs-akg",
+    "sessions_count": 5,
+    "agent": "llm-md-wiki",
+    "opponent": "llm-akg-durable",
+    "seeds": [1, 2, 3, 4, 5]
+  },
+  "expected_direction": {
+    "tokens_per_decision": "increase",
+    "profile_fidelity_error": "increase"
+  }
+}
