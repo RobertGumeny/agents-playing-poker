@@ -105,8 +105,10 @@ The ladder benchmark: the whole lineup against itself in **non-mirror** matchups
 
 Prerequisites:
 
-- Build `llm-md-single` and `llm-md-wiki` (see lineup) — **not built**.
+- Build `llm-md-single` and `llm-md-wiki` (see lineup) — **not built**. Contracts are specced in [`llm-md-single-spec.md`](llm-md-single-spec.md) and [`llm-md-wiki-spec.md`](llm-md-wiki-spec.md).
 - Standardize the profile-fidelity cross-validation (stated read vs `hands.jsonl`) as a first-class eval analysis, rather than the ad-hoc script used to date.
+
+The headline matchup is teed up as a checked-in pairwise definition at `research/experiments/phase2-wiki-vs-akg/` (seat-mirrored, non-mirror; runnable once the agents exist). The full ladder is a set of such pairwise definitions — the experiment-definition contract is two-group, so each rung-vs-`llm-akg-durable` comparison is its own file.
 
 The output of this phase is the **frontier baseline** that Phase 3 must beat.
 

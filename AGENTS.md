@@ -20,6 +20,8 @@ There is no single monolithic spec anymore. Repository-specific contracts now li
 
 - [`docs/wire-protocol.md`](docs/wire-protocol.md) — server/agent JSONL protocol
 - [`docs/llm-akg-durable-spec.md`](docs/llm-akg-durable-spec.md) — durable AKG agent contract
+- [`docs/llm-md-single-spec.md`](docs/llm-md-single-spec.md) — single-file markdown agent contract
+- [`docs/llm-md-wiki-spec.md`](docs/llm-md-wiki-spec.md) — linked-markdown ("wiki") agent contract
 - [`docs/eval-system.md`](docs/eval-system.md) — eval and experiment-definition system
 - [`docs/session-artifacts.md`](docs/session-artifacts.md) — stable additive session-artifact schemas for `memory-export.json` and `eval.json`
 - [`docs/experiment-definition.md`](docs/experiment-definition.md) — normative JSON contract for planned experiment session sets
