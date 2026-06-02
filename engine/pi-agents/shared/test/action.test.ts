@@ -10,12 +10,36 @@ describe("parseActionResponse", () => {
     });
   });
 
-  it("rejects commentary around the JSON object", () => {
-    expect(parseActionResponse('answer: {"action":"call","amount":2}')).toBeUndefined();
+  it("recovers the action when the model leaks reasoning prose before the JSON", () => {
+    expect(parseActionResponse('answer: {"action":"call","amount":2}')).toEqual({
+      action: "call",
+      amount: 2,
+    });
+    expect(
+      parseActionResponse('QJsuited is a strong hand here.\n\n{"action":"raise","amount":8}'),
+    ).toEqual({ action: "raise", amount: 8 });
+  });
+
+  it("recovers the action from a fenced code block", () => {
+    expect(parseActionResponse('```json\n{"action":"fold"}\n```')).toEqual({ action: "fold" });
+  });
+
+  it("prefers the final action object when several appear", () => {
+    expect(
+      parseActionResponse('I considered {"action":"fold"} but instead {"action":"check"}'),
+    ).toEqual({ action: "check" });
+  });
+
+  it("ignores embedded objects that are not legal action shapes", () => {
+    expect(parseActionResponse('context {"note":"villain folds a lot"} {"action":"bet","amount":5}')).toEqual({
+      action: "bet",
+      amount: 5,
+    });
   });
 
   it("rejects malformed, missing, or unsupported actions", () => {
     expect(parseActionResponse("not json")).toBeUndefined();
+    expect(parseActionResponse("just some prose with no object at all")).toBeUndefined();
     expect(parseActionResponse('{"amount":2}')).toBeUndefined();
     expect(parseActionResponse('{"action":"dance"}')).toBeUndefined();
     expect(parseActionResponse('{"action":"raise"}')).toBeUndefined();
