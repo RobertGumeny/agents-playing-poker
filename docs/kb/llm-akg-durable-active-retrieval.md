@@ -29,6 +29,10 @@ Current behavior:
 
 Rebuilding from hand nodes keeps profile and pattern state logically idempotent. Reprocessing the same hand number rewrites that hand and recomputes derived state instead of blindly incrementing counters.
 
+### File growth: WAL accumulation, not data
+
+Because the opponent and all pattern nodes/edges are re-`putNode`d every hand and the store is committed but never `compact()`ed, the on-disk `.akg` grows far faster than the logical graph. After the 500-hand `mirror-match-500` run, `memory.akg` was ~8.2 MB while the live exported graph was ~575 KB/agent — roughly 93% accumulated WAL history. This caused **zero operational trouble** (the file loaded, queried, and exported fine with no degradation), so it is a cost/efficiency issue, not a correctness one. It is a strategy-layer characteristic, not an AKG limit: the format is log-structured and a single `compact()` collapses the file (see `~/source/akg/docs/spec/06-compaction.md`). Two strategy-layer levers bound it: (1) compact periodically / at session end; (2) the bigger lever — write incrementally (update counters in place / only when changed) instead of rebuilding all aggregates from all hands every hand. Both belong in the planned `pi-akg-memory` package so every agent inherits bounded files. The ~575 KB logical floor is dominated by per-hand `hand` nodes; bounding that over very long horizons would need a deliberate retention/summarization policy.
+
 ## Stored graph shape
 
 The graph stores:
