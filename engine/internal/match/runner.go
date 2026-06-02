@@ -95,7 +95,16 @@ func NewRunner(config Config) (*Runner, error) {
 		config.AKGSpecVersion = defaultAKGSpecVersion
 	}
 	if config.ShutdownGracePeriod <= 0 {
-		config.ShutdownGracePeriod = 2 * time.Second
+		// Agents drain their final hand_end + session_end after stdin closes; for an
+		// agent that updates memory with an LLM call in afterHandEnd (the markdown
+		// strategies), that drain includes one model round-trip. Give it the same
+		// budget as a single decision so the last hand's memory write is not killed
+		// mid-flight. Well-behaved agents exit as soon as they finish, so this only
+		// extends patience for the force-kill backstop; it does not slow normal runs.
+		config.ShutdownGracePeriod = config.DecisionDeadline
+		if config.ShutdownGracePeriod < 2*time.Second {
+			config.ShutdownGracePeriod = 2 * time.Second
+		}
 	}
 	for i, spec := range config.AgentSpecs {
 		if spec.Name == "" {
