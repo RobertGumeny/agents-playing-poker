@@ -29,6 +29,10 @@
     {
       "key": "llm-md-single",
       "type": "pi-agent"
+    },
+    {
+      "key": "llm-md-wiki",
+      "type": "pi-agent"
     }
   ]
 }

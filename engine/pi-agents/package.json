@@ -17,6 +17,7 @@
     "llm-fullhistory",
     "llm-akg-recent",
     "llm-akg-durable",
-    "llm-md-single"
+    "llm-md-single",
+    "llm-md-wiki"
   ]
 }
