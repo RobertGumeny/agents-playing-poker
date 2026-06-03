@@ -1,6 +1,6 @@
 {
   "id": "phase2-fullhistory-vs-akg",
-  "hypothesis": "Phase 2 cost-ceiling bracket: raw full-history prompting (llm-fullhistory) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror, seat-mirrored across seeds so positional and blind-rotation effects cancel. This is the bottom of the cost axis: llm-fullhistory stuffs every prior hand back into the prompt, so per-decision input tokens grow O(N) and the prompt balloons as the session runs - a prior 200-hand run was prohibitively expensive. The horizon is deliberately SHORT (80 hands) to capture the linear token-growth slope and the early part of the curve without the runaway cost; if it hits the context ceiling first, that hand count IS the result. Reported on the FIDELITY-VS-COST FRONTIER, not chips: AKG's precomputed-profile reads stay roughly flat while full-history climbs linearly; full-history fidelity is high in principle (the raw transcript is lossless) but the model must re-derive everything in-context every decision. Chip outcomes are DIAGNOSTIC ONLY. Both agents are built, so this rung is runnable now.",
+  "hypothesis": "Phase 2 cost-ceiling bracket: raw full-history prompting (llm-fullhistory) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror, seat-mirrored across 5 seeds (10 sessions) so positional and blind-rotation effects cancel. llm-fullhistory keeps no maintained memory - it stuffs every prior hand back into the prompt - so per-decision input tokens grow O(N) and the prompt balloons as the session runs (a prior 200-hand run was prohibitively expensive). Horizon is deliberately SHORT (80 hands) to capture the linear token-growth slope and the early curve without runaway cost; if it hits the context ceiling first, that hand count IS the result. OBSERVATIONAL (we are learning, not predicting a winner): we measure (1) profile fidelity - full-history is lossless in principle (the raw transcript is all there) but the model must re-derive everything in-context every decision, so we observe whether its stated reads stay accurate; against the AKG agent we cross-validate its self-maintained graph against engine ground truth in hands.jsonl. (2) Honest TOTAL token cost - for the AKG agent, decision-prompt tokens PLUS the post-hand update-session tokens; for full-history, the climbing decision-prompt tokens (it has no update step). Chip outcomes are DIAGNOSTIC ONLY. expected_direction is intentionally empty: reported as measured fidelity-vs-cost curves, not pass/fail predictions.",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 80,
   "control": {
@@ -17,8 +17,5 @@
     "opponent": "llm-akg-durable",
     "seeds": [1, 2, 3, 4, 5]
   },
-  "expected_direction": {
-    "tokens_per_decision": "increase",
-    "profile_fidelity_error": "increase"
-  }
+  "expected_direction": {}
 }

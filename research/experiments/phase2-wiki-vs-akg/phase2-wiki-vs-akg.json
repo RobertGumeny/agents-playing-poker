@@ -1,6 +1,6 @@
 {
   "id": "phase2-wiki-vs-akg",
-  "hypothesis": "Phase 2 headline matchup: a knowledge graph faked in linked markdown (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror. Seat-mirrored across seeds (control runs AKG in seat 0 vs wiki in seat 1; treatment swaps them) so positional and blind-rotation effects cancel and each strategy produces a memory artifact from both seats on identical deals. The thesis is reported on the FIDELITY-VS-COST FRONTIER, not chips: (1) cross-validate each agent's stated opponent stats against engine ground truth in hands.jsonl - AKG matches to the digit, the wiki is expected to drift as prose tallies go stale; (2) tokens per decision vs hand count - AKG's precomputed profile reads stay roughly flat, the wiki's active page retrieval plus in-context re-tallying climbs; plus wiki-specific link-integrity decay (dangling/duplicate/orphaned [[links]]) which has no analog in the typed store. Chip outcomes here are DIAGNOSTIC ONLY - high variance, not proof. Both sides may run to different effective horizons; a rung breaking earlier is a result. This is the frontier baseline Phase 3 must beat.",
+  "hypothesis": "Phase 2 headline matchup: a knowledge graph faked in linked markdown (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror. Seat-mirrored across 5 seeds (10 sessions): control runs AKG in seat 0 vs wiki in seat 1, treatment swaps them, so positional and blind-rotation effects cancel and each strategy plays both seats on identical deals. POST-REWORK both agents are model-maintained - each agent's own LLM writes its memory after every hand - so this isolates REPRESENTATION (typed graph vs linked prose), not who writes the memory. OBSERVATIONAL (we are learning, not predicting a winner): for BOTH agents we measure (1) profile-fidelity drift - cross-validate each agent's stated opponent reads against engine ground truth in hands.jsonl and watch where they diverge; (2) honest TOTAL token cost - decision-prompt tokens PLUS the post-hand update-session tokens, since both agents now run an update session each hand. Plus wiki-specific link-integrity decay (dangling/duplicate/orphaned [[links]]), against the AKG agent's orphan-node diagnostics. Chip outcomes are DIAGNOSTIC ONLY (high variance, not proof). expected_direction is intentionally empty: this is the Phase 2 fidelity-vs-cost frontier baseline Phase 3 must beat, reported as measured curves rather than pass/fail predictions.",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 200,
   "control": {
@@ -17,8 +17,5 @@
     "opponent": "llm-akg-durable",
     "seeds": [1, 2, 3, 4, 5]
   },
-  "expected_direction": {
-    "tokens_per_decision": "increase",
-    "profile_fidelity_error": "increase"
-  }
+  "expected_direction": {}
 }
