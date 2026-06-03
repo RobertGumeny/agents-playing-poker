@@ -96,12 +96,14 @@ func NewRunner(config Config) (*Runner, error) {
 	}
 	if config.ShutdownGracePeriod <= 0 {
 		// Agents drain their final hand_end + session_end after stdin closes; for an
-		// agent that updates memory with an LLM call in afterHandEnd (the markdown
-		// strategies), that drain includes one model round-trip. Give it the same
-		// budget as a single decision so the last hand's memory write is not killed
-		// mid-flight. Well-behaved agents exit as soon as they finish, so this only
-		// extends patience for the force-kill backstop; it does not slow normal runs.
-		config.ShutdownGracePeriod = config.DecisionDeadline
+		// agent that updates memory with an LLM call in afterHandEnd, that drain is a
+		// full update session. For the AKG strategy that update is several model
+		// round-trips (read the graph, write nodes, write edges, summarize), not one,
+		// so a single-decision budget force-kills the last hand's memory write
+		// mid-flight. Budget several decisions. Well-behaved agents exit as soon as
+		// they finish, so this only extends patience for the force-kill backstop on a
+		// genuinely hung agent; it does not slow normal runs.
+		config.ShutdownGracePeriod = 4 * config.DecisionDeadline
 		if config.ShutdownGracePeriod < 2*time.Second {
 			config.ShutdownGracePeriod = 2 * time.Second
 		}
