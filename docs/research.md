@@ -41,20 +41,20 @@ All LLM agents in a benchmark use the same model and runtime settings unless tho
 | `llm-fullhistory` | raw prior hands in prompt | context ceiling + O(N) token growth | built |
 | `llm-md-single` | one freeform markdown file, rewritten | maintenance fidelity + full-rewrite cost | **not built** |
 | `llm-md-wiki` | linked markdown pages (`[[links]]`), a graph faked in prose | query/aggregation + link integrity | **not built** |
-| `llm-akg-durable` | typed, queryable AKG graph with computed aggregates | the thesis control | built |
+| `llm-akg-durable` | typed, queryable AKG graph, model-maintained via write tools | maintenance drift in a typed graph (the thesis contestant) | built |
 
 Supporting agents:
 
 - **`llm-akg-recent`** — shallow bounded AKG memory: an opponent profile plus recent-hand summaries injected at decision time. A wiring and token-efficiency control, and an *intentionally weak* baseline — not proof of the structured-memory thesis.
 - **`random` / `heuristic`** — scripted non-LLM agents for validating protocol, rules, artifacts, and local execution without model calls. Not part of the memory-strategy comparison.
 
-The headline comparison the lineup is built toward is **`llm-md-wiki` vs `llm-akg-durable`**: if a linked pile of markdown matches AKG, the typed graph is overhead. `llm-fullhistory` and `llm-md-single` bracket the cost and fidelity failure modes below it.
+The headline comparison the lineup is built toward is **`llm-md-wiki` vs `llm-akg-durable`**: if a linked pile of markdown matches AKG, the typed graph is overhead. Both are now **model-maintained** (the model writes its own memory after each hand), so the comparison cleanly isolates *representation* — typed graph vs linked prose — rather than extraction method. `llm-fullhistory` and `llm-md-single` bracket the cost and fidelity failure modes below it.
 
 ## Metrics and interpretation
 
 **Primary lens — the fidelity-vs-cost frontier.** The thesis lives on two low-variance curves, both extractable from existing artifacts. These are what experiments should report first.
 
-1. **Profile fidelity vs. hand count.** Cross-validate what the agent *states* it knows about the opponent against engine ground truth in `hands.jsonl` (VPIP, PFR, fold-to-c-bet, river aggression, 3-bet counts, showdown record). For `llm-akg-durable` this matches to the digit at 500 hands. The same check applied up the ladder exposes where each representation's accuracy decays — "where the patterns fall apart." *(Instrumentation note: this cross-validation has been done ad hoc against `hands.jsonl` + `memory-export.json`; folding it into the eval tooling as a standard analysis is pending.)*
+1. **Profile fidelity vs. hand count.** Cross-validate what the agent *states* it knows about the opponent against engine ground truth in `hands.jsonl` (VPIP, PFR, fold-to-c-bet, river aggression, 3-bet counts, showdown record). The "matches to the digit at 500 hands" result belonged to the *former code-computed* `llm-akg-durable` and was tautological (the extractor and the validation read the same action log — see [`research/llm-akg-durable-rework.md`](research/llm-akg-durable-rework.md)). Now that the durable agent is model-maintained, it is expected to *drift* like the prose rungs, and this check measures that drift against ground truth — exposing where each representation's accuracy decays, "where the patterns fall apart." *(Instrumentation note: this cross-validation has been done ad hoc against `hands.jsonl` + `memory-export.json`; folding it into the eval tooling as a standard analysis is pending.)*
 2. **Tokens per decision vs. hand count.** From the prompts in `pi-session.jsonl`: per-decision input tokens and their growth slope. AKG should be ~flat; full-history linear; markdown-rewrite scaling with file size. This is where a *cost* win is demonstrated.
 
 **Secondary — poker performance (diagnostic).** Chip delta, chips/BB per hand, treatment/control deltas, showdown vs non-showdown behavior. Treat single-session chip outcomes as diagnostics, not proof; they are high-variance and, in near-mirror matchups, uninformative without large samples. Prefer non-mirror matchups across the ladder, multiple seeds, and mirrored seat assignments to cancel positional effects.
@@ -97,7 +97,7 @@ Three claims in increasing ambition. They are ordered, and each later phase is g
 
 ### Phase 1 — Does `.akg` work functionally? ✅ Settled
 
-`mirror-match-500` answered this unequivocally: flawless `.akg` maintenance across 500 hands (full node coverage, zero lost decisions, no degradation as the file grew to multiple MB), a faithful opponent model that cross-validates to engine ground truth to the digit, and an agent that queries and reasons over that model nearly every hand. The durable strategy is real and reliable. Not in question.
+`mirror-match-500` answered this unequivocally: flawless `.akg` maintenance across 500 hands (full node coverage, zero lost decisions, no degradation as the file grew to multiple MB) and an agent that queries and reasons over its model nearly every hand. (The "cross-validates to ground truth to the digit" property of that run came from the *code-computed* write path and was tautological; the now-model-maintained agent is expected to drift — see [`research/llm-akg-durable-rework.md`](research/llm-akg-durable-rework.md). The durability/engineering result stands regardless.) The durable store is real and reliable. Not in question.
 
 ### Phase 2 — Does the structure earn its keep? ⏳ Next
 

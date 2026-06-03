@@ -24,10 +24,13 @@ not through one-off run notes.
 
 ## The one design choice that matters: the model updates the file, not code
 
-This is the line between `llm-md-single` and `llm-akg-durable`. The durable agent updates
-its memory with **plain code** (`rebuildOpponent` / `rebuildPatterns` recompute exact
-counts from stored hands), which is why its stated profile matches ground truth to the
-digit. `llm-md-single` deliberately does the opposite:
+This is the defining choice for `llm-md-single`: **the model updates the file, not code.**
+The durable agent was *once* code-maintained (`rebuildOpponent` / `rebuildPatterns` recomputed
+exact counts from stored hands, which is why its stated profile matched ground truth to the
+digit), but it has since been reworked to be model-maintained too — see
+[`llm-akg-durable-spec.md`](llm-akg-durable-spec.md). So across all contestants the model now
+keeps its own memory; the axis under test is *representation*, not extraction method.
+`llm-md-single` keeps that memory as one freeform file:
 
 > After each hand, the model is given the current notes plus a summary of the hand that
 > just ended, and asked to return the full updated notes.

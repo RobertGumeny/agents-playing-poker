@@ -39,8 +39,9 @@ Evaluate it through checked-in experiment definitions and
    pages current they'd never drift and the links would never rot, which would defeat the
    measurement. "The model updates the pages" is fixed.
 2. **The agent pulls up pages on demand; it isn't handed the whole wiki.** This mirrors
-   `llm-akg-durable` starting from `akg_get_opponent`. The decision prompt includes only
-   the root page as an index; the agent fetches deeper pages through tools. That keeps the
+   `llm-akg-durable` starting from the `opponent/villain` root node (via `akg_get_node`). The
+   decision prompt includes only the root page as an index; the agent fetches deeper pages
+   through tools. That keeps the
    matchup a fair test of *structure*, not of "who got more text pasted into the prompt,"
    and it's the step up from `llm-md-single`, which always preloads its whole file.
 
