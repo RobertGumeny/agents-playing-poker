@@ -65,7 +65,7 @@ Columns:
 - `c/h` — chips per hand (the primary comparable metric across groups)
 - `sdr` — showdown rate
 - `fallbacks` — fallback action count (high values indicate agent parsing failures)
-- `memory` — `pat=N sup=M` shorthand for `NodesByType.pattern` and `EdgesByRelation.supported_by`
+- `memory` — `n=TOTAL[type:count,…] e=TOTAL[relation:count,…]`: total node/edge counts plus the top three node types and edge relations by count. Agents author an open vocabulary (their own node types and relations), so this reflects whatever the agent actually created rather than fixed `pattern`/`supported_by` keys.
 
 ## Step 5: Check the written report
 

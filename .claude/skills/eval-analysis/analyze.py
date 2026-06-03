@@ -86,9 +86,16 @@ def build_comparison_table(exp):
         mem = seat.get("memory_export") or {}
         nodes = mem.get("NodesByType", {})
         edges = mem.get("EdgesByRelation", {})
+        # Agents author an open vocabulary (their own node types and edge relations),
+        # so show the actual histogram rather than fixed pattern/supported_by keys.
+        # Totals plus the top three of each by count.
+        n_total = sum(nodes.values())
+        e_total = sum(edges.values())
+        top_nodes = ",".join(f"{t}:{c}" for t, c in sorted(nodes.items(), key=lambda kv: -kv[1])[:3])
+        top_edges = ",".join(f"{r}:{c}" for r, c in sorted(edges.items(), key=lambda kv: -kv[1])[:3])
         mem_summary = (
-            f"pat={nodes.get('pattern', '?')} "
-            f"sup={edges.get('supported_by', '?')}"
+            f"n={n_total}[{top_nodes}] e={e_total}[{top_edges}]"
+            if (nodes or edges) else "n=0 e=0"
         )
         rows.append((label, sid, delta, hands, cph, sdr, fallbacks, mem_summary))
         group_totals[label].append(cph)
