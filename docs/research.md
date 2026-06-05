@@ -39,8 +39,8 @@ All LLM agents in a benchmark use the same model and runtime settings unless tho
 |---|---|---|---|
 | `llm-stateless` | current hand only | no opponent model (floor) | built |
 | `llm-fullhistory` | raw prior hands in prompt | context ceiling + O(N) token growth | built |
-| `llm-md-single` | one freeform markdown file, rewritten | maintenance fidelity + full-rewrite cost | **not built** |
-| `llm-md-wiki` | linked markdown pages (`[[links]]`), a graph faked in prose | query/aggregation + link integrity | **not built** |
+| `llm-md-single` | one freeform markdown file, rewritten | maintenance fidelity + full-rewrite cost | built |
+| `llm-md-wiki` | linked markdown pages (`[[links]]`), a graph faked in prose | query/aggregation + link integrity | built |
 | `llm-akg-durable` | typed, queryable AKG graph, model-maintained via write tools | maintenance drift in a typed graph (the thesis contestant) | built |
 
 Supporting agents:
@@ -105,10 +105,10 @@ The ladder benchmark: the whole lineup against itself in **non-mirror** matchups
 
 Prerequisites:
 
-- Build `llm-md-single` and `llm-md-wiki` (see lineup) — **not built**. Contracts are specced in [`llm-md-single-spec.md`](llm-md-single-spec.md) and [`llm-md-wiki-spec.md`](llm-md-wiki-spec.md).
-- Standardize the profile-fidelity cross-validation (stated read vs `hands.jsonl`) as a first-class eval analysis, rather than the ad-hoc script used to date.
+- ~~Build `llm-md-single` and `llm-md-wiki` (see lineup)~~ — **done**; both built, model-maintained, and unit-tested. Contracts are specced in [`llm-md-single-spec.md`](llm-md-single-spec.md) and [`llm-md-wiki-spec.md`](llm-md-wiki-spec.md).
+- Standardize the profile-fidelity cross-validation (stated read vs `hands.jsonl`) as a first-class eval analysis, rather than the ad-hoc script used to date — **still pending**.
 
-The headline matchup is teed up as a checked-in pairwise definition at `research/experiments/phase2-wiki-vs-akg/` (seat-mirrored, non-mirror; runnable once the agents exist). The full ladder is a set of such pairwise definitions — the experiment-definition contract is two-group, so each rung-vs-`llm-akg-durable` comparison is its own file.
+The headline matchup is teed up as a checked-in pairwise definition at `research/experiments/phase2-wiki-vs-akg/` (seat-mirrored, non-mirror; agents built, definition runnable now), alongside the cost/fidelity brackets `research/experiments/phase2-fullhistory-vs-akg/` and `research/experiments/phase2-mdsingle-vs-akg/`. The full ladder is a set of such pairwise definitions — the experiment-definition contract is two-group, so each rung-vs-`llm-akg-durable` comparison is its own file.
 
 The output of this phase is the **frontier baseline** that Phase 3 must beat.
 

@@ -1,21 +1,21 @@
 {
   "id": "phase2-mdsingle-vs-akg",
-  "hypothesis": "Phase 2 single-file bracket: one freeform markdown file the model rewrites after each hand (llm-md-single) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror, seat-mirrored across 5 seeds (10 sessions) so positional and blind-rotation effects cancel. POST-REWORK both agents are model-maintained - each keeps its own memory current via its own LLM after every hand - so this isolates REPRESENTATION (one flat file vs a typed graph), not who writes the memory. OBSERVATIONAL (we are learning, not predicting a winner): for BOTH agents we measure (1) profile-fidelity drift - cross-validate each agent's stated opponent reads against engine ground truth in hands.jsonl and watch where facts get silently dropped, contradicted, or bloated; (2) honest TOTAL token cost - decision-prompt tokens PLUS the post-hand update-session tokens. The single-file representation's distinctive cost is that it injects the whole file every decision and rewrites the whole file every update, so both grow with file size. Horizon is 150 hands - lower than the wiki headline (200) to let single-file drift show without runaway cost. Chip outcomes are DIAGNOSTIC ONLY. expected_direction is intentionally empty: reported as measured fidelity-vs-cost curves, not pass/fail predictions.",
+  "hypothesis": "Phase 2 single-file bracket: one freeform markdown file the model rewrites after each hand (llm-md-single) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror, seat-mirrored across 2 seeds (4 sessions) so positional and blind-rotation effects cancel. POST-REWORK both agents are model-maintained - each keeps its own memory current via its own LLM after every hand - so this isolates REPRESENTATION (one flat file vs a typed graph), not who writes the memory. OBSERVATIONAL (we are learning, not predicting a winner): for BOTH agents we measure (1) profile-fidelity drift - cross-validate each agent's stated opponent reads against engine ground truth in hands.jsonl and watch where facts get silently dropped, contradicted, or bloated; (2) honest TOTAL token cost - decision-prompt tokens PLUS the post-hand update-session tokens. The single-file representation's distinctive cost is that it injects the whole file every decision and rewrites the whole file every update, so both grow with file size. Horizon is 150 hands - lower than the wiki headline (200) to let single-file drift show without runaway cost. Chip outcomes are DIAGNOSTIC ONLY. expected_direction is intentionally empty: reported as measured fidelity-vs-cost curves, not pass/fail predictions.",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 150,
   "control": {
     "session_base": "akg-vs-mdsingle",
-    "sessions_count": 5,
+    "sessions_count": 2,
     "agent": "llm-akg-durable",
     "opponent": "llm-md-single",
-    "seeds": [1, 2, 3, 4, 5]
+    "seeds": [1, 2]
   },
   "treatment": {
     "session_base": "mdsingle-vs-akg",
-    "sessions_count": 5,
+    "sessions_count": 2,
     "agent": "llm-md-single",
     "opponent": "llm-akg-durable",
-    "seeds": [1, 2, 3, 4, 5]
+    "seeds": [1, 2]
   },
   "expected_direction": {}
 }
