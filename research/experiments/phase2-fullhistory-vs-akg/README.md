@@ -28,3 +28,11 @@ those metrics are wired in.
 
 Sibling rungs: [`phase2-mdsingle-vs-akg`](../phase2-mdsingle-vs-akg/) and
 [`phase2-wiki-vs-akg`](../phase2-wiki-vs-akg/) (both await their agents being built).
+
+## Runs
+
+- **2026-06-04 (archived, invalid)** —
+  [`archive/run-2026-06-04-30s-deadline-prefix-fixes/`](archive/run-2026-06-04-30s-deadline-prefix-fixes/NOTES.md).
+  `llm-akg-durable` timed out on ~50% of its turns at the 30s default decision deadline, so chip
+  outcomes are an artifact of forced folds. Cost/fidelity curves are still usable. Superseded by
+  the efficiency-fixed re-run. Re-run with `-decision-deadline ≥120s`.

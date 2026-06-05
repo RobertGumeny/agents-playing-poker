@@ -1,0 +1,2453 @@
+{
+  "nodes": [
+    {
+      "type": "hand",
+      "id": "hand_1",
+      "title": "Hand 1 — 8h Th, passive all streets",
+      "body": "Hero: BB, 9c Jc. Villain: SB, 8h Th.\nBoard: 2c Ks 6d Kh As.\nPreflop: villain calls. Flop/Turn/River: hero checks, villain checks back every street.\nShowdown: villain loses with one pair (pair of aces on board) vs hero's better kicker play. Hero +2.",
+      "meta": {},
+      "tags": [
+        "showdown",
+        "passive"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_10",
+      "title": "Hand 10",
+      "body": "Hero SB folded preflop with A4o. Villain BB held 9s 7d (97o — speculative connector). No postflop data. Confirms villain's BB range includes weak suited/offsuit connectors.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "speculative"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_11",
+      "title": "Hand 11",
+      "body": "Hero BB (5s 3h) vs villain SB (Ks 3d). Villain called preflop. Flop: 6h Kc 7s. Hero checked, villain BET 3 (pot-ish). Hero folded. Villain revealed Ks 3d — top pair, weak kicker.\n\nNotable: Villain BET the flop with top pair (Ks 3d on K-high board). First observed postflop aggression. Contradicts prior passivity pattern, OR suggests villain bets top pair but slowplays stronger holdings (straight in Hand 3).\n\nSB preflop call with K3o — extends SB call range to very weak kings.",
+      "meta": {},
+      "tags": [
+        "postflop_bet",
+        "top_pair",
+        "sb_call",
+        "weak_king"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_12",
+      "title": "Hand 12",
+      "body": "Villain in BB with Td Qc (QTo — broadway offsuit). Hero (SB) folded preflop with 4d9s. No postflop data. Another broadway holding in BB.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "bb",
+        "broadway"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_13",
+      "title": "Hand 13",
+      "body": "Hero: BB with Jh Td. Villain SB raised to 8. Hero folded. Villain showed As Ts (ATo suited). Another SB raise with strong Ax broadway.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "ace_broadway"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_14",
+      "title": "Hand 14",
+      "body": "Hero (SB) folded preflop with As 8d. Villain in BB with Qd Jd (QJs — suited broadway). No postflop data.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "bb",
+        "suited_broadway"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_15",
+      "title": "Hand 15",
+      "body": "Hero in BB with Ac 6d. Villain (SB) folded preflop. Hero wins +1. No postflop data.",
+      "meta": {},
+      "tags": [
+        "preflop_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_16",
+      "title": "Hand 16",
+      "body": "Hero (SB) folded 6h5c preflop. Villain in BB held 5h4h (54s — very weak suited connector). No postflop data. BB range continues to show weak/speculative holdings.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "suited_connector"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_17",
+      "title": "Hand 17",
+      "body": "Hero BB (9h Qc). Villain SB folded preflop. Hero wins +1. Second SB fold observed (hand 15 was the first).",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "sb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_18",
+      "title": "Hand 18",
+      "body": "Hero (SB) folded preflop with Td6c. Villain in BB with 5s 9h (95o — weak offsuit connector). No postflop data.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_connector"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_19",
+      "title": "Hand 19",
+      "body": "Hero in BB with Td2s. Villain (SB) FOLDED preflop. Hero wins +1. Third SB fold observed (hands 15, 17, 19).",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "sb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_2",
+      "title": "Hand 2",
+      "body": "Hero (SB/BTN) folded preflop with 3h 4d. Villain was in BB with 7c 7d (pocket sevens). No postflop action. Hero lost 1 (blind). Villain's hand revealed at fold — pocket pair mid-strength.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "pocket_pair"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_20",
+      "title": "Hand 20",
+      "body": "Hero (SB) folded preflop with K7o. Villain in BB held Ad 4s (A4o — weak ace). No postflop data. Villain wins +1 (BB).",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_ace"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_21",
+      "title": "Hand 21",
+      "body": "Villain in SB with 7s 6h (suited connector). Called preflop (did not raise). Flop 4s 7c Jd — villain BET 3 with middle pair (pair of 7s). Hero folded 8s 3c. Revealed at showdown: 7s 6h.\n\nKey: Villain bet middle pair IP on a dry board — extends betting range beyond just top pair. SB call with 76s fits weak suited connector preflop range.",
+      "meta": {},
+      "tags": [
+        "suited_connector",
+        "middle_pair",
+        "bet_middle_pair",
+        "sb_call",
+        "postflop_bet"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_22",
+      "title": "Hand 22",
+      "body": "Villain in BB with Td Th (pocket tens — strong pair). Hero (SB) folded preflop with 5h 5d. No postflop data. Villain held a premium BB hand; no action taken.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "bb",
+        "pocket_pair",
+        "strong_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_23",
+      "title": "Hand 23",
+      "body": "Hero: BB with Tc 2h. Villain: SB with Ad 5s (A5o — weak ace).\n\nPreflop: Villain called (SB limp). Hero checked BB.\nFlop: 6c 3c Qs. Hero checked. Villain BET 3 with A5o — complete air (A-high, no pair, no real draw on this board). Hero folded.\n\nKey finding: Villain c-bet the flop as a BLUFF with pure air (A-high no pair, no flush draw with 5s Ad). First observed IP air c-bet. Contradicts prior read that villain only bets paired hands IP.",
+      "meta": {},
+      "tags": [
+        "postflop",
+        "bluff",
+        "cbet",
+        "air",
+        "sb",
+        "a5o"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_24",
+      "title": "Hand 24",
+      "body": "Hero (SB) folded preflop with Qd 7d. Villain in BB held 5h 4c (54o — weak offsuit connector). No postflop data. Revealed at showdown after hero fold.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_connector"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_25",
+      "title": "Hand 25",
+      "body": "Villain in SB with Ks 7d (K7o — weak king). Called preflop. Board: 2d Ad Ts. Hero (BB) checked, villain BET 3 with K-high (no pair, no draw of note). Hero folded. Revealed at runout: Ks 7d.\n\nKEY: Another air/bluff c-bet IP. Villain had K-high only on A-high board — pure bluff. Air c-bet count now 2/3 observed opportunities.",
+      "meta": {},
+      "tags": [
+        "bluff",
+        "cbet_air",
+        "sb_call",
+        "weak_king"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_26",
+      "title": "Hand 26",
+      "body": "Villain in BB with Kd 5h (K5o — weak king offsuit). Hero (SB) folded J3o preflop. No postflop data. Confirms BB range includes weak kings.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_king"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_27",
+      "title": "Hand 27",
+      "body": "Villain in SB with 8d 2d (82s — extremely weak suited hand). CALLED preflop. Hero in BB with Td 8h checked. Flop: 9c 8s 5s. Hero checked, villain BET 3 with bottom pair (pair of 8s). Hero folded Td 8h (also had a pair of 8s). Villain won pot.\n\nNotable: 82s is near-bottom of any range — extends SB call range further down. Villain bet bottom pair IP, consistent with tendency to bet pairs regardless of strength.",
+      "meta": {},
+      "tags": [
+        "postflop",
+        "pair_bet",
+        "loose_call",
+        "sb_call"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_28",
+      "title": "Hand 28",
+      "body": "Hero in SB with Ac As (premium). Hero FOLDED preflop (unusual/erroneous fold with AA). Villain in BB with 8s 9c (89o — weak offsuit connector). Confirms villain's BB range includes weak offsuit connectors. No postflop data.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_connector"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_29",
+      "title": "Hand 29",
+      "body": "Villain in SB with 9c Jh (J9o — weak offsuit connector). Called preflop. Hero in BB with Js 8h, checked.\n\nFlop: Ts 4c 7d. Hero checked. Villain BET 3. Hero folded Js 8h.\n\nVillain's hand: 9c Jh — gutshot draw (8 makes 7-8-9-T straight), J overcard. No pair. This is a SEMI-BLUFF / DRAW C-BET, distinct from pure air bets (hands 23, 25).\n\nBoard: Ts 4c 7d — Villain has gutshot (needs 8), no pair.\n\nSignificance: Confirms villain bets draws IP as well as pairs and pure air. His IP c-betting range is near-universal (all pairs, ~67%+ air, draws). Only monsters get checked back.",
+      "meta": {},
+      "tags": [
+        "postflop",
+        "cbet",
+        "draw",
+        "semi_bluff"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_3",
+      "title": "Hand 3",
+      "body": "Villain in SB, called preflop with 7s Kh (K7o — offsuit, weak kicker).\nBoard: 9d Tc 8s Ts 6s\nVillain flopped a straight (6-7-8-9-T) immediately on the flop (9d Tc 8s + 7 in hand).\nHero (BB) led flop 3bb — villain called.\nTurn: hero checked, villain checked back (has a made straight!).\nRiver: hero checked, villain checked back again.\nShowdown: villain wins with straight vs hero's one pair (AJ).\nKey insight: villain slow-played a flopped straight by only calling flop bet and checking turn+river. Extremely passive even with a strong made hand.",
+      "meta": {},
+      "tags": [
+        "slowplay",
+        "passive",
+        "straight",
+        "k7o"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_30",
+      "title": "Hand 30",
+      "body": "Hero (SB) folded 2d 6h preflop. Villain in BB held 3h 5c (35o — extremely weak offsuit connector). No postflop data. Further confirms villain's BB range includes near-any two cards.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_offsuit"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_31",
+      "title": "Hand 31",
+      "body": "Villain in SB with Kd 9h (K9o). RAISED to 8 (4x BB). Hero folded BB with Js5s. Showdown revealed K9o — FIRST SB RAISE with a non-Ace hand. Expands villain SB raise range beyond Ax to include Kx broadwayish hands.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "kx"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_32",
+      "title": "Hand 32",
+      "body": "Hero (SB) folded Q6o preflop. Villain (BB) held Ah 3d (A3o — weak ace). No postflop data. Further confirms BB range includes weak aces.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_ace"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_33",
+      "title": "Hand 33",
+      "body": "Villain in SB with 4c Qh (Q4o — very weak offsuit). Called preflop. Flop: Jd 3h Kh. Hero (BB) checked. Villain BET 3 with Q-high only (no pair, no flush draw). Hero folded 2c 8h.\n\nAnother confirmed air c-bet IP. Q-high on K-J board = pure bluff with one overcard.\n\nAir c-bet tally: 3/3 now (hands 23, 25, 33).",
+      "meta": {},
+      "tags": [
+        "air_cbet",
+        "bluff",
+        "ip_bet",
+        "weak_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_34",
+      "title": "Hand 34",
+      "body": "Villain in BB with Kc 5s (K5o — weak king offsuit). Hero (SB) folded J6o preflop. No postflop data. Further confirms BB range includes weak kings (K5o seen alongside K5h from hand 26).",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "weak_king"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_35",
+      "title": "Hand 35",
+      "body": "In SB with unknown hand. FOLDED preflop. Hero (BB) wins +1. Fourth observed SB fold (hands 15, 17, 19, 35).",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "sb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_36",
+      "title": "Hand 36",
+      "body": "Villain in BB with Ad 6c (A6o — weak ace). Hero (SB) folded 8c Tc preflop. No postflop data. Consistent with wide BB range.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "bb",
+        "weak_ace"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_37",
+      "title": "Hand 37",
+      "body": "Villain in SB with 8d Jd (J8s — suited connector). Called preflop. Flop: Td 6h Jh. Hero (BB/KTo) checked, villain bet 3 (top pair, Jacks). Hero folded KT (top pair worse kicker). Showdown: villain showed 8d Jd.\n\nCategory: IP bet with top pair — 4th confirmed pair bet. Also confirms SB call range includes J8s (suited connectors, weak offsuit).",
+      "meta": {},
+      "tags": [
+        "postflop",
+        "top_pair",
+        "cbet",
+        "suited_connector",
+        "sb_call"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_38",
+      "title": "Hand 38",
+      "body": "Hero (SB) folded preflop with 2s 8d. Villain in BB held Kc As (AKo — premium broadway). No postflop data. Hero result: -1.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "villain_bb",
+        "premium_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_39",
+      "title": "Hand 39",
+      "body": "Villain in SB with 6c Kc (K6s — weak suited king). RAISED to 8 (4x BB). Hero folded K8o from BB. Revealed at no showdown.\n\nSignificance: SB raise range now includes K6s — weakest king raise observed. Previously K9o was the weakest king raise. Raise range expanding further down the Kx spectrum when suited.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb",
+        "raise",
+        "suited_king"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_4",
+      "title": "Hand 4",
+      "body": "Hero (SB) folded preflop with 5d 7s. Villain (BB) held Kd Ad. No postflop data. Villain's hand was premium — no tendency update warranted beyond noting he does hold strong hands occasionally.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "no_showdown_postflop"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_40",
+      "title": "Hand 40",
+      "body": "Villain in BB with Js Jd (pocket jacks — premium). Hero (SB) folded 6h Ts preflop. No postflop data. Another premium holding in BB.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "pocket_pair",
+        "premium"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_41",
+      "title": "Hand 41",
+      "body": "Hand 41: Villain in SB with 4h 7s (74o — extremely weak offsuit). CALLED preflop vs hero BB (2d 8c). Flop: 9c 7h 3c. Hero checked, villain BET 3 with middle pair (pair of 7s). Hero folded. Villain wins pot.\n\nKey observations:\n- SB call with 74o: continues extremely wide preflop call range (joins 82s, K3o, Q4o, etc.)\n- IP bet with middle pair: pair betting rate now 5/5 (100%)\n- Universal IP c-bet pattern holds: 11/11 postflop IP hands, 11 bets",
+      "meta": {},
+      "tags": [
+        "preflop_call",
+        "pair_bet",
+        "ip_cbet",
+        "middle_pair"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_42",
+      "title": "Hand 42",
+      "body": "Hero SB with 5c 6h, folded preflop. Villain BB held 6c 8c (suited connector). No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "villain_bb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_43",
+      "title": "Hand 43",
+      "body": "Hero: BB, 9d Js. Villain: SB — folded preflop. Hero wins +1 (BB).",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "sb_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_44",
+      "title": "Hand 44",
+      "body": "Hero SB folded preflop (6s Qs). Villain BB held Js 4c — another weak BB holding. Hero result: -1.",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "bb_wide"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_45",
+      "title": "Hand 45",
+      "body": "Hero BB (6c Qc) vs Villain SB (9d 6h). Board: Jd 9h 7s. Preflop: Villain calls. Flop: Hero checks, Villain bets 3. Hero folds. Villain showed 9d 6h — middle pair (9s) + gutshot. Another IP c-bet with a pair.",
+      "meta": {},
+      "tags": [
+        "villain_sb",
+        "ip_cbet",
+        "pair_bet",
+        "villain_calls_preflop"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_46",
+      "title": "Hand 46",
+      "body": "Hero SB with 8h 8d, folded preflop (both blinds posted, hero folded). Villain BB showed 2c Tc at showdown. Another weak BB holding confirmed.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_47",
+      "title": "Hand 47",
+      "body": "Hero BB: Qs 5h. Villain SB raised 8 (4x). Hero folded. Showdown: Villain held Ah 4d.\nConfirms villain raises weak Ax from SB — A4o is the weakest Ax raise seen yet.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "weak_ace"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_48",
+      "title": "Hand 48",
+      "body": "Hero SB folded 2d Jh preflop. Villain BB held 3c 4c (revealed). Hero lost 1 (posted SB). Confirms BB range includes very weak suited low connectors.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_49",
+      "title": "Hand 49",
+      "body": "Hand 49: Villain SB held 2s Kc, called preflop. Board: Jh Tc Ah. Villain bet flop (3 into ~6) with K-high / gutshot (needs Q for broadway). Hero BB folded Qd 6d. Another IP c-bet with weak holding — confirms near-universal postflop betting IP.",
+      "meta": {},
+      "tags": [
+        "sb_call",
+        "ip_cbet",
+        "weak_king",
+        "air_cbet"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_5",
+      "title": "Hand 5",
+      "body": "Villain in SB with Tc Ah (ATo — strong broadway). Raised to 8 (4x BB) preflop vs BB. Hero folded T6o. No postflop data.\n\nNotable: First observed preflop RAISE from villain (previous SB hands were calls). ATo is a clear raising hand. This suggests villain does raise strong hands preflop, not just call with everything.",
+      "meta": {
+        "action": "raise",
+        "hero_result": -2,
+        "hole_cards": "Tc Ah",
+        "position": "sb",
+        "raise_size": 8
+      },
+      "tags": [
+        "preflop",
+        "raise",
+        "ato",
+        "sb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_50",
+      "title": "Hand 50",
+      "body": "Hero SB folded 8h Qd preflop. Villain BB held 9c Ac (not revealed until showdown). No postflop action. Confirms BB can hold decent suited aces too — range is wide but not exclusively weak.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "fold",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_51",
+      "title": "Hand 51",
+      "body": "Hand 51: Villain SB called with 7c Td (weak offsuit). Board: Kd Kc 5h. Hero BB checked flop, villain bet 3 (air, T-high no pair). Hero folded. Villain c-bet air again on a paired board IP — previously the ONLY exception to IP c-betting was Hand 1 (T-high, dry non-paired board). This is now the 5th confirmed air c-bet IP.",
+      "meta": {},
+      "tags": [
+        "air_cbet",
+        "postflop",
+        "preflop_call"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_52",
+      "title": "Hand 52",
+      "body": "Hero SB folded preflop (9d Ts). Villain BB held 3c 3h — pocket pair, no action.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "pocket_pair"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_53",
+      "title": "Hand 53",
+      "body": "Hero BB 9s 4c, Villain SB 6c Qc (limped). Flop Tc 8h 7c. Hero check, villain bet 3, hero fold. Villain had flush draw + gutshot straight draw — c-bet draw IP confirmed (2nd instance). SB limp with Q6s adds to wide SB call range.",
+      "meta": {},
+      "tags": [
+        "draw",
+        "cbet",
+        "ip"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_54",
+      "title": "Hand 54",
+      "body": "Hero SB folded preflop (3d 4c). Villain BB held 7h 2s — another confirmed raggy BB holding. No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "villain_bb",
+        "weak_holding"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_55",
+      "title": "Hand 55",
+      "body": "Hero BB 3s 4d vs Villain SB Tc 2s. Board: 9s 7s Ah. Villain limped SB preflop. Hero checked flop, villain bet 3 (c-bet air — T-high no pair no draw on A97). Hero folded. Villain showed Tc 2s — pure air c-bet confirmed.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "cbet_air",
+        "showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_56",
+      "title": "Hand 56",
+      "body": "Hero SB folded preflop (7c 8c). Villain BB showed 7h 2h — another ultra-weak BB holding confirmed.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range",
+        "weak_holding"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_57",
+      "title": "Hand 57",
+      "body": "Hero BB: Tc 8d. Villain SB limped 6d 3h. Board: Jd 5d 6c. Hero checked flop, villain bet 3, hero folded. Villain held 6d 3h — bottom pair on flop, bet it. Another SB limp with ultra-weak offsuit (63o). IP c-bet confirmed again.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "ip_cbet",
+        "weak_offsuit"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_58",
+      "title": "Hand 58",
+      "body": "Hero SB folded K9o preflop. Villain BB had Ah 3c (A3o). Confirms villain's BB range includes weak Ax hands.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range",
+        "ax_weak"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_59",
+      "title": "Hand 59",
+      "body": "Hero BB Kc 9c vs Villain SB. Board: 4d 5h Td. Villain limped SB with Qh Tc (Q10o). Flop: Hero checked, Villain bet 3 (top pair, Td). Hero folded. Villain showed Qh Tc. Hero -2. Another SB limp with Q10o; IP flop bet with top pair confirmed.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "ip_cbet",
+        "top_pair"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_6",
+      "title": "Hand 6",
+      "body": "Hero (SB) folded T2s preflop. Villain (BB) held Ac 3d — weak ace offsuit. No postflop data. Hero result: -1.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "villain_bb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_60",
+      "title": "Hand 60",
+      "body": "Hero SB folded QQ preflop (hero error). Villain BB held As 7c (A7o) — confirmed another Ax holding in BB range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "ax"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_61",
+      "title": "Hand 61",
+      "body": "Hero BB (5s 9d) vs Villain SB limp (3c 5c). Board: 3s Qh Kh. Hero check/fold to flop c-bet of 3. Villain had bottom pair (3s) and c-bet — confirms universal IP c-bet with any pair. SB limp with 35s confirms ultra-wide SB limp range.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "ip_cbet",
+        "bottom_pair"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_62",
+      "title": "Hand 62",
+      "body": "Hero SB folded 8h 9c preflop. Villain BB held 4h 9h (revealed at showdown). No postflop action. Confirms villain BB range includes weak suited-gapper holdings like 49s.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range",
+        "no_showdown"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_63",
+      "title": "Hand 63",
+      "body": "Hero BB 7c8h. Villain SB limped 8c7d. Flop Th Qc Kc. Hero check, villain bet 3, hero fold. Villain c-bet 87o (no pair, backdoor only) on high coordinated board. Another SB limp with weak offsuit connector confirmed.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "cbet_ip",
+        "weak_offsuit"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_64",
+      "title": "Hand 64",
+      "body": "Hero SB folded 9d Jc preflop. Villain BB held 3h 4d (34o) — revealed at showdown. Hero result: -1.",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "villain_bb",
+        "34o"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_65",
+      "title": "Hand 65",
+      "body": "Hero BB 9h7h. Villain SB raised to 8. Hero folded. Villain showed Ac 6c (A6s). Confirms Ax suited in SB raise range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "axs"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_66",
+      "title": "Hand 66",
+      "body": "Hero SB folded 3h7s preflop. Villain BB held Jh 7c (J7o) — another weak offsuit hand in BB, consistent with ultra-wide BB range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_67",
+      "title": "Hand 67",
+      "body": "Hero BB: As Qh. Villain SB limped 6c 3d. Board: 8s 3c Th. Hero checked flop, villain bet 3 with bottom pair (3s), hero folded AQo (would have had top pair!). Another bottom-pair c-bet IP confirmed.",
+      "meta": {},
+      "tags": [
+        "preflop_limp",
+        "cbet_pair",
+        "bottom_pair",
+        "ip_aggression"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_68",
+      "title": "Hand 68",
+      "body": "Hero SB folded Jh 6h preflop. Villain BB held Ts 6d (revealed). No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop_only"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_69",
+      "title": "Hand 69",
+      "body": "Hero BB 4d 7h. Villain SB limped 3s 8c (38o). Board Qs Kh Jd. Hero check, villain bet 3, hero fold. Confirms: SB limp range includes 38o (air); villain c-bet IP with total air on K-high broadway board.",
+      "meta": {},
+      "tags": [
+        "sb_limp",
+        "cbet_ip",
+        "air_cbet"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_7",
+      "title": "Hand 7",
+      "body": "Villain in SB with Ad Tc (ATo). Raised to 8 (4x BB). Hero folded BB with 2h 2d. No postflop data. Second time villain raises ATo from SB — consistent with raising strong broadways.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "broadway"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_70",
+      "title": "Hand 70",
+      "body": "Hero SB folded 4c 6s preflop. Villain BB held 5d 2c (52o) — another ultra-weak BB holding confirmed.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range",
+        "weak_holding"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_71",
+      "title": "Hand 71",
+      "body": "Hero BB (6s 2d), villain SB folded preflop. Hero wins +1.",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "villain_sb"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_72",
+      "title": "Hand 72",
+      "body": "Hero SB folded preflop (9s 6c). Villain BB held 8h Tc — another weak offsuit hand in BB, consistent with any-two-cards range.",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_73",
+      "title": "Hand 73",
+      "body": "Hero BB (Ts Ks), Villain SB raised to 8. Hero folded. Villain showed Jh Ad (AJo — strong broadway, consistent with SB raise range).",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "villain_sb_raise",
+        "ax_hand"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_74",
+      "title": "Hand 74",
+      "body": "Hero SB folded A7o preflop. Villain BB held Qh Tc (QTo). No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb_range"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_75",
+      "title": "Hand 75",
+      "body": "Hero BB Kh 8c vs Villain SB raise 8s Kc. Hero folded preflop. Villain raises K8o from SB — extends weak Kx raise range down to K8o.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "kx_offsuit"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_76",
+      "title": "Hand 76",
+      "body": "Hero SB folded 9s Jh preflop. Villain BB held As Kh (AKs). No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop_fold",
+        "villain_bb",
+        "aks"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_77",
+      "title": "Hand 77",
+      "body": "Hero BB (5c Jc) folded to SB raise. Villain SB held Qs Jh (QJo) — raised preflop. Confirms QJo in SB raising range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb_raise",
+        "broadway"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_78",
+      "title": "Hand 78",
+      "body": "Hero SB folded 6h 3d preflop. Villain BB held As Jd (AJo). No postflop action.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_79",
+      "title": "Hand 79",
+      "body": "Hero BB (7c Ah). Villain SB folded preflop. Hero wins +1. No postflop info.",
+      "meta": {},
+      "tags": [
+        "preflop_only",
+        "villain_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_8",
+      "title": "Hand 8",
+      "body": "Villain in BB with Qd Jc (QJo — decent broadway offsuit). Hero (SB) folded preflop with K5o. No postflop data. Villain's BB holding revealed: QJo fits within wide range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "bb",
+        "broadway",
+        "no_postflop"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_80",
+      "title": "Hand 80",
+      "body": "Hero SB folded preflop (9h 6s). Villain BB held Ad 4d. Hero result: -1. Villain BB range: A4o confirmed again.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "hero_fold"
+      ]
+    },
+    {
+      "type": "hand",
+      "id": "hand_9",
+      "title": "Hand 9",
+      "body": "Villain in SB with As 8c (A8o). Raised to 8 (4x BB). Hero folded from BB with Js 6h. No showdown postflop data.\n\nNotable: Villain raises A8o from SB — extends SB raising range below ATo. Ace-x offsuit with decent kicker appears to be a consistent raise.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "sb",
+        "raise",
+        "a8o"
+      ]
+    },
+    {
+      "type": "opponent",
+      "id": "villain",
+      "title": "Villain",
+      "body": "Hand 80: Hero SB folded preflop; Villain BB held Ad 4d, won +1.\n\n===TENDENCIES (80 hands)===\nPREFLOP: Wide/loose range from both blinds. SB raises: ANY Ax (suited and offsuit), Kx suited broadly (K6s+), Kx offsuit down to K8o, strong broadways (AJo, QJo confirmed), likely all broadway combos. SB calls/limps: nearly any two cards including 82s, 74o, J8s, J9o, K3o, K7o, Q4o, 9d 6h, 2s Kc, 7c Td, 6c Qc, Tc 2s, 6d 3h (63o confirmed twice), Qh Tc, 3c 5c, 8c 7d, 6c 3d, 3s 8c. SB folds ~12% (~7 times total out of ~80 SB opportunities). BB range virtually any two cards — 72o confirmed twice, 52o confirmed, A3o, A4o, A7o, 49s, 34o, J7o, Ts 6d, 8h Tc, Qh Tc, AKs, AJo all confirmed.\n\nPOSTFLOP (22 hands IP): C-bet rate 21/22 (95%). Bets any pair 10/10 (100%), draws 2/2 (100%), air 8/8 (100%). IP check = monster alarm (1 slowplay observed).\n\nEXPLOIT: Villain c-bets ~100% IP — raise/float liberally. IP check = fold or trap, treat with extreme caution. SB limp range essentially any two cards. SB raise range is very wide: all Ax, wide Kx, all broadways (QJo, AJo confirmed). BB range is virtually any two cards.",
+      "meta": {},
+      "tags": null
+    },
+    {
+      "type": "tendency",
+      "id": "postflop_passivity",
+      "title": "Postflop Betting IP — Bets Pairs, Draws, AND Bluffs; Slowplays Monsters",
+      "body": "IP c-bet frequency: 20/21 hands (95%). Bets any pair (including bottom pair), draws, air on all board textures. C-bet air/weak: 7/7 (100%). Pair bets: 10/10 (100%). Draw bets: 2/2 (100%). Slowplay: 1 instance (nuts). IP check = strong monster alarm.",
+      "meta": {
+        "cbet_air": 7,
+        "cbet_draw": 2,
+        "cbet_ip_opportunities": 21,
+        "cbet_ip_total": 20,
+        "cbet_pair": 10,
+        "slowplay": 1
+      },
+      "tags": [
+        "postflop",
+        "cbet",
+        "aggression"
+      ]
+    },
+    {
+      "type": "tendency",
+      "id": "preflop_aggression",
+      "title": "Preflop Aggression — Raises Ax (any kicker) and Wide Kx from SB, Calls Speculative Hands",
+      "body": "SB raise range: ALL Ax suited/offsuit, Kx suited (K6s+), Kx offsuit confirmed down to K8o (K8o, K9o+). Strong broadways (AJo+). Very wide raising range from SB. Limps/calls with almost any two cards not in raise range.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "aggression",
+        "sb_raise",
+        "kx_offsuit"
+      ]
+    },
+    {
+      "type": "tendency",
+      "id": "preflop_range",
+      "title": "Preflop Range — Wide, Includes Suited Connectors, Pocket Pairs, Weak Offsuit Hands, Strong Broadways, Weak Aces, Weak Kings",
+      "body": "BB range (9 hands seen): 77, AKs, A3o, QJo, 97o, QTo, QJs, 54s, 95o — extremely wide, defends virtually any two cards.\nSB raise range (4 raises): ATo x2, A8o, ATs — consistent Ax8+ suited or offsuit.\nSB call range (3 calls): T8s, K7o, K3o — weak kings and suited connectors.\nSB folds (2): unknown holdings.",
+      "meta": {},
+      "tags": [
+        "preflop",
+        "range",
+        "wide",
+        "loose"
+      ]
+    },
+    {
+      "type": "tendency",
+      "id": "slowplay_strong_hands",
+      "title": "Slow-Plays Strong Made Hands",
+      "body": "Hand 3: Villain flopped a straight (7s on 9d Tc 8s) — the nuts at the time — and only called a flop bet, then checked back turn and river. Never raised or bet for value with a made straight.\n\nThis is a significant exploit: if villain has a strong hand, he will rarely raise or re-raise. Hero can bet/raise without fearing a re-raise represents a monster. Villain will likely just call or check — leaving money on the table with strong hands.\n\nSlow-play instances: 1/1 (strong made hands checked down or just called).",
+      "meta": {
+        "slowplay_instances": 1,
+        "strong_hand_opportunities": 1
+      },
+      "tags": [
+        "postflop",
+        "slowplay",
+        "passive",
+        "exploit"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_1"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_10"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_11"
+      },
+      "relation": "contradicts",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Villain bet top pair IP — first postflop aggression seen; passivity node updated to reflect nuance"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_11"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_12"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_13"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_16"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_18"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_2"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_21"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Villain bet middle pair IP — expands value-betting range beyond top pair"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_21"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {
+        "note": "SB called with 76s — weak suited connector, consistent with wide calling range"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_23"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "First observed air c-bet IP — villain does bluff, not only value-bets pairs"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_25"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Second air c-bet confirmed — bluff frequency now 2/3 (67%) IP"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_27"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Bottom pair IP bet — confirms 100% pair-betting frequency, extends to weakest pairs"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_29"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "First confirmed draw/semi-bluff c-bet IP — villain bets draws too, not just pairs and air"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_3"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_3"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "slowplay_strong_hands"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_3"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_31"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {
+        "note": "K9o raise expands SB raise range beyond Ax"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_33"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Third air c-bet confirmed IP — now 3/3 (100%) air c-bet frequency"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_37"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Top pair bet IP — 4th consecutive pair bet, 100% pair betting rate maintained"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_39"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {
+        "note": "K6s raise expands SB raise range to weak suited kings"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_41"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Middle pair IP bet — pair betting rate now 5/5 (100%), universal IP c-bet continues"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_44"
+      },
+      "relation": "exemplifies",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_45"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_45"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_47"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {
+        "note": "A4o raise confirms villain raises any Ax from SB, not just medium+ kicker"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_48"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_5"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_5"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_51"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "5th confirmed air c-bet IP, now on paired board — air c-bet rate 5/5 (100%), IP c-bet total 13/14"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_53"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "2nd confirmed draw c-bet IP — draws_bet now 2/2 (100%), IP c-bet total 14/15"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_55"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_56"
+      },
+      "relation": "illustrates",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_57"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_57"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_58"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_59"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_59"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_6"
+      },
+      "relation": "reveals_holding",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_61"
+      },
+      "relation": "exhibits",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_61"
+      },
+      "relation": "exhibits",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_63"
+      },
+      "relation": "illustrates",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_67"
+      },
+      "relation": "evidences",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {
+        "note": "Bottom pair c-bet IP — pair bet count now 10/10 (100%), IP c-bet 20/21"
+      }
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_7"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_73"
+      },
+      "relation": "exemplifies",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_75"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_77"
+      },
+      "relation": "illustrates",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_8"
+      },
+      "relation": "updates",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "hand",
+        "id": "hand_9"
+      },
+      "relation": "supports",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "demonstrated_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_70"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "documented_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_30"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "example_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_32"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "exhibited_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_54"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "exhibited_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_65"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "exhibited_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_66"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_10"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_18"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand_logged",
+      "to": {
+        "type": "hand",
+        "id": "hand_2"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand_played",
+      "to": {
+        "type": "hand",
+        "id": "hand_19"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand_played",
+      "to": {
+        "type": "hand",
+        "id": "hand_22"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand_played",
+      "to": {
+        "type": "hand",
+        "id": "hand_34"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "hand_played",
+      "to": {
+        "type": "hand",
+        "id": "hand_50"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "notable_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_40"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "notable_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_80"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_17"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_46"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_47"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_55"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_59"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_60"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_62"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_68"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_69"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_72"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_74"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_76"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "observed_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_8"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_15"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_20"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_24"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_26"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_28"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_36"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_43"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_7"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_78"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played",
+      "to": {
+        "type": "hand",
+        "id": "hand_79"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_1"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_11"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_12"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_13"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_25"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_27"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_29"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_3"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_31"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_35"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_38"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_4"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_41"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_49"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_5"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_51"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_hand",
+      "to": {
+        "type": "hand",
+        "id": "hand_9"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_64"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "played_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_71"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "seen_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_14"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "seen_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_42"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "seen_in",
+      "to": {
+        "type": "hand",
+        "id": "hand_52"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_tendency",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_tendency",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_aggression"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_tendency",
+      "to": {
+        "type": "tendency",
+        "id": "preflop_range"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "opponent",
+        "id": "villain"
+      },
+      "relation": "shows_tendency",
+      "to": {
+        "type": "tendency",
+        "id": "slowplay_strong_hands"
+      },
+      "meta": {}
+    },
+    {
+      "from": {
+        "type": "tendency",
+        "id": "slowplay_strong_hands"
+      },
+      "relation": "related_to",
+      "to": {
+        "type": "tendency",
+        "id": "postflop_passivity"
+      },
+      "meta": {}
+    }
+  ]
+}

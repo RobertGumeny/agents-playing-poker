@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "session_id": "akg-vs-fullhistory-2",
+  "match_id": "mat_001",
+  "source_artifacts": {
+    "manifest": "manifest.json",
+    "hands": "hands.jsonl",
+    "runner_errors": null,
+    "agents": {
+      "llm-akg-durable": {
+        "pi_session": "agents/llm-akg-durable/pi-session.jsonl",
+        "memory_export": "agents/llm-akg-durable/memory-export.json",
+        "stderr": "agents/llm-akg-durable/stderr.log"
+      },
+      "llm-fullhistory": {
+        "pi_session": "agents/llm-fullhistory/pi-session.jsonl",
+        "memory_export": null,
+        "stderr": "agents/llm-fullhistory/stderr.log"
+      }
+    }
+  },
+  "session": {
+    "seed": 2,
+    "duration_s": 4222,
+    "hand_count": 80,
+    "variant": "heads-up-nlhe",
+    "info_realism": "showdown-only",
+    "starting_stack": 200,
+    "blinds": {
+      "sb": 1,
+      "bb": 2
+    },
+    "completed": true,
+    "server_version": "dev",
+    "akg_spec_version": "v1-draft-2"
+  },
+  "metrics": {
+    "preflop_only_hands": 50,
+    "preflop_only_rate": 0.625,
+    "showdown_hands": 1,
+    "showdown_rate": 0.0125,
+    "biggest_swing_hand": {
+      "hand_number": 22,
+      "chips": 16
+    },
+    "fallback_action_count": 124
+  },
+  "seats": [
+    {
+      "seat": 0,
+      "name": "llm-akg-durable",
+      "version": "llm-akg-durable/0.1.0",
+      "chips_delta": -90,
+      "pi_session_present": true,
+      "decision_prompt_count": 118,
+      "tool_calls": {
+        "akg_get_node": 61,
+        "akg_list_nodes": 2
+      },
+      "tool_calls_per_hand": {
+        "akg_get_node": 0.7625,
+        "akg_list_nodes": 0.025
+      },
+      "retry_metrics": {
+        "attempt_failures": 2,
+        "malformed_action_retries": 0,
+        "exhausted_count": 1,
+        "max_attempts_observed": 2
+      },
+      "memory_export": {
+        "NodeCount": 55,
+        "EdgeCount": 79,
+        "NodesByType": {
+          "hand": 40,
+          "opponent": 1,
+          "tendency": 14
+        },
+        "EdgesByRelation": {
+          "contradicts": 1,
+          "evidenced_by": 35,
+          "exhibits": 14,
+          "follows_from": 1,
+          "hand_played": 15,
+          "illustrates": 9,
+          "played": 4
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "name": "llm-fullhistory",
+      "version": "llm-fullhistory/0.1.0",
+      "chips_delta": 90,
+      "pi_session_present": true,
+      "decision_prompt_count": 82,
+      "tool_calls": {},
+      "tool_calls_per_hand": {},
+      "retry_metrics": {
+        "attempt_failures": 4,
+        "malformed_action_retries": 4,
+        "exhausted_count": 2,
+        "max_attempts_observed": 2
+      },
+      "memory_export": null
+    }
+  ]
+}
