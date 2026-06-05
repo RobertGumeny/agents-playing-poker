@@ -29,6 +29,7 @@ The format is JSON rather than YAML so parsing stays stdlib-only.
   "hypothesis": "string, optional",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 25,
+  "decision_deadline_seconds": 180,
   "control": { "...group...": true },
   "treatment": { "...group...": true },
   "expected_direction": {
@@ -50,6 +51,11 @@ The format is JSON rather than YAML so parsing stays stdlib-only.
 
 - **`hypothesis`** — free-form operator note about what the experiment is testing
 - **`expected_direction`** — metric-to-direction map used by future compare tooling
+- **`decision_deadline_seconds`** — per-decision wall-clock deadline for the agents; must be
+  `>= 0`. Omitted or `0` falls back to the runner's `30s` default. The `poker experiment
+  run`/`go` `-decision-deadline` flag (a Go duration, e.g. `180s`) overrides this per run.
+  Recorded here because the deadline is a run condition that affects results: too tight a
+  deadline forces `decision_timeout` auto-folds and silently invalidates chip outcomes.
 
 Unknown JSON fields are invalid.
 
@@ -252,6 +258,7 @@ A definition is invalid when any of the following are true:
 - required top-level fields are missing
 - `model` is empty
 - `hands_per_session <= 0`
+- `decision_deadline_seconds < 0`
 - a group omits `agent`
 - a group mixes session-base and explicit-session fields
 - a group provides neither session mode

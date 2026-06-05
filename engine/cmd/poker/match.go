@@ -45,6 +45,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	var agent0, agent1, sessionID, sessionsDir, model, thinkingLevel string
 	var hands int
 	var seed int64
+	var decisionDeadline time.Duration
 
 	fs.StringVar(&agent0, "agent0", "", "seat 0 agent key")
 	fs.StringVar(&agent1, "agent1", "", "seat 1 agent key")
@@ -54,6 +55,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	fs.StringVar(&sessionsDir, "sessions-dir", filepath.Join(repoDir, "research/sessions"), "session output root directory")
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", "low", "PI_POKER_THINKING_LEVEL for Pi agents")
+	fs.DurationVar(&decisionDeadline, "decision-deadline", 30*time.Second, "per-decision deadline (e.g. 180s)")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -88,7 +90,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 		StartingStack:    200,
 		SmallBlind:       1,
 		BigBlind:         2,
-		DecisionDeadline: 30 * time.Second,
+		DecisionDeadline: decisionDeadline,
 		AgentSpecs:       []match.AgentSpec{spec0, spec1},
 		ProgressWriter:   stdout,
 	})

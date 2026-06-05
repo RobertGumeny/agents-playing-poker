@@ -3,6 +3,7 @@
   "hypothesis": "Phase 2 headline matchup: a knowledge graph faked in linked markdown (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror. Seat-mirrored across 2 seeds (4 sessions): control runs AKG in seat 0 vs wiki in seat 1, treatment swaps them, so positional and blind-rotation effects cancel and each strategy plays both seats on identical deals. POST-REWORK both agents are model-maintained - each agent's own LLM writes its memory after every hand - so this isolates REPRESENTATION (typed graph vs linked prose), not who writes the memory. OBSERVATIONAL (we are learning, not predicting a winner): for BOTH agents we measure (1) profile-fidelity drift - cross-validate each agent's stated opponent reads against engine ground truth in hands.jsonl and watch where they diverge; (2) honest TOTAL token cost - decision-prompt tokens PLUS the post-hand update-session tokens, since both agents now run an update session each hand. Plus wiki-specific link-integrity decay (dangling/duplicate/orphaned [[links]]), against the AKG agent's orphan-node diagnostics. Chip outcomes are DIAGNOSTIC ONLY (high variance, not proof). expected_direction is intentionally empty: this is the Phase 2 fidelity-vs-cost frontier baseline Phase 3 must beat, reported as measured curves rather than pass/fail predictions.",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 200,
+  "decision_deadline_seconds": 180,
   "control": {
     "session_base": "akg-vs-wiki",
     "sessions_count": 2,

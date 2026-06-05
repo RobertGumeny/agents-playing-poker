@@ -18,13 +18,14 @@ const (
 )
 
 type Definition struct {
-	ID                string               `json:"id"`
-	Hypothesis        string               `json:"hypothesis,omitempty"`
-	Model             string               `json:"model"`
-	HandsPerSession   int                  `json:"hands_per_session"`
-	Control           Group                `json:"control"`
-	Treatment         Group                `json:"treatment"`
-	ExpectedDirection map[string]Direction `json:"expected_direction,omitempty"`
+	ID                      string               `json:"id"`
+	Hypothesis              string               `json:"hypothesis,omitempty"`
+	Model                   string               `json:"model"`
+	HandsPerSession         int                  `json:"hands_per_session"`
+	DecisionDeadlineSeconds int                  `json:"decision_deadline_seconds,omitempty"`
+	Control                 Group                `json:"control"`
+	Treatment               Group                `json:"treatment"`
+	ExpectedDirection       map[string]Direction `json:"expected_direction,omitempty"`
 }
 
 type Group struct {
@@ -43,11 +44,12 @@ type PlannedSession struct {
 }
 
 type Plan struct {
-	ExperimentID    string
-	Model           string
-	HandsPerSession int
-	SessionsRootDir string
-	PlannedSessions []PlannedRun
+	ExperimentID            string
+	Model                   string
+	HandsPerSession         int
+	DecisionDeadlineSeconds int
+	SessionsRootDir         string
+	PlannedSessions         []PlannedRun
 }
 
 type PlannedRun struct {
@@ -98,6 +100,9 @@ func (d Definition) Validate() error {
 	if d.HandsPerSession <= 0 {
 		return fmt.Errorf("validate experiment definition: hands_per_session must be > 0")
 	}
+	if d.DecisionDeadlineSeconds < 0 {
+		return fmt.Errorf("validate experiment definition: decision_deadline_seconds must be >= 0")
+	}
 	if err := d.Control.validate("control"); err != nil {
 		return err
 	}
@@ -120,10 +125,11 @@ func (d Definition) Validate() error {
 func (d Definition) Plan(sessionsRootDir string) (Plan, error) {
 	rootDir := filepath.Clean(sessionsRootDir)
 	plan := Plan{
-		ExperimentID:    d.ID,
-		Model:           d.Model,
-		HandsPerSession: d.HandsPerSession,
-		SessionsRootDir: rootDir,
+		ExperimentID:            d.ID,
+		Model:                   d.Model,
+		HandsPerSession:         d.HandsPerSession,
+		DecisionDeadlineSeconds: d.DecisionDeadlineSeconds,
+		SessionsRootDir:         rootDir,
 	}
 
 	seen := make(map[string]PlannedRun)

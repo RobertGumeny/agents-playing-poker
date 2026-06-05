@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/RobertGumeny/agent-poker/internal/eval"
 	"github.com/RobertGumeny/agent-poker/internal/evalrun"
@@ -115,15 +116,17 @@ func runExperimentRun(args []string, defaultExperimentsDir string, stdout, stder
 
 	var model string
 	var thinkingLevel string
+	var decisionDeadline time.Duration
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
+	fs.DurationVar(&decisionDeadline, "decision-deadline", 0, "override per-decision deadline (e.g. 180s); 0 uses the experiment definition or the 30s default")
 
 	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
 
-	return execRun(ef, model, thinkingLevel, stdout, stderr)
+	return execRun(ef, model, thinkingLevel, decisionDeadline, stdout, stderr)
 }
 
 func runExperimentAnalyze(args []string, defaultExperimentsDir string, stdout, stderr io.Writer) error {
@@ -144,15 +147,17 @@ func runExperimentGo(args []string, defaultExperimentsDir string, stdout, stderr
 
 	var model string
 	var thinkingLevel string
+	var decisionDeadline time.Duration
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", defaultThinkingLevel, "PI_POKER_THINKING_LEVEL for Pi agents")
+	fs.DurationVar(&decisionDeadline, "decision-deadline", 0, "override per-decision deadline (e.g. 180s); 0 uses the experiment definition or the 30s default")
 
 	ef, err := parseExperimentFlags(fs, args, defaultExperimentsDir)
 	if err != nil {
 		return err
 	}
 
-	if err := execRun(ef, model, thinkingLevel, stdout, stderr); err != nil {
+	if err := execRun(ef, model, thinkingLevel, decisionDeadline, stdout, stderr); err != nil {
 		return err
 	}
 	return execAnalyze(ef, stdout)
@@ -246,7 +251,7 @@ func runExperimentList(args []string, defaultExperimentsDir string, stdout, stde
 	return nil
 }
 
-func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.Writer) error {
+func execRun(ef experimentFlags, model, thinkingLevel string, decisionDeadline time.Duration, stdout, stderr io.Writer) error {
 	coverage, err := evalrun.LoadPlanCoverage(ef.experimentPath, ef.sessionsDir, experiment.Load, evalrun.InspectSession)
 	if err != nil {
 		return err
@@ -263,6 +268,13 @@ func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.
 	effectiveModel := model
 	if effectiveModel == "" {
 		effectiveModel = coverage.Plan.Model
+	}
+
+	// CLI flag overrides; otherwise fall back to the experiment definition; 0 leaves the
+	// match runner's own 30s default.
+	effectiveDeadline := decisionDeadline
+	if effectiveDeadline <= 0 && coverage.Plan.DecisionDeadlineSeconds > 0 {
+		effectiveDeadline = time.Duration(coverage.Plan.DecisionDeadlineSeconds) * time.Second
 	}
 
 	var toRun []evalrun.SessionCoverage
@@ -308,16 +320,17 @@ func execRun(ef experimentFlags, model, thinkingLevel string, stdout, stderr io.
 			defer wg.Done()
 			pw := &handProgressWriter{sessionID: s.Planned.SessionID, disp: disp}
 			runErr := executor.Execute(context.Background(), evalrun.ExecuteConfig{
-				Agent0:        s.Planned.Agent,
-				Agent1:        s.Planned.Opponent,
-				Hands:         coverage.Plan.HandsPerSession,
-				Seed:          s.Planned.Seed,
-				SessionID:     s.Planned.SessionID,
-				SessionsDir:   absSessionsDir,
-				Model:         effectiveModel,
-				ThinkingLevel: thinkingLevel,
-				Stdout:        pw,
-				Stderr:        stderr,
+				Agent0:           s.Planned.Agent,
+				Agent1:           s.Planned.Opponent,
+				Hands:            coverage.Plan.HandsPerSession,
+				Seed:             s.Planned.Seed,
+				SessionID:        s.Planned.SessionID,
+				SessionsDir:      absSessionsDir,
+				Model:            effectiveModel,
+				ThinkingLevel:    thinkingLevel,
+				DecisionDeadline: effectiveDeadline,
+				Stdout:           pw,
+				Stderr:           stderr,
 			})
 			if runErr != nil {
 				disp.setError(s.Planned.SessionID, runErr.Error())

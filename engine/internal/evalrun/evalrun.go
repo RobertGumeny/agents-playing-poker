@@ -5,22 +5,24 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/RobertGumeny/agent-poker/internal/experiment"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 )
 
 type ExecuteConfig struct {
-	Agent0        string
-	Agent1        string
-	Hands         int
-	Seed          int64
-	SessionID     string
-	SessionsDir   string
-	Model         string
-	ThinkingLevel string
-	Stdout        io.Writer // optional; overrides Executor.Stdout when set
-	Stderr        io.Writer // optional; overrides Executor.Stderr when set
+	Agent0           string
+	Agent1           string
+	Hands            int
+	Seed             int64
+	SessionID        string
+	SessionsDir      string
+	Model            string
+	ThinkingLevel    string
+	DecisionDeadline time.Duration // optional; 0 leaves the match runner's own default
+	Stdout           io.Writer     // optional; overrides Executor.Stdout when set
+	Stderr           io.Writer     // optional; overrides Executor.Stderr when set
 }
 
 type SessionInspection struct {

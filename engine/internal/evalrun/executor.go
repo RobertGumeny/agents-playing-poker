@@ -55,6 +55,9 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 	if cfg.Model != "" {
 		args = append(args, "-model", cfg.Model)
 	}
+	if cfg.DecisionDeadline > 0 {
+		args = append(args, "-decision-deadline", cfg.DecisionDeadline.String())
+	}
 
 	stdout := e.Stdout
 	if cfg.Stdout != nil {
