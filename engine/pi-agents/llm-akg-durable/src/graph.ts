@@ -1,4 +1,4 @@
-import { open, type Node, type Store } from "akg-ts";
+import { open, type Store } from "akg-ts";
 
 export const STORE_FILE = "memory.akg";
 export const ROOT_TYPE = "opponent";
@@ -48,8 +48,4 @@ export function countGraphRot(store: Store): GraphRot {
     if (!isRoot(node) && outbound === 0 && inbound === 0) orphans += 1;
   }
   return { nodes: nodes.length, edges, orphan_nodes: orphans };
-}
-
-export function nodeSummaryLine(node: Node): string {
-  return `${node.type}/${node.id} — ${node.title}`;
 }

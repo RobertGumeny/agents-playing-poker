@@ -1,4 +1,4 @@
-import { type Node, type Store } from "akg-ts";
+import { type Store } from "akg-ts";
 export declare const STORE_FILE = "memory.akg";
 export declare const ROOT_TYPE = "opponent";
 export declare const ROOT_ID = "villain";
@@ -15,4 +15,3 @@ export interface GraphRot {
     orphan_nodes: number;
 }
 export declare function countGraphRot(store: Store): GraphRot;
-export declare function nodeSummaryLine(node: Node): string;

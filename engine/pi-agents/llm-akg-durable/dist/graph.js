@@ -39,6 +39,3 @@ export function countGraphRot(store) {
     }
     return { nodes: nodes.length, edges, orphan_nodes: orphans };
 }
-export function nodeSummaryLine(node) {
-    return `${node.type}/${node.id} — ${node.title}`;
-}

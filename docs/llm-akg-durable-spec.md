@@ -42,8 +42,17 @@ Behavior:
 
 - After a completed hand, `afterHandEnd` runs a fresh one-shot Pi **update session** using the
   same model and thinking level as decisions (`PI_POKER_MODEL` / `PI_POKER_THINKING_LEVEL`).
-- The update session is given the current node list, the current root node body, and a summary
-  of the hand that just finished, then writes its changes with AKG write tools.
+- The update session is given the current root node body and a summary of the hand that just
+  finished. The rest of the graph is **not inlined**; the model discovers it through the same
+  read tools the decision session uses (`akg_list_nodes` / `akg_get_node`). This keeps the
+  update prompt bounded instead of growing O(N) with the hand count, symmetric with the
+  active-retrieval decision path.
+- The update prompt steers the model to **only record significant hands** (a showdown, a
+  multi-street line, a surprising decision) and to leave trivial hands — preflop folds, blind
+  steals — unwritten, and to **prefer durable tendency nodes over one node per hand**. This is
+  model judgement expressed through the prompt, not a code-side skip, so it stays symmetric with
+  the prose agents (`llm-md-single`, `llm-md-wiki`), which also run a model update every hand.
+- The model writes its changes with AKG write tools, batched into a single `akg_apply` call.
 - The store is committed after the update session finishes. A failed update keeps the prior
   graph (it never corrupts or truncates it) and logs to `stderr.log`.
 - The update transcript is written to a separate `update-session.jsonl` so update cost is
@@ -88,7 +97,7 @@ part of the contract; they may appear only if the model chooses them.
 
 ## Decision-time retrieval tools
 
-The durable decision session registers two generic, read-only graph tools (the schema-specific
+The durable decision session registers three generic, read-only graph tools (the schema-specific
 `akg_get_opponent` / `akg_list_patterns` / … tools are gone, because the model now authors an
 open vocabulary they could not describe):
 
@@ -96,22 +105,29 @@ open vocabulary they could not describe):
   by type or tag.
 - `akg_get_node` — return a node's `title`, `body`, `meta`, `tags`, plus its outbound and
   inbound edges; the model follows an edge by reading its other endpoint.
+- `akg_get_nodes` — read several nodes in one call (an array of `{type, id}` refs), returning
+  the same per-node shape as `akg_get_node`, with `found:false` for any missing ref. Collapses
+  a multi-node drill-down into a single turn instead of sequential `akg_get_node` round-trips.
 
 Builtin Pi tools are disabled for this agent. Tool results are JSON-serializable and
 deterministic for empty/unknown cases (missing nodes return `found:false`).
 
 ## Post-hand update tools and inconsistency diagnostics
 
-The update session registers the two read tools above plus two write tools:
+The update session registers the two read tools above plus three write tools:
 
-- `akg_put_node` — create or replace a node with a model-chosen `type`, `id`, `title`, `body`,
-  `meta`, and `tags`.
-- `akg_put_edge` — create or replace a directed edge with a model-chosen `relation` between two
-  existing nodes.
+- `akg_apply` — apply a whole update in one call: an optional `nodes` array (upserted first) and
+  an optional `edges` array (applied after, so endpoints created in the same call resolve). This
+  is the preferred write path and keeps the update session to a single turn instead of one
+  round-trip per write. Returns per-item `{written, …}` results under `nodes` and `edges`.
+- `akg_put_node` — create or replace a single node with a model-chosen `type`, `id`, `title`,
+  `body`, `meta`, and `tags`. Retained for one-off writes; `akg_apply` is preferred.
+- `akg_put_edge` — create or replace a single directed edge with a model-chosen `relation`
+  between two existing nodes. Retained for one-off writes; `akg_apply` is preferred.
 
 There is **no delete tool**, symmetric with the wiki agent's `md_write_page` ("does not delete
 pages"): the model retires stale state by overwriting a node body or authoring a superseding
-edge. Both write tools return a structured `{written:false, error}` result on malformed input
+edge. All write tools return structured `{written:false, error}` results on malformed input
 or a missing edge endpoint, rather than throwing.
 
 After each update the runtime records a best-effort **graph-rot diagnostic** to
@@ -140,18 +156,26 @@ The durable decision system prompt tells the model:
 
 - it is a heads-up no-limit Texas Hold'em decision engine
 - a knowledge graph about the opponent is available through AKG tools
-- `opponent/villain` is the starting index; follow its edges by reading connected nodes
-- `akg_list_nodes` and `akg_get_node` may be used as needed before the final answer
+- the `opponent/villain` summary is **already injected inline** in the prompt; it should be read
+  there directly and **not** re-fetched with a tool call
+- the read tools (`akg_list_nodes`, `akg_get_node`, `akg_get_nodes`) are for drilling into
+  detail the inline summary does not cover — most decisions need no tool calls
 - the final answer must be exactly one legal action encoded as JSON
 
 `beforeDecision` injects the root node body as the index (or a "no reads yet" reminder when
 the graph is empty), rather than preloading a fixed history block. This is the active-retrieval
-distinction from `llm-akg-recent`.
+distinction from `llm-akg-recent`. Because the summary is supplied inline, the prompt steers the
+model away from a reflexive per-decision re-read of `opponent/villain` (a redundant round-trip),
+which keeps routine decisions to a single turn while preserving tool-driven retrieval for the
+spots that need deeper graph detail.
 
 The update session uses its own system prompt instructing the model to fold the just-finished
-hand into the graph: keep the `opponent/villain` summary current, author nodes for observed
-tendencies with its own types/relations, keep its own counts, avoid duplicate nodes, reconcile
-contradictions toward newest evidence, and not delete.
+hand into the graph: discover existing nodes with the read tools (the graph is not inlined),
+keep the `opponent/villain` summary current, author nodes for observed tendencies with its own
+types/relations, keep its own counts, avoid duplicate nodes, reconcile contradictions toward
+newest evidence, and not delete. It is told to **record only significant hands** (leaving
+trivial preflop folds and blind steals unwritten), to **prefer durable tendency nodes over a
+node per hand**, and to make all its writes in a **single `akg_apply` call**.
 
 ## Artifacts
 

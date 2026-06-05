@@ -104,6 +104,30 @@ describe("read tools", () => {
     expect(missing).toEqual({ found: false, type: "pattern", id: "ghost" });
   });
 
+  it("akg_get_nodes reads several nodes in one call, marking missing ones found:false", async () => {
+    const store = await open(join(tmpDir, STORE_FILE));
+    ensureRootNode(store);
+    store.putNode("pattern", "folds-to-cbet", { title: "Folds to c-bets", body: "folds 4/7" }, ["pattern"]);
+    store.putEdge({ type: ROOT_TYPE, id: ROOT_ID }, "shows", { type: "pattern", id: "folds-to-cbet" }, {});
+    await store.commit();
+    const read = createReadTools(storeProvider(store));
+
+    const result = (await callTool(read, "akg_get_nodes", {
+      refs: [
+        { type: ROOT_TYPE, id: ROOT_ID },
+        { type: "pattern", id: "folds-to-cbet" },
+        { type: "pattern", id: "ghost" },
+      ],
+    })) as { nodes: Array<Record<string, unknown>> };
+
+    expect(result.nodes).toHaveLength(3);
+    expect(result.nodes[0]).toMatchObject({ found: true, type: ROOT_TYPE, id: ROOT_ID });
+    expect(result.nodes[1]).toMatchObject({ found: true, title: "Folds to c-bets" });
+    expect((result.nodes[1].outbound_edges as unknown[] | undefined) ?? []).toHaveLength(0);
+    expect((result.nodes[1].inbound_edges as unknown[]).length).toBe(1);
+    expect(result.nodes[2]).toEqual({ found: false, type: "pattern", id: "ghost" });
+  });
+
   it("returns empty/not-found when no store is available", async () => {
     const read = createReadTools(storeProvider(null));
     expect(await callTool(read, "akg_list_nodes")).toEqual({ nodes: [] });
@@ -151,18 +175,47 @@ describe("write tools", () => {
     const invalid = (await callTool(write, "akg_put_node", { type: "Bad Type", id: "x", title: "x" })) as { written: boolean };
     expect(invalid.written).toBe(false);
   });
+
+  it("akg_apply batches nodes-before-edges in one call and reports per-item results", async () => {
+    const store = await open(join(tmpDir, STORE_FILE));
+    ensureRootNode(store);
+    const write = createWriteTools(storeProvider(store));
+
+    const result = (await callTool(write, "akg_apply", {
+      nodes: [
+        { type: "pattern", id: "limps", title: "Limps a lot", body: "limps 6/10" },
+        { type: "pattern", id: "stabs", title: "Stabs turns" },
+      ],
+      edges: [
+        { from_type: ROOT_TYPE, from_id: ROOT_ID, relation: "shows", to_type: "pattern", to_id: "limps" },
+        // Edge to a node created in the same call resolves because nodes apply first.
+        { from_type: "pattern", from_id: "limps", relation: "relates_to", to_type: "pattern", to_id: "stabs" },
+      ],
+    })) as { applied: boolean; nodes: { written: boolean }[]; edges: { written: boolean }[] };
+
+    expect(result.applied).toBe(true);
+    expect(result.nodes.every((node) => node.written)).toBe(true);
+    expect(result.edges.every((edge) => edge.written)).toBe(true);
+    expect(store.getNode("pattern", "limps")?.body).toContain("limps 6/10");
+    expect(store.outboundEdges({ type: ROOT_TYPE, id: ROOT_ID }).some((edge) => edge.relation === "shows")).toBe(true);
+  });
 });
 
 describe("buildDurableUpdatePrompt", () => {
-  it("includes the node list, current root body, and the hand summary", () => {
+  it("includes the current root body and the hand summary without inlining the node list", () => {
     const prompt = buildDurableUpdatePrompt(
-      ["opponent/villain — villain", "pattern/folds-to-cbet — Folds to c-bets"],
       "loose-aggressive; folds to c-bet 4/7",
       "hand=9 | hero_result=+5",
     );
-    expect(prompt).toContain("pattern/folds-to-cbet — Folds to c-bets");
     expect(prompt).toContain("loose-aggressive; folds to c-bet 4/7");
     expect(prompt).toContain("hand=9 | hero_result=+5");
+    // The full graph is no longer pre-stuffed; the model discovers nodes via read tools.
+    expect(prompt).not.toContain("Current nodes:");
+  });
+
+  it("falls back to a placeholder when the root body is empty", () => {
+    const prompt = buildDurableUpdatePrompt("", "hand=1 | hero_result=0");
+    expect(prompt).toContain("(empty — no notes yet)");
   });
 });
 

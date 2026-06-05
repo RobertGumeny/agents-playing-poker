@@ -15,7 +15,7 @@ import {
 import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-poker/pi-agent-shared";
 import type { Store } from "akg-ts";
 
-import { countGraphRot, ensureRootNode, nodeSummaryLine, ROOT_ID, ROOT_TYPE } from "./graph.js";
+import { countGraphRot, ensureRootNode, ROOT_ID, ROOT_TYPE } from "./graph.js";
 import { createReadTools, createWriteTools, type StoreProvider } from "./tools.js";
 
 const STDERR_LOG = "stderr.log";
@@ -25,10 +25,11 @@ const DIAGNOSTICS_LOG = "diagnostics.jsonl";
 export const DURABLE_UPDATE_SYSTEM_PROMPT = [
   "You maintain an AKG knowledge graph modeling one opponent in heads-up no-limit Texas Hold'em.",
   `Nodes are connected by directed edges you create. The node ${ROOT_TYPE}/${ROOT_ID} is the root index.`,
-  "You are given the current node list, the current root node body, and a summary of the hand that just finished. Use akg_get_node to pull up any node you intend to change.",
-  `Update the graph to fold in what this hand revealed: keep the ${ROOT_TYPE}/${ROOT_ID} root summary current, create or update nodes for the tendencies you observe, optionally add a node for a notable hand, and connect them with edges (relations you choose) so the graph stays navigable.`,
+  `You are given the current ${ROOT_TYPE}/${ROOT_ID} body and a summary of the hand that just finished. The rest of the graph is NOT inlined — use akg_list_nodes to discover what exists and akg_get_node to read any node (and its edges) you intend to change.`,
+  "Only record what is worth remembering. Most heads-up hands — preflop folds, blind steals, uncontested pots — reveal little or nothing; for those, change nothing and reply with a one-line \"no durable change\" note. Spend writes on hands that actually show a tendency: a showdown, a played-out multi-street line, or a surprising decision.",
+  `Prefer durable tendency nodes over per-hand records. Keep the ${ROOT_TYPE}/${ROOT_ID} root summary current and create or update nodes for the tendencies you observe, connected with edges (relations you choose) so the graph stays navigable. Add a node for an individual hand only when it is genuinely notable — do not create one node per hand.`,
   'You invent your own node types, ids, and edge relations — you are not limited to a fixed schema. Count tendencies yourself in node bodies or meta (for example "folds to flop c-bet 4/7"); no tool computes them, so keep your own counts current. Avoid duplicate nodes for the same idea, and reconcile contradictions in favor of the newest evidence.',
-  "Write nodes with akg_put_node and edges with akg_put_edge. Both endpoints of an edge must exist first. Do not delete nodes or edges. When finished, reply with a one-line summary of what you changed.",
+  "When you do write, make ALL your changes in a SINGLE akg_apply call (batch your nodes and edges together) instead of many separate calls; akg_apply upserts every node before every edge so endpoints exist. Do not delete nodes or edges. When finished, reply with a one-line summary of what you changed.",
 ].join("\n");
 
 type PiSession = {
@@ -49,20 +50,16 @@ export interface DurableUpdateOptions {
   thinkingLevel?: string;
 }
 
-export function buildDurableUpdatePrompt(nodeSummaries: string[], rootBody: string, handSummary: string): string {
-  const list = nodeSummaries.length > 0 ? nodeSummaries.join("\n") : "(none yet)";
+export function buildDurableUpdatePrompt(rootBody: string, handSummary: string): string {
   const root = rootBody.trim().length > 0 ? rootBody.trim() : "(empty — no notes yet)";
   return [
-    "Current nodes:",
-    list,
-    "",
-    `Current ${ROOT_TYPE}/${ROOT_ID} body:`,
+    `Current ${ROOT_TYPE}/${ROOT_ID} summary:`,
     root,
     "",
     "Hand that just finished:",
     handSummary,
     "",
-    "Read any node you need with akg_get_node, then write your updates with akg_put_node and akg_put_edge.",
+    "If this hand is worth recording, read any node you need with akg_list_nodes / akg_get_node, then apply every change in one akg_apply call. If it reveals nothing durable, reply that there is no durable change and write nothing.",
   ].join("\n");
 }
 
@@ -86,9 +83,8 @@ export async function runDurableUpdate(options: DurableUpdateOptions): Promise<v
     return;
   }
 
-  const nodeSummaries = store.listNodes().map(nodeSummaryLine);
   const rootBody = store.getNode(ROOT_TYPE, ROOT_ID)?.body ?? "";
-  const prompt = buildDurableUpdatePrompt(nodeSummaries, rootBody, options.handSummary);
+  const prompt = buildDurableUpdatePrompt(rootBody, options.handSummary);
 
   let session: PiSession | undefined;
   try {

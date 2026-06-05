@@ -9,5 +9,5 @@ export interface DurableUpdateOptions {
     model?: string;
     thinkingLevel?: string;
 }
-export declare function buildDurableUpdatePrompt(nodeSummaries: string[], rootBody: string, handSummary: string): string;
+export declare function buildDurableUpdatePrompt(rootBody: string, handSummary: string): string;
 export declare function runDurableUpdate(options: DurableUpdateOptions): Promise<void>;
