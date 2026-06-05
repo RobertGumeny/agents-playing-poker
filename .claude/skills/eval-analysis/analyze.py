@@ -14,6 +14,8 @@ Examples:
 import json
 import os
 import sys
+import re
+import csv
 import argparse
 import textwrap
 from datetime import date
@@ -23,34 +25,61 @@ EXPERIMENTS_DIR = "research/experiments"
 RESULTS_DIR = "docs/research/results"
 
 
+# Set by main() once the experiment is resolved. Sessions for a claimed experiment
+# live at research/experiments/<id>/sessions/<sid>/; unclaimed ones fall back to
+# the flat research/sessions/<sid>/ area.
+SCOPED_SESSIONS_DIR = None
+
+
 def load_experiment(experiment_id):
-    path = os.path.join(EXPERIMENTS_DIR, f"{experiment_id}.json")
+    nested = os.path.join(EXPERIMENTS_DIR, experiment_id, f"{experiment_id}.json")
+    flat = os.path.join(EXPERIMENTS_DIR, f"{experiment_id}.json")
+    path = nested if os.path.exists(nested) else flat
     with open(path) as f:
         return json.load(f)
+
+
+def resolve_scoped_sessions_dir(experiment_id):
+    scoped = os.path.join(EXPERIMENTS_DIR, experiment_id, "sessions")
+    return scoped if os.path.isdir(scoped) else None
+
+
+def session_dir(sid):
+    """First existing of the experiment-scoped then flat session location."""
+    candidates = []
+    if SCOPED_SESSIONS_DIR:
+        candidates.append(os.path.join(SCOPED_SESSIONS_DIR, sid))
+    candidates.append(os.path.join(SESSIONS_DIR, sid))
+    for c in candidates:
+        if os.path.isdir(c):
+            return c
+    return candidates[0]
+
+
+def group_session_ids(group):
+    """Session ids for one group: an explicit `sessions` list wins, else expand
+    `session_base` + `sessions_count` per the experiment-definition contract."""
+    explicit = group.get("sessions")
+    if explicit:
+        return list(explicit)
+    base = group.get("session_base")
+    count = group.get("sessions_count", 0)
+    if base and count:
+        return [f"{base}-{i}" for i in range(1, count + 1)]
+    return []
 
 
 def session_ids(exp):
     """Return [(label, session_id), ...] for all control and treatment sessions."""
     results = []
-    ctrl = exp.get("control", {})
-    for sid in ctrl.get("sessions", []):
-        results.append(("control", sid))
-
-    treat = exp.get("treatment", {})
-    base = treat.get("session_base")
-    count = treat.get("sessions_count", 0)
-    if base and count:
-        for i in range(1, count + 1):
-            results.append(("treatment", f"{base}-{i}"))
-    else:
-        for sid in treat.get("sessions", []):
-            results.append(("treatment", sid))
-
+    for label in ("control", "treatment"):
+        for sid in group_session_ids(exp.get(label, {})):
+            results.append((label, sid))
     return results
 
 
 def load_eval(session_id):
-    path = os.path.join(SESSIONS_DIR, session_id, "eval.json")
+    path = os.path.join(session_dir(session_id), "eval.json")
     with open(path) as f:
         return json.load(f)
 
@@ -169,7 +198,7 @@ def traces_table(exp, keyword):
     lines.append("-" * 90)
     for label, sid in session_ids(exp):
         pi_path = os.path.join(
-            SESSIONS_DIR, sid,
+            session_dir(sid),
             f"agents/{exp.get('treatment', {}).get('agent') or exp.get('control', {}).get('agent')}/pi-session.jsonl"
         )
         mentions, total = count_reasoning_mentions(pi_path, keyword)
@@ -217,7 +246,7 @@ def hand_drill(exp, hand_number):
     lines = []
     lines.append(f"\nHand #{hand_number} context across sessions")
     for label, sid in session_ids(exp):
-        pi_path = os.path.join(SESSIONS_DIR, sid, f"agents/{agent_name}/pi-session.jsonl")
+        pi_path = os.path.join(session_dir(sid), f"agents/{agent_name}/pi-session.jsonl")
         hits = find_hand_context(pi_path, hand_number)
         lines.append(f"\n--- {label} / {sid} ---")
         if not hits:
@@ -225,6 +254,226 @@ def hand_drill(exp, hand_number):
         else:
             for lineno, excerpt in hits:
                 lines.append(f"  L{lineno}: {excerpt}")
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Token-cost analysis (the fidelity-vs-COST frontier, metric #2 in research.md).
+#
+# Two LLM calls per agent are logged separately:
+#   - decision calls   -> agents/<name>/pi-session.jsonl   (prompt header "Hand: N")
+#   - post-hand update -> agents/<name>/update-session.jsonl (summary token "hand=N")
+# Both files are concatenations of full Pi session transcripts, one sub-session
+# per call, each delimited by a {"type":"session",...} boundary line. The prompt
+# CONTEXT SIZE for a call is the first assistant turn's input+cacheRead+cacheWrite
+# (cache reduces cost, not context size — the ballooning we want to chart is size).
+# ---------------------------------------------------------------------------
+
+HAND_DECISION_RE = re.compile(r"Hand:\s*(\d+)")
+HAND_UPDATE_RE = re.compile(r"hand=(\d+)")
+STREET_RE = re.compile(r"Street:\s*(\w+)")
+
+
+def iter_subsessions(path):
+    """Yield lists of message-objects, one list per Pi sub-session (split on
+    {"type":"session"} boundary lines). Non-transcript records (e.g. compact
+    fake_update_session entries) ride along harmlessly — they carry no usage."""
+    cur = None
+    try:
+        with open(path) as f:
+            for line in f:
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if obj.get("type") == "session":
+                    if cur:
+                        yield cur
+                    cur = []
+                    continue
+                if cur is None:
+                    cur = []
+                cur.append(obj)
+    except FileNotFoundError:
+        return
+    if cur:
+        yield cur
+
+
+def _first_user_text(sub):
+    for obj in sub:
+        m = obj.get("message", obj)
+        if isinstance(m, dict) and m.get("role") == "user":
+            c = m.get("content", "")
+            if isinstance(c, list):
+                return " ".join(b.get("text", "") for b in c if isinstance(b, dict))
+            return str(c)
+    return ""
+
+
+def _assistant_usages(sub):
+    out = []
+    for obj in sub:
+        m = obj.get("message", obj)
+        if isinstance(m, dict) and m.get("role") == "assistant" and isinstance(m.get("usage"), dict):
+            out.append(m["usage"])
+    return out
+
+
+def _prompt_context_tokens(usage):
+    return usage.get("input", 0) + usage.get("cacheRead", 0) + usage.get("cacheWrite", 0)
+
+
+def extract_calls(path, kind):
+    """Return one row per LLM call in `path`. kind is 'decision' or 'update'."""
+    rows = []
+    for sub in iter_subsessions(path):
+        usages = _assistant_usages(sub)
+        if not usages:
+            continue
+        text = _first_user_text(sub)
+        hand_re = HAND_DECISION_RE if kind == "decision" else HAND_UPDATE_RE
+        hm = hand_re.search(text)
+        sm = STREET_RE.search(text) if kind == "decision" else None
+        rows.append({
+            "kind": kind,
+            "hand": int(hm.group(1)) if hm else None,
+            "street": sm.group(1) if sm else "",
+            "prompt_tokens": _prompt_context_tokens(usages[0]),
+            "total_tokens": sum(u.get("totalTokens", 0) for u in usages),
+            "cost": sum((u.get("cost") or {}).get("total", 0) for u in usages),
+        })
+    return rows
+
+
+def agent_dirs(sid):
+    base = os.path.join(session_dir(sid), "agents")
+    if not os.path.isdir(base):
+        return []
+    return sorted(d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d)))
+
+
+def linregress_slope(points):
+    """Least-squares slope of y on x for [(x, y), ...]; returns (slope, n)."""
+    pts = [(x, y) for x, y in points if x is not None]
+    n = len(pts)
+    if n < 2:
+        return None, n
+    sx = sum(x for x, _ in pts)
+    sy = sum(y for _, y in pts)
+    sxx = sum(x * x for x, _ in pts)
+    sxy = sum(x * y for x, y in pts)
+    denom = n * sxx - sx * sx
+    if denom == 0:
+        return None, n
+    return (n * sxy - sx * sy) / denom, n
+
+
+def collect_token_rows(exp):
+    """Walk every session and agent, returning a flat list of per-call rows
+    tagged with group/session/agent. Aggregated by AGENT NAME downstream, so a
+    seat-mirrored strategy's two appearances (focal in control, opponent in
+    treatment) fold into one curve."""
+    rows = []
+    for label, sid in session_ids(exp):
+        for agent in agent_dirs(sid):
+            adir = os.path.join(session_dir(sid), "agents", agent)
+            calls = (
+                extract_calls(os.path.join(adir, "pi-session.jsonl"), "decision")
+                + extract_calls(os.path.join(adir, "update-session.jsonl"), "update")
+            )
+            for c in calls:
+                c.update({"group": label, "session": sid, "agent": agent})
+                rows.append(c)
+    return rows
+
+
+def write_token_csv(experiment_id, rows):
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    path = os.path.join(RESULTS_DIR, f"{experiment_id}-tokens.csv")
+    cols = ["group", "session", "agent", "kind", "hand", "street",
+            "prompt_tokens", "total_tokens", "cost"]
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        for r in sorted(rows, key=lambda r: (r["agent"], r["session"], r["hand"] or 0,
+                                             0 if r["kind"] == "decision" else 1)):
+            w.writerow({k: r.get(k, "") for k in cols})
+    return path
+
+
+def _window_mean(decisions, lo_frac, hi_frac):
+    """Mean prompt_tokens over a hand-number window [lo_frac, hi_frac] of the span."""
+    hands = [d["hand"] for d in decisions if d["hand"] is not None]
+    if not hands:
+        return None
+    lo_h, hi_h = min(hands), max(hands)
+    span = hi_h - lo_h
+    if span == 0:
+        vals = [d["prompt_tokens"] for d in decisions if d["hand"] is not None]
+        return sum(vals) / len(vals) if vals else None
+    lo = lo_h + lo_frac * span
+    hi = lo_h + hi_frac * span
+    vals = [d["prompt_tokens"] for d in decisions
+            if d["hand"] is not None and lo <= d["hand"] <= hi]
+    return sum(vals) / len(vals) if vals else None
+
+
+def token_summary(rows):
+    """Per-agent token aggregates. Returns (agents_sorted, summary_by_agent)."""
+    by_agent = {}
+    for r in rows:
+        by_agent.setdefault(r["agent"], []).append(r)
+
+    summary = {}
+    for agent, ars in by_agent.items():
+        decisions = [r for r in ars if r["kind"] == "decision"]
+        updates = [r for r in ars if r["kind"] == "update"]
+        slope, n = linregress_slope([(d["hand"], d["prompt_tokens"]) for d in decisions])
+        early = _window_mean(decisions, 0.0, 0.1)
+        late = _window_mean(decisions, 0.9, 1.0)
+        dec_prompt = [d["prompt_tokens"] for d in decisions]
+        upd_prompt = [u["prompt_tokens"] for u in updates]
+        summary[agent] = {
+            "decisions": len(decisions),
+            "updates": len(updates),
+            "slope_tok_per_hand": slope,
+            "slope_n": n,
+            "dec_prompt_mean": (sum(dec_prompt) / len(dec_prompt)) if dec_prompt else 0,
+            "early_prompt_mean": early,
+            "late_prompt_mean": late,
+            "upd_prompt_mean": (sum(upd_prompt) / len(upd_prompt)) if upd_prompt else 0,
+            "total_tokens": sum(r["total_tokens"] for r in ars),
+            "total_cost": sum(r["cost"] for r in ars),
+        }
+    return sorted(summary), summary
+
+
+def format_token_table(rows, csv_path):
+    agents, summary = token_summary(rows)
+    lines = []
+    lines.append("\nToken cost vs. hand count (decision prompt context = input+cacheRead+cacheWrite)")
+    if not agents:
+        lines.append("  (no token data found — pi-session.jsonl / update-session.jsonl missing)")
+        return "\n".join(lines)
+    hdr = (f"{'Agent':<22} {'decs':>5} {'upds':>5} {'slope tok/hand':>14} "
+           f"{'early→late prompt':>20} {'upd prompt':>11} {'total tok':>12} {'total $':>9}")
+    lines.append(hdr)
+    lines.append("-" * len(hdr))
+    for a in agents:
+        s = summary[a]
+        slope = f"{s['slope_tok_per_hand']:+.1f}" if s["slope_tok_per_hand"] is not None else "n/a"
+        early = s["early_prompt_mean"]
+        late = s["late_prompt_mean"]
+        el = (f"{early:,.0f}→{late:,.0f}" if early is not None and late is not None else "n/a")
+        lines.append(
+            f"{a:<22} {s['decisions']:>5} {s['updates']:>5} {slope:>14} {el:>20} "
+            f"{s['upd_prompt_mean']:>11,.0f} {s['total_tokens']:>12,} {s['total_cost']:>9.2f}"
+        )
+    lines.append("-" * len(hdr))
+    lines.append("slope = least-squares growth of decision prompt context per hand "
+                 "(≈flat ⇒ structured-memory cost win; steep ⇒ context ballooning).")
+    lines.append(f"Per-call series written to: {csv_path}")
     return "\n".join(lines)
 
 
@@ -264,8 +513,12 @@ def main():
                         help="Analyze assistant reasoning mentions for KEYWORD (default: 'pattern')")
     parser.add_argument("--hand", type=int, metavar="N",
                         help="Drill into hand number N across all sessions")
+    parser.add_argument("--tokens", action="store_true",
+                        help="Per-decision token-cost growth vs hand count (+CSV series)")
     args = parser.parse_args()
 
+    global SCOPED_SESSIONS_DIR
+    SCOPED_SESSIONS_DIR = resolve_scoped_sessions_dir(args.experiment_id)
     exp = load_experiment(args.experiment_id)
     rows, ctrl_mean, treat_mean = build_comparison_table(exp)
     table_text = format_table(rows, ctrl_mean, treat_mean)
@@ -301,6 +554,13 @@ def main():
         drill_text = hand_drill(exp, args.hand)
         print(drill_text)
         extra_sections.append((f"Hand {args.hand} Context", drill_text))
+
+    if args.tokens:
+        token_rows = collect_token_rows(exp)
+        csv_path = write_token_csv(args.experiment_id, token_rows)
+        tokens_text = format_token_table(token_rows, csv_path)
+        print(tokens_text)
+        extra_sections.append(("Token Cost vs. Hand Count", tokens_text))
 
     report_path = write_report(args.experiment_id, exp, table_text, highlights, extra_sections)
     print(f"\nReport written to: {report_path}")

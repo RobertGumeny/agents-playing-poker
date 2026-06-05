@@ -1,6 +1,6 @@
 ---
 name: "eval-analysis"
-description: "Analyze experiment results across sessions. Reads eval.json for each session in an experiment, builds a comparison table (chips/hand, showdown rate, memory graph shape), and writes a markdown report. Optional --traces flag analyzes pattern-reasoning mentions in pi-session.jsonl; optional --hand N drills into a specific hand across all sessions."
+description: "Analyze experiment results across sessions. Reads eval.json for each session in an experiment, builds a comparison table (chips/hand, showdown rate, memory graph shape), and writes a markdown report. Optional --traces flag analyzes pattern-reasoning mentions in pi-session.jsonl; optional --hand N drills into a specific hand across all sessions; optional --tokens flag charts per-decision token-cost growth vs hand count (the fidelity-vs-cost frontier) and writes a per-call CSV."
 ---
 
 # Eval Analysis Workflow
@@ -38,6 +38,16 @@ python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --traces <keywor
 ```bash
 python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --hand <N>
 ```
+
+**With token-cost growth** (the fidelity-vs-**cost** frontier, metric #2 in `research.md`):
+
+```bash
+python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --tokens
+```
+
+Extracts, per agent, the per-decision prompt **context size** (`input + cacheRead + cacheWrite` of each decision call's first assistant turn) versus hand number, plus the post-hand update-session cost. Prints a per-agent summary — decision count, update count, least-squares **slope in tokens/hand**, early→late mean prompt size, mean update-prompt size, total tokens, total cost — and writes a per-call CSV to `docs/research/results/<experiment-id>-tokens.csv` (columns: `group,session,agent,kind,hand,street,prompt_tokens,total_tokens,cost`) for plotting.
+
+Reads `agents/<name>/pi-session.jsonl` (decision calls, prompt header `Hand: N`) and `agents/<name>/update-session.jsonl` (post-hand model-maintained updates, summary token `hand=N`). Agents are aggregated by name across both seats, so a seat-mirrored strategy's two appearances fold into one curve. **Interpretation:** a flat slope is the structured-memory cost win (AKG holds context roughly constant as the session grows); a steep positive slope is the context ballooning expected from `llm-fullhistory` and, more mildly, the markdown-rewrite agents. Requires the agents' `pi-session.jsonl` to be retained in the session dir — some committed test sessions strip it to save space, leaving only `memory-export.json`.
 
 Flags are combinable.
 
