@@ -29,8 +29,8 @@ villain.md — PURE INDEX. Allowed content only:
   • YAML frontmatter: slug, tags, hands_observed, last_updated
   • A ## Stats section: up to ~10 one-line bullets (e.g. "- Folds to c-bet: 5/10 → [[patterns/folds-to-cbet]]")
   • A ## Pages section: one line per page — [[slug]] — one-sentence description
-  • A ## Notable Hands section (optional): [[hands/hand-N]] links with one-line notes only
-  FORBIDDEN in villain.md: per-hand narratives, positional notes, action logs, hand histories.
+  • A ## Notable Hands section (optional): [[hands/hand-N]] links with one-line notes ONLY for hands that changed the model — a first observation of a new tendency, a behaviour that contradicts prior reads, or an unusual showdown. Do NOT add an entry for hands that are routine evidence for an already-established pattern; those belong only in the pattern page.
+  FORBIDDEN in villain.md: per-hand narratives, positional notes, action logs, hand histories, routine evidence entries.
   If villain.md body exceeds ~25 lines, you are accumulating narrative — move detail to pages.
 
 patterns/<slug>.md — Pattern detail page. Contains:

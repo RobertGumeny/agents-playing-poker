@@ -79,7 +79,7 @@ frontmatter and are connected by `[[wiki links]]`.
 - `## Stats` section: up to ~10 one-line stat bullets, each linking to its pattern page
   (e.g. `- Folds to c-bet: 5/10 → [[patterns/folds-to-cbet]]`)
 - `## Pages` section: one line per page — `[[slug]] — one-sentence description`
-- `## Notable Hands` section (optional): `[[hands/hand-N]]` links with one-line notes only
+- `## Notable Hands` section (optional): `[[hands/hand-N]]` links with one-line notes, **only for hands that changed the model** — a first observation of a new tendency, a behaviour that contradicts prior reads, or an unusual showdown. Routine evidence for already-established patterns goes only in the pattern page, not here.
 
 **Forbidden in villain.md**: per-hand narratives, positional notes, action logs, hand
 histories. If villain.md body exceeds ~25 lines, detail is accumulating in the wrong

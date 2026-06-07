@@ -1,6 +1,6 @@
 {
   "id": "phase2-wiki-vs-akg-pilot",
-  "hypothesis": "Pilot for phase2-wiki-vs-akg after tightening the llm-md-wiki memory strategy: villain.md is now a pure index (YAML frontmatter + stat lines + [[link]] directory, no per-hand narrative), pattern pages hold counts, and the decision prompt requires following links before deciding. 20-hand smoke test to measure the new token-cost slope and confirm the structural changes take effect (villain.md stays compact, md_read_page tool calls appear in pi-session.jsonl). Compare cost curve against archived pre-tightening baseline (+58.4 tok/hand decision slope, $3.44/2-session total for wiki).",
+  "hypothesis": "Pilot v3: re-run after tightening the llm-md-wiki editorial threshold for villain.md Notable Hands entries. Previously the agent added one index entry per moderately interesting hand, keeping the slope at +50.1 tok/hand (O(hands)). Fix: Notable Hands entries now only appear when a hand changes the model — a first observation of a new tendency, a behaviour contradiction, or an unusual showdown. Routine confirmations of established patterns belong only in the pattern page. Expected outcome: villain.md Notable Hands section stays sparse (3-5 entries for 20 hands vs 13 in v2), slope moves toward O(distinct patterns discovered) rather than O(hands). Compare against v2 baseline: +50.1 tok/hand slope, $2.61 per 2-session total.",
   "model": "anthropic:claude-sonnet-4-6",
   "hands_per_session": 20,
   "decision_deadline_seconds": 180,
