@@ -1,7 +1,7 @@
 import { formatCompletedHand } from "@agent-poker/pi-agent-shared";
 import { ensureRootPage, readPage, ROOT_PAGE, wikiDir } from "./pages.js";
 import { runWikiUpdate } from "./update.js";
-const INDEX_HEADER = `Your opponent wiki index (${ROOT_PAGE}.md). Call md_list_pages and md_read_page to follow [[links]] to deeper pages before deciding:`;
+const INDEX_HEADER = `Your opponent wiki index (${ROOT_PAGE}.md) — index only; pattern details are in linked pages. Use md_read_page to follow [[links]] before deciding:`;
 const NO_READS_SECTION = `Your opponent wiki index (${ROOT_PAGE}.md): no reads yet. md_list_pages and md_read_page are available once pages exist.`;
 export class MarkdownWikiMemoryPolicy {
     serverMemoryDir;

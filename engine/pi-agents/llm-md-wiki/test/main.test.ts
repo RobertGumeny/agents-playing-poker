@@ -207,19 +207,23 @@ describe("llm-md-wiki package wiring", () => {
     expect(decoded[1]).toMatchObject({ type: "action", in_reply_to: "msg-3", payload: { action: "call", amount: 2 } });
     expect(decoded[2]).toMatchObject({ type: "action", in_reply_to: "msg-6", payload: { action: "check" } });
 
-    // The post-hand update wrote the root page and a hand page.
+    // The post-hand update wrote the root page (index only) and a hand page.
     const root = await readPage(wikiDir(sessionDir), ROOT_PAGE);
-    expect(root.content).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
+    expect(root.content).toContain("[[hands/hand-1]]");
     expect(await listPages(wikiDir(sessionDir))).toContain("hands/hand-1");
+
+    // The hand summary lives in the hand page, not in villain.md.
+    const handPage = await readPage(wikiDir(sessionDir), "hands/hand-1");
+    expect(handPage.content).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
 
     // Update transcript is kept separate from the decision transcript.
     const updateLog = await readFile(path.join(sessionDir, "update-session.jsonl"), "utf8");
     expect(updateLog.trim().split("\n").filter((l) => l.length > 0).length).toBeGreaterThanOrEqual(1);
 
-    // The second decision prompt injects the updated root index.
+    // The second decision prompt injects the updated root index (which links to hand-1).
     const sessionLog = await readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8");
     const lines = sessionLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(lines).toHaveLength(2);
-    expect(String(lines[1].prompt)).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
+    expect(String(lines[1].prompt)).toContain("[[hands/hand-1]]");
   });
 });

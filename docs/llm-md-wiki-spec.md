@@ -68,15 +68,32 @@ decision engine with a `sessionFactory` (the way `llm-akg-durable` does in
 
 ## Stored memory
 
-A directory of markdown pages under the server-provided `memory_dir`:
+A directory of markdown pages under the server-provided `memory_dir`. All pages use YAML
+frontmatter and are connected by `[[wiki links]]`.
 
-- `memory_dir/wiki/villain.md` — the **root page**: the index, the equivalent of the AKG
-  `opponent/villain` node and the agent's starting point. A short summary plus `[[links]]`
-  to deeper pages.
-- `memory_dir/wiki/patterns/<slug>.md` — one page per tendency
-  (e.g. `[[patterns/folds-to-cbet]]`), the equivalent of AKG pattern nodes.
-- `memory_dir/wiki/hands/hand-<n>.md` — optional pages for notable hands, linked from the
-  patterns they support.
+### Page roles
+
+**`memory_dir/wiki/villain.md`** — **pure index**. Allowed content only:
+
+- YAML frontmatter: `slug`, `tags`, `hands_observed`, `last_updated`
+- `## Stats` section: up to ~10 one-line stat bullets, each linking to its pattern page
+  (e.g. `- Folds to c-bet: 5/10 → [[patterns/folds-to-cbet]]`)
+- `## Pages` section: one line per page — `[[slug]] — one-sentence description`
+- `## Notable Hands` section (optional): `[[hands/hand-N]]` links with one-line notes only
+
+**Forbidden in villain.md**: per-hand narratives, positional notes, action logs, hand
+histories. If villain.md body exceeds ~25 lines, detail is accumulating in the wrong
+place — it belongs in pattern or hand pages. The villain.md root is the AKG
+`opponent/villain` equivalent and must stay comparably compact.
+
+**`memory_dir/wiki/patterns/<slug>.md`** — one page per opponent tendency, equivalent to
+AKG pattern nodes. Frontmatter: `slug`, `tags`, `sample_size`, `last_updated`. Body:
+bold count line (`**Count: N/M**`), concise evidence notes, links to supporting hand
+pages, cross-links to related patterns.
+
+**`memory_dir/wiki/hands/hand-<n>.md`** — optional per-notable-hand page. Frontmatter:
+`slug`, `tags: [hand]`, `hand: N`. Body: full action summary and what it revealed, links
+back to the pattern pages it supports.
 
 Page names and links are the **model's** to create and keep tidy — including letting them
 rot. Only the root page name (`villain.md`) is fixed, as the guaranteed entry point;
@@ -139,20 +156,21 @@ prompt does not preload the whole wiki — the same on-demand pattern as
 The decision prompt tells the model:
 
 - it is a heads-up no-limit Texas Hold'em decision engine
-- its memory is a linked markdown wiki; `villain.md` is the index
-- it may call `md_list_pages` / `md_read_page` and follow `[[links]]` before deciding
-- the final answer must be exactly one legal action from the server-provided
-  `legal_actions`, as JSON: `{"action": string, "amount"?: number}`
+- `villain.md` is an index only — real pattern data lives in linked pages
+- it **must** read relevant pattern pages via `md_read_page` before deciding; the
+  villain.md one-liners are not sufficient on their own
+- the final answer must be exactly one legal action, as JSON: `{"action": string, "amount"?: number}`
 - no commentary, markdown, or extra keys in the final JSON
 
 The shared parser (`shared/src/action.ts`) already recovers the action even if the model
 writes some reasoning before the JSON, so a leak costs nothing — keep the prompt strict
 anyway.
 
-The update prompt (in `src/update.ts`) asks the model to: keep the root summary current,
-create/update pattern pages with their `[[links]]`, keep the durable facts, reconcile
-contradictions in favor of the newest evidence, and avoid duplicate pages for the same
-idea.
+The update prompt (in `src/update.ts`) enforces strict page roles: villain.md is a pure
+index (stats + page directory, no narratives); pattern pages hold counts and evidence;
+hand pages hold per-hand detail. The model follows this workflow each hand: read pages to
+update, update pattern counts, create hand pages as needed, refresh villain.md index
+entries only, write all changed pages.
 
 ## Artifacts
 
@@ -199,9 +217,13 @@ which is exactly the trade this matchup is meant to expose.
 
 - The model, not code, updates the pages and links.
 - The update runs in a fresh session seeing only the wiki and the new hand.
+- **villain.md is a pure index** — per-hand narratives, positional notes, and action logs
+  are forbidden there; they belong in `hands/` pages linked from villain.md.
+- All pages use YAML frontmatter (`slug`, `tags`, and page-type-specific fields).
 - Reading is on-demand and tool-driven; only the root page is injected, deeper pages are
-  fetched through read-only tools.
-- Counts are tallied in prose, never computed in code and injected.
+  fetched through read-only tools. The decision prompt must instruct the model to follow
+  links — not treat the villain.md summary as sufficient.
+- Counts are tallied in prose in pattern pages, never computed in code and injected.
 - The runtime counts but does not auto-repair broken/duplicate/orphan links.
 - The model is held constant across decisions and updates.
 - `memory_dir` comes from the server and scopes the wiki and logs.

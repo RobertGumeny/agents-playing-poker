@@ -133,8 +133,12 @@ describe("runWikiUpdate scripted (fake) mode", () => {
     }
 
     const root = await readPage(wikiDir(dir), ROOT_PAGE);
-    expect(root.content).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
     expect(root.content).toContain("[[hands/hand-1]]");
+    expect(root.content).not.toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
+
+    const handPage = await readPage(wikiDir(dir), "hands/hand-1");
+    expect(handPage.content).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
+
     expect(await listPages(wikiDir(dir))).toEqual(["hands/hand-1", "villain"]);
 
     const updateLog = await readFile(path.join(dir, "update-session.jsonl"), "utf8");

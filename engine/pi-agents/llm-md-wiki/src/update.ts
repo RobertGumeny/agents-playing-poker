@@ -20,14 +20,39 @@ import { createReadTools, createWriteTool } from "./tools.js";
 const STDERR_LOG = "stderr.log";
 const UPDATE_LOG = "update-session.jsonl";
 
-export const WIKI_UPDATE_SYSTEM_PROMPT = [
-  "You maintain a small wiki of linked markdown pages modeling one opponent in heads-up no-limit Texas Hold'em.",
-  "Pages are connected by [[wiki links]]. The page \"villain\" is the root index.",
-  "You are given the current page list, the current root page, and a summary of the hand that just finished. Use md_read_page to pull up any page you intend to change.",
-  "Update the wiki to fold in what this hand revealed: keep the villain root summary current, create or update the relevant pages under patterns/, optionally add a page under hands/, and keep the [[links]] between pages honest.",
-  "You count tendencies yourself in prose (for example \"folds to flop c-bet 4/7\"); no tool computes them, so keep your own counts current. Avoid duplicate pages for the same idea, and reconcile contradictions in favor of the newest evidence.",
-  "Write each changed page with md_write_page. Do not delete pages. When finished, reply with a one-line summary of what you changed.",
-].join("\n");
+export const WIKI_UPDATE_SYSTEM_PROMPT = `You maintain a small wiki of linked markdown pages modeling one opponent in heads-up no-limit Texas Hold'em.
+Pages use YAML frontmatter and are connected by [[wiki links]].
+
+PAGE ROLES — follow these exactly:
+
+villain.md — PURE INDEX. Allowed content only:
+  • YAML frontmatter: slug, tags, hands_observed, last_updated
+  • A ## Stats section: up to ~10 one-line bullets (e.g. "- Folds to c-bet: 5/10 → [[patterns/folds-to-cbet]]")
+  • A ## Pages section: one line per page — [[slug]] — one-sentence description
+  • A ## Notable Hands section (optional): [[hands/hand-N]] links with one-line notes only
+  FORBIDDEN in villain.md: per-hand narratives, positional notes, action logs, hand histories.
+  If villain.md body exceeds ~25 lines, you are accumulating narrative — move detail to pages.
+
+patterns/<slug>.md — Pattern detail page. Contains:
+  • YAML frontmatter: slug, tags (e.g. [pattern, flop, c-bet]), sample_size, last_updated
+  • Count line: **Count: N/M** (keep this accurate each hand)
+  • Evidence: concise notes per observed instance; link to [[hands/hand-N]] for detail
+  • Cross-links to related patterns
+
+hands/hand-N.md — One page per notable hand. Contains:
+  • YAML frontmatter: slug, tags: [hand], hand: N
+  • Full action summary and what it revealed
+  • Links back to the pattern pages it supports
+
+WORKFLOW each hand:
+1. Read any pages you intend to update (md_read_page).
+2. Update pattern page counts and evidence. Create the pattern page if it doesn't exist.
+3. Create hands/hand-N.md if the hand is notable evidence for a pattern.
+4. Update villain.md: refresh the ## Stats one-liners and ## Pages directory. Do NOT add a per-hand entry.
+5. Write all changed pages with md_write_page.
+6. Reply with a one-line summary of what you changed.
+
+Keep [[links]] honest. Reconcile contradictions in favor of newest evidence. Do not delete pages.`;
 
 type PiSession = {
   prompt(text: string): Promise<void>;
@@ -108,12 +133,19 @@ export async function runWikiUpdate(options: WikiUpdateOptions): Promise<void> {
 
 async function applyScriptedUpdate(dir: string, options: WikiUpdateOptions): Promise<void> {
   const root = await readPage(dir, ROOT_PAGE);
-  const handPage = `hands/hand-${options.handNumber}`;
-  const section = `## Hand ${options.handNumber}\n${options.handSummary}\n[[${handPage}]]`;
+  const handSlug = `hands/hand-${options.handNumber}`;
   const base = (root.content ?? "").trim();
-  const updatedRoot = base.length > 0 ? `${base}\n\n${section}` : `# villain\n\n${section}`;
+  const handsLine = `- [[${handSlug}]] — hand ${options.handNumber}`;
+  let updatedRoot: string;
+  if (base.includes("## Notable Hands")) {
+    updatedRoot = base.replace("## Notable Hands", `## Notable Hands\n${handsLine}`);
+  } else {
+    updatedRoot = base.length > 0
+      ? `${base}\n\n## Notable Hands\n${handsLine}`
+      : `---\nslug: villain\ntags: [index, opponent-model]\nhands_observed: ${options.handNumber}\nlast_updated: hand-${options.handNumber}\n---\n# Villain\n\n## Notable Hands\n${handsLine}`;
+  }
   await writePage(dir, ROOT_PAGE, updatedRoot);
-  await writePage(dir, handPage, `# Hand ${options.handNumber}\n\n${options.handSummary}`);
+  await writePage(dir, handSlug, `---\nslug: ${handSlug}\ntags: [hand]\nhand: ${options.handNumber}\n---\n# Hand ${options.handNumber}\n\n${options.handSummary}`);
 }
 
 async function promptOnce(session: PiSession, prompt: string): Promise<string> {
