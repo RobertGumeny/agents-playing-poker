@@ -171,10 +171,9 @@ Sent once per hand after resolution.
 
 Notes:
 - `action_history` is the final server-authoritative completed action log for the hand.
-- `showdown_reached` distinguishes true showdowns from non-showdown pots where the winner's cards may still be revealed under project policy or `perfect-info` mode.
-- In `showdown-only` information mode, non-revealed opponent cards are omitted unless shown at showdown.
-- If no showdown occurs, `showdown` contains only revealed winner cards.
-- In `perfect-info`, both players' hole cards are always included.
+- `showdown_reached` distinguishes true showdowns from non-showdown pots.
+- In `showdown-only` mode: `showdown` contains all players' cards when a showdown occurs; it is **empty** when no showdown occurs (the winner's hole cards are not revealed).
+- In `perfect-info` mode: `showdown` always contains all players' hole cards regardless of whether a showdown occurred.
 - This message gives memory-bearing agents enough server-authoritative information to build later prior-hand summaries without inferring hidden cards or missing the final action.
 
 ### `session_end`

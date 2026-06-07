@@ -10,30 +10,21 @@ import (
 	"strings"
 )
 
-type Direction string
-
-const (
-	DirectionIncrease Direction = "increase"
-	DirectionDecrease Direction = "decrease"
-)
-
 type Definition struct {
-	ID                      string               `json:"id"`
-	Hypothesis              string               `json:"hypothesis,omitempty"`
-	Model                   string               `json:"model"`
-	HandsPerSession         int                  `json:"hands_per_session"`
-	DecisionDeadlineSeconds int                  `json:"decision_deadline_seconds,omitempty"`
-	Control                 Group                `json:"control"`
-	Treatment               Group                `json:"treatment"`
-	ExpectedDirection       map[string]Direction `json:"expected_direction,omitempty"`
+	ID                      string `json:"id"`
+	Hypothesis              string `json:"hypothesis,omitempty"`
+	Model                   string `json:"model"`
+	HandsPerSession         int    `json:"hands_per_session"`
+	DecisionDeadlineSeconds int    `json:"decision_deadline_seconds,omitempty"`
+	Groups                  []Group `json:"groups"`
 }
 
 type Group struct {
 	SessionBase   string   `json:"session_base,omitempty"`
 	SessionsCount int      `json:"sessions_count,omitempty"`
 	Sessions      []string `json:"sessions,omitempty"`
-	Agent         string   `json:"agent"`
-	Opponent      string   `json:"opponent,omitempty"`
+	Seat0         string   `json:"seat0"`
+	Seat1         string   `json:"seat1,omitempty"`
 	Seeds         []int64  `json:"seeds,omitempty"`
 }
 
@@ -57,8 +48,8 @@ type PlannedRun struct {
 	SessionID       string
 	SessionDir      string
 	Seed            int64
-	Agent           string
-	Opponent        string
+	Seat0           string
+	Seat1           string
 	ExplicitSession bool // true when session was named explicitly rather than generated from session_base
 }
 
@@ -103,20 +94,12 @@ func (d Definition) Validate() error {
 	if d.DecisionDeadlineSeconds < 0 {
 		return fmt.Errorf("validate experiment definition: decision_deadline_seconds must be >= 0")
 	}
-	if err := d.Control.validate("control"); err != nil {
-		return err
+	if len(d.Groups) == 0 {
+		return fmt.Errorf("validate experiment definition: at least one group is required")
 	}
-	if err := d.Treatment.validate("treatment"); err != nil {
-		return err
-	}
-	for metric, direction := range d.ExpectedDirection {
-		if strings.TrimSpace(metric) == "" {
-			return fmt.Errorf("validate experiment definition: expected_direction metric name is required")
-		}
-		switch direction {
-		case DirectionIncrease, DirectionDecrease:
-		default:
-			return fmt.Errorf("validate experiment definition: expected_direction[%q] must be %q or %q", metric, DirectionIncrease, DirectionDecrease)
+	for i, g := range d.Groups {
+		if err := g.validate(fmt.Sprintf("groups[%d]", i)); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -133,28 +116,23 @@ func (d Definition) Plan(sessionsRootDir string) (Plan, error) {
 	}
 
 	seen := make(map[string]PlannedRun)
-	for _, group := range []struct {
-		label string
-		spec  Group
-	}{
-		{label: "control", spec: d.Control},
-		{label: "treatment", spec: d.Treatment},
-	} {
-		for _, planned := range group.spec.PlannedSessions(group.label) {
+	for i, g := range d.Groups {
+		label := fmt.Sprintf("group-%d", i)
+		for _, planned := range g.PlannedSessions(label) {
 			run := PlannedRun{
-				GroupLabel:      group.label,
+				GroupLabel:      label,
 				SessionID:       planned.SessionID,
 				SessionDir:      filepath.Join(rootDir, planned.SessionID),
 				Seed:            planned.Seed,
-				Agent:           group.spec.Agent,
-				Opponent:        group.spec.Opponent,
-				ExplicitSession: len(group.spec.Sessions) > 0,
+				Seat0:           g.Seat0,
+				Seat1:           g.Seat1,
+				ExplicitSession: len(g.Sessions) > 0,
 			}
 			if prior, ok := seen[run.SessionID]; ok {
 				if prior == run {
 					return Plan{}, fmt.Errorf("plan experiment %q: duplicate planned session %q", d.ID, run.SessionID)
 				}
-				return Plan{}, fmt.Errorf("plan experiment %q: conflicting planned session %q (%s seed=%d agent=%q opponent=%q vs %s seed=%d agent=%q opponent=%q)", d.ID, run.SessionID, prior.GroupLabel, prior.Seed, prior.Agent, prior.Opponent, run.GroupLabel, run.Seed, run.Agent, run.Opponent)
+				return Plan{}, fmt.Errorf("plan experiment %q: conflicting planned session %q (%s seed=%d seat0=%q seat1=%q vs %s seed=%d seat0=%q seat1=%q)", d.ID, run.SessionID, prior.GroupLabel, prior.Seed, prior.Seat0, prior.Seat1, run.GroupLabel, run.Seed, run.Seat0, run.Seat1)
 			}
 			seen[run.SessionID] = run
 			plan.PlannedSessions = append(plan.PlannedSessions, run)
@@ -175,8 +153,8 @@ func (g Group) PlannedSessions(label string) []PlannedSession {
 }
 
 func (g Group) validate(label string) error {
-	if strings.TrimSpace(g.Agent) == "" {
-		return fmt.Errorf("validate experiment definition: %s.agent is required", label)
+	if strings.TrimSpace(g.Seat0) == "" {
+		return fmt.Errorf("validate experiment definition: %s.seat0 is required", label)
 	}
 
 	hasSessionBaseMode := strings.TrimSpace(g.SessionBase) != "" || g.SessionsCount != 0

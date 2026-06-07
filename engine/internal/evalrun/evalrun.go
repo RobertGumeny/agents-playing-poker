@@ -51,10 +51,7 @@ type GroupCoverage struct {
 }
 
 func (c PlanCoverage) GroupSummaries() map[string]GroupCoverage {
-	summaries := map[string]GroupCoverage{
-		"control":   {},
-		"treatment": {},
-	}
+	summaries := make(map[string]GroupCoverage)
 	for _, session := range c.Sessions {
 		summary := summaries[session.Planned.GroupLabel]
 		summary.Planned++
@@ -139,11 +136,11 @@ func InspectExistingSession(planned experiment.PlannedRun, handsPerSession int) 
 	if !manifest.Matches[0].Completed {
 		return SessionInspection{Status: "incomplete", Reason: "match_incomplete"}, nil
 	}
-	if !MatchHasSeat(manifest.Matches[0], planned.Agent) {
-		return SessionInspection{Status: "incomplete", Reason: "agent_missing"}, nil
+	if !MatchHasSeat(manifest.Matches[0], planned.Seat0) {
+		return SessionInspection{Status: "incomplete", Reason: "seat0_missing"}, nil
 	}
-	if strings.TrimSpace(planned.Opponent) != "" && !MatchHasSeat(manifest.Matches[0], planned.Opponent) {
-		return SessionInspection{Status: "incomplete", Reason: "opponent_missing"}, nil
+	if strings.TrimSpace(planned.Seat1) != "" && !MatchHasSeat(manifest.Matches[0], planned.Seat1) {
+		return SessionInspection{Status: "incomplete", Reason: "seat1_missing"}, nil
 	}
 
 	hands, err := sessionlog.ReadHands(planned.SessionDir)

@@ -397,14 +397,7 @@ func buildHandEndPayload(infoRealism string, hand *rules.HandState, recipientSea
 			}
 		}
 	} else {
-		for _, winningSeat := range hand.Result.WinningSeats {
-			player := hand.Players[winningSeat]
-			showdown[winningSeat] = wire.ShowdownSeat{HoleCards: []string{player.HoleCards[0].String(), player.HoleCards[1].String()}}
-		}
-		if infoRealism == "perfect-info" {
-			player := hand.Players[recipientSeat]
-			showdown[player.Seat] = wire.ShowdownSeat{HoleCards: []string{player.HoleCards[0].String(), player.HoleCards[1].String()}}
-		}
+		// showdown-only: non-showdown hands reveal no opponent hole cards
 	}
 	return wire.HandEndPayload{
 		HandNumber:      hand.HandNumber,

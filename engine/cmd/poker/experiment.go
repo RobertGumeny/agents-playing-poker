@@ -188,17 +188,19 @@ func runExperimentNew(args []string, defaultExperimentsDir string, stdout, stder
 		Hypothesis:      "TODO: describe what you expect to happen and why.",
 		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 25,
-		Control: experiment.Group{
-			SessionBase:   id + "-control",
-			SessionsCount: 5,
-			Agent:         "llm-stateless",
-			Opponent:      "heuristic",
-		},
-		Treatment: experiment.Group{
-			SessionBase:   id + "-treatment",
-			SessionsCount: 5,
-			Agent:         "llm-akg-durable",
-			Opponent:      "heuristic",
+		Groups: []experiment.Group{
+			{
+				SessionBase:   id + "-group-0",
+				SessionsCount: 2,
+				Seat0:         "llm-akg-durable",
+				Seat1:         "heuristic",
+			},
+			{
+				SessionBase:   id + "-group-1",
+				SessionsCount: 2,
+				Seat0:         "heuristic",
+				Seat1:         "llm-akg-durable",
+			},
 		},
 	}
 
@@ -283,8 +285,8 @@ func execRun(ef experimentFlags, model, thinkingLevel string, decisionDeadline t
 			_, _ = fmt.Fprintf(stdout, "skip session_id=%s reason=present\n", session.Planned.SessionID)
 			continue
 		}
-		if strings.TrimSpace(session.Planned.Opponent) == "" {
-			return fmt.Errorf("session %q cannot run without opponent metadata in experiment definition", session.Planned.SessionID)
+		if strings.TrimSpace(session.Planned.Seat1) == "" {
+			return fmt.Errorf("session %q cannot run without seat1 metadata in experiment definition", session.Planned.SessionID)
 		}
 		toRun = append(toRun, session)
 	}
@@ -320,8 +322,8 @@ func execRun(ef experimentFlags, model, thinkingLevel string, decisionDeadline t
 			defer wg.Done()
 			pw := &handProgressWriter{sessionID: s.Planned.SessionID, disp: disp}
 			runErr := executor.Execute(context.Background(), evalrun.ExecuteConfig{
-				Agent0:           s.Planned.Agent,
-				Agent1:           s.Planned.Opponent,
+				Agent0:           s.Planned.Seat0,
+				Agent1:           s.Planned.Seat1,
 				Hands:            coverage.Plan.HandsPerSession,
 				Seed:             s.Planned.Seed,
 				SessionID:        s.Planned.SessionID,
@@ -420,10 +422,24 @@ func collectMissing(coverage evalrun.PlanCoverage, stdout io.Writer) error {
 
 func printCoverage(stdout io.Writer, coverage evalrun.PlanCoverage) {
 	_, _ = fmt.Fprintf(stdout, "experiment=%s planned=%d present=%d missing=%d incomplete=%d\n", coverage.Plan.ExperimentID, len(coverage.Sessions), coverage.Present, coverage.Missing, coverage.Incomplete)
-	for _, label := range []string{"control", "treatment"} {
-		summary := coverage.GroupSummaries()[label]
+	summaries := coverage.GroupSummaries()
+	labels := groupLabels(coverage)
+	for _, label := range labels {
+		summary := summaries[label]
 		_, _ = fmt.Fprintf(stdout, "group_summary group=%s planned=%d present=%d missing=%d incomplete=%d\n", label, summary.Planned, summary.Present, summary.Missing, summary.Incomplete)
 	}
+}
+
+func groupLabels(coverage evalrun.PlanCoverage) []string {
+	seen := make(map[string]struct{})
+	var labels []string
+	for _, s := range coverage.Sessions {
+		if _, ok := seen[s.Planned.GroupLabel]; !ok {
+			seen[s.Planned.GroupLabel] = struct{}{}
+			labels = append(labels, s.Planned.GroupLabel)
+		}
+	}
+	return labels
 }
 
 func nextStep(coverage evalrun.PlanCoverage) string {

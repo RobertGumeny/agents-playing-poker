@@ -13,8 +13,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/RobertGumeny/agent-poker/internal/deck"
 	"github.com/RobertGumeny/agent-poker/internal/heuristicagent"
 	"github.com/RobertGumeny/agent-poker/internal/randomagent"
+	"github.com/RobertGumeny/agent-poker/internal/rules"
 	"github.com/RobertGumeny/agent-poker/internal/sessionlog"
 	"github.com/RobertGumeny/agent-poker/internal/wire"
 	akg "github.com/RobertGumeny/akg/sdk/akg-go"
@@ -458,6 +460,79 @@ func readLines(t *testing.T, path string) []string {
 		return nil
 	}
 	return strings.Split(trimmed, "\n")
+}
+
+func TestBuildHandEndPayloadShowdownOnlyNonShowdown(t *testing.T) {
+	as := mustParseCard("As")
+	kh := mustParseCard("Kh")
+	td := mustParseCard("Td")
+	nine := mustParseCard("9c")
+
+	hand := &rules.HandState{
+		Players: []rules.PlayerState{
+			{Seat: 0, HoleCards: [2]deck.Card{as, kh}},
+			{Seat: 1, HoleCards: [2]deck.Card{td, nine}},
+		},
+		Result: &rules.HandResult{
+			Showdown:     false,
+			WinningSeats: []int{0},
+		},
+	}
+
+	tests := []struct {
+		name         string
+		infoRealism  string
+		wantShowdown int // expected len(showdown)
+	}{
+		{"showdown-only non-showdown reveals nothing", "showdown-only", 0},
+		{"perfect-info non-showdown reveals winner", "perfect-info", 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload := buildHandEndPayload(tt.infoRealism, hand, 1)
+			if got := len(payload.Showdown); got != tt.wantShowdown {
+				t.Errorf("len(showdown) = %d, want %d", got, tt.wantShowdown)
+			}
+		})
+	}
+}
+
+func TestBuildHandEndPayloadShowdownOnlyAtShowdown(t *testing.T) {
+	as := mustParseCard("As")
+	kh := mustParseCard("Kh")
+	td := mustParseCard("Td")
+	nine := mustParseCard("9c")
+
+	hand := &rules.HandState{
+		Players: []rules.PlayerState{
+			{Seat: 0, HoleCards: [2]deck.Card{as, kh}},
+			{Seat: 1, HoleCards: [2]deck.Card{td, nine}},
+		},
+		Result: &rules.HandResult{
+			Showdown:     true,
+			WinningSeats: []int{0},
+			ShowdownHands: []rules.ShowdownHand{
+				{Seat: 0, HoleCards: [2]deck.Card{as, kh}, Label: "pair of aces"},
+				{Seat: 1, HoleCards: [2]deck.Card{td, nine}, Label: "ten-high"},
+			},
+		},
+	}
+
+	payload := buildHandEndPayload("showdown-only", hand, 0)
+	if got := len(payload.Showdown); got != 2 {
+		t.Fatalf("len(showdown) = %d, want 2", got)
+	}
+	if payload.Showdown[0].Rank != "pair of aces" {
+		t.Errorf("seat0 rank = %q, want pair of aces", payload.Showdown[0].Rank)
+	}
+}
+
+func mustParseCard(s string) deck.Card {
+	c, err := deck.ParseCard(s)
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
 func TestBuildAgentDirKeys(t *testing.T) {

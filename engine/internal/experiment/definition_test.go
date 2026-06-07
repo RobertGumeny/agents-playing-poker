@@ -9,50 +9,48 @@ import (
 
 func TestParseValidSessionBaseDefinition(t *testing.T) {
 	def, err := Parse([]byte(`{
-		"id": "test-2b-retrieval-throttle",
-		"hypothesis": "Throttle retrieval to once per hand.",
+		"id": "phase2-mdsingle-vs-akg",
+		"hypothesis": "AKG vs md-single on the fidelity-vs-cost frontier.",
 		"model": "anthropic:claude-sonnet-4-6",
-		"hands_per_session": 25,
-		"control": {
-			"session_base": "akg-durable-vs-stateless-test",
-			"sessions_count": 3,
-			"agent": "llm-akg-durable/0.1.0",
-			"opponent": "llm-stateless"
-		},
-		"treatment": {
-			"session_base": "akg-durable-throttle-test",
-			"sessions_count": 3,
-			"agent": "llm-akg-durable@exp-0.1.3-throttle",
-			"opponent": "llm-stateless",
-			"seeds": [17, 23, 42]
-		},
-		"expected_direction": {
-			"chips_per_hand": "increase",
-			"session_duration_s": "decrease"
-		}
+		"hands_per_session": 60,
+		"decision_deadline_seconds": 180,
+		"groups": [
+			{
+				"session_base": "akg-vs-mdsingle",
+				"sessions_count": 2,
+				"seat0": "llm-akg-durable",
+				"seat1": "llm-md-single",
+				"seeds": [1, 2]
+			},
+			{
+				"session_base": "mdsingle-vs-akg",
+				"sessions_count": 2,
+				"seat0": "llm-md-single",
+				"seat1": "llm-akg-durable",
+				"seeds": [1, 2]
+			}
+		]
 	}`))
 	if err != nil {
 		t.Fatalf("Parse() error = %v", err)
 	}
 
-	control := def.Control.PlannedSessions("control")
-	wantControl := []PlannedSession{
-		{GroupLabel: "control", SessionID: "akg-durable-vs-stateless-test-1", Seed: 1},
-		{GroupLabel: "control", SessionID: "akg-durable-vs-stateless-test-2", Seed: 2},
-		{GroupLabel: "control", SessionID: "akg-durable-vs-stateless-test-3", Seed: 3},
+	got0 := def.Groups[0].PlannedSessions("group-0")
+	want0 := []PlannedSession{
+		{GroupLabel: "group-0", SessionID: "akg-vs-mdsingle-1", Seed: 1},
+		{GroupLabel: "group-0", SessionID: "akg-vs-mdsingle-2", Seed: 2},
 	}
-	if !reflect.DeepEqual(control, wantControl) {
-		t.Fatalf("control planned sessions = %#v, want %#v", control, wantControl)
+	if !reflect.DeepEqual(got0, want0) {
+		t.Fatalf("group-0 planned sessions = %#v, want %#v", got0, want0)
 	}
 
-	treatment := def.Treatment.PlannedSessions("treatment")
-	wantTreatment := []PlannedSession{
-		{GroupLabel: "treatment", SessionID: "akg-durable-throttle-test-1", Seed: 17},
-		{GroupLabel: "treatment", SessionID: "akg-durable-throttle-test-2", Seed: 23},
-		{GroupLabel: "treatment", SessionID: "akg-durable-throttle-test-3", Seed: 42},
+	got1 := def.Groups[1].PlannedSessions("group-1")
+	want1 := []PlannedSession{
+		{GroupLabel: "group-1", SessionID: "mdsingle-vs-akg-1", Seed: 1},
+		{GroupLabel: "group-1", SessionID: "mdsingle-vs-akg-2", Seed: 2},
 	}
-	if !reflect.DeepEqual(treatment, wantTreatment) {
-		t.Fatalf("treatment planned sessions = %#v, want %#v", treatment, wantTreatment)
+	if !reflect.DeepEqual(got1, want1) {
+		t.Fatalf("group-1 planned sessions = %#v, want %#v", got1, want1)
 	}
 }
 
@@ -61,27 +59,29 @@ func TestParseValidExplicitSessionDefinition(t *testing.T) {
 		"id": "retro-benchmark",
 		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 200,
-		"control": {
-			"sessions": ["fullhistory-vs-stateless-a", "fullhistory-vs-stateless-b"],
-			"agent": "llm-fullhistory",
-			"seeds": [1, 1]
-		},
-		"treatment": {
-			"sessions": ["akg-durable-vs-fullhistory-a", "akg-durable-vs-fullhistory-b"],
-			"agent": "llm-akg-durable"
-		}
+		"groups": [
+			{
+				"sessions": ["fullhistory-vs-stateless-a", "fullhistory-vs-stateless-b"],
+				"seat0": "llm-fullhistory",
+				"seeds": [1, 1]
+			},
+			{
+				"sessions": ["akg-durable-vs-fullhistory-a", "akg-durable-vs-fullhistory-b"],
+				"seat0": "llm-akg-durable"
+			}
+		]
 	}`))
 	if err != nil {
 		t.Fatalf("Parse() error = %v", err)
 	}
 
-	got := def.Treatment.PlannedSessions("treatment")
+	got := def.Groups[1].PlannedSessions("group-1")
 	want := []PlannedSession{
-		{GroupLabel: "treatment", SessionID: "akg-durable-vs-fullhistory-a", Seed: 1},
-		{GroupLabel: "treatment", SessionID: "akg-durable-vs-fullhistory-b", Seed: 2},
+		{GroupLabel: "group-1", SessionID: "akg-durable-vs-fullhistory-a", Seed: 1},
+		{GroupLabel: "group-1", SessionID: "akg-durable-vs-fullhistory-b", Seed: 2},
 	}
 	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("treatment planned sessions = %#v, want %#v", got, want)
+		t.Fatalf("group-1 planned sessions = %#v, want %#v", got, want)
 	}
 }
 
@@ -90,18 +90,20 @@ func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
 		"id": "run-benchmark",
 		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
-		"control": {
-			"session_base": "control-group",
-			"sessions_count": 2,
-			"agent": "llm-stateless",
-			"opponent": "heuristic"
-		},
-		"treatment": {
-			"sessions": ["treatment-a", "treatment-b"],
-			"agent": "llm-akg-recent",
-			"opponent": "heuristic",
-			"seeds": [17, 23]
-		}
+		"groups": [
+			{
+				"session_base": "control-group",
+				"sessions_count": 2,
+				"seat0": "llm-stateless",
+				"seat1": "heuristic"
+			},
+			{
+				"sessions": ["treatment-a", "treatment-b"],
+				"seat0": "llm-akg-recent",
+				"seat1": "heuristic",
+				"seeds": [17, 23]
+			}
+		]
 	}`))
 	if err != nil {
 		t.Fatalf("Parse() error = %v", err)
@@ -113,10 +115,10 @@ func TestDefinitionPlanExpandsSessionDirsDeterministically(t *testing.T) {
 	}
 
 	want := []PlannedRun{
-		{GroupLabel: "control", SessionID: "control-group-1", SessionDir: filepath.Join("sessions", "control-group-1"), Seed: 1, Agent: "llm-stateless", Opponent: "heuristic", ExplicitSession: false},
-		{GroupLabel: "control", SessionID: "control-group-2", SessionDir: filepath.Join("sessions", "control-group-2"), Seed: 2, Agent: "llm-stateless", Opponent: "heuristic", ExplicitSession: false},
-		{GroupLabel: "treatment", SessionID: "treatment-a", SessionDir: filepath.Join("sessions", "treatment-a"), Seed: 17, Agent: "llm-akg-recent", Opponent: "heuristic", ExplicitSession: true},
-		{GroupLabel: "treatment", SessionID: "treatment-b", SessionDir: filepath.Join("sessions", "treatment-b"), Seed: 23, Agent: "llm-akg-recent", Opponent: "heuristic", ExplicitSession: true},
+		{GroupLabel: "group-0", SessionID: "control-group-1", SessionDir: filepath.Join("sessions", "control-group-1"), Seed: 1, Seat0: "llm-stateless", Seat1: "heuristic", ExplicitSession: false},
+		{GroupLabel: "group-0", SessionID: "control-group-2", SessionDir: filepath.Join("sessions", "control-group-2"), Seed: 2, Seat0: "llm-stateless", Seat1: "heuristic", ExplicitSession: false},
+		{GroupLabel: "group-1", SessionID: "treatment-a", SessionDir: filepath.Join("sessions", "treatment-a"), Seed: 17, Seat0: "llm-akg-recent", Seat1: "heuristic", ExplicitSession: true},
+		{GroupLabel: "group-1", SessionID: "treatment-b", SessionDir: filepath.Join("sessions", "treatment-b"), Seed: 23, Seat0: "llm-akg-recent", Seat1: "heuristic", ExplicitSession: true},
 	}
 	if !reflect.DeepEqual(plan.PlannedSessions, want) {
 		t.Fatalf("plan.PlannedSessions = %#v, want %#v", plan.PlannedSessions, want)
@@ -128,18 +130,20 @@ func TestDefinitionPlanRejectsConflictingSessionIDsAcrossGroups(t *testing.T) {
 		"id": "conflict",
 		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
-		"control": {
-			"sessions": ["shared-session"],
-			"agent": "llm-stateless",
-			"opponent": "heuristic",
-			"seeds": [1]
-		},
-		"treatment": {
-			"sessions": ["shared-session"],
-			"agent": "llm-akg-recent",
-			"opponent": "heuristic",
-			"seeds": [2]
-		}
+		"groups": [
+			{
+				"sessions": ["shared-session"],
+				"seat0": "llm-stateless",
+				"seat1": "heuristic",
+				"seeds": [1]
+			},
+			{
+				"sessions": ["shared-session"],
+				"seat0": "llm-akg-recent",
+				"seat1": "heuristic",
+				"seeds": [2]
+			}
+		]
 	}`))
 	if err != nil {
 		t.Fatalf("Parse() error = %v", err)
@@ -156,8 +160,7 @@ func TestParseRejectsUnknownField(t *testing.T) {
 		"id": "bad",
 		"model": "anthropic:claude-sonnet-4-6",
 		"hands_per_session": 25,
-		"control": {"sessions": ["a"], "agent": "x"},
-		"treatment": {"sessions": ["b"], "agent": "y"},
+		"groups": [{"sessions": ["a"], "seat0": "x"}],
 		"extra": true
 	}`))
 	if err == nil || !strings.Contains(err.Error(), "unknown field \"extra\"") {
@@ -174,9 +177,9 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 		{
 			name: "missing id",
 			json: `{
+				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
-				"control": {"sessions": ["a"], "agent": "x"},
-				"treatment": {"sessions": ["b"], "agent": "y"}
+				"groups": [{"sessions": ["a"], "seat0": "x"}]
 			}`,
 			want: "id is required",
 		},
@@ -185,10 +188,29 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 			json: `{
 				"id": "bad",
 				"hands_per_session": 25,
-				"control": {"sessions": ["a"], "agent": "x"},
-				"treatment": {"sessions": ["b"], "agent": "y"}
+				"groups": [{"sessions": ["a"], "seat0": "x"}]
 			}`,
 			want: "model is required",
+		},
+		{
+			name: "zero groups",
+			json: `{
+				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
+				"hands_per_session": 25,
+				"groups": []
+			}`,
+			want: "at least one group is required",
+		},
+		{
+			name: "missing seat0",
+			json: `{
+				"id": "bad",
+				"model": "anthropic:claude-sonnet-4-6",
+				"hands_per_session": 25,
+				"groups": [{"sessions": ["a"]}]
+			}`,
+			want: "seat0 is required",
 		},
 		{
 			name: "group uses both modes",
@@ -196,10 +218,9 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 				"id": "bad",
 				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
-				"control": {"session_base": "group", "sessions_count": 2, "sessions": ["a"], "agent": "x"},
-				"treatment": {"sessions": ["b"], "agent": "y"}
+				"groups": [{"session_base": "group", "sessions_count": 2, "sessions": ["a"], "seat0": "x"}]
 			}`,
-			want: "control must use exactly one session mode",
+			want: "must use exactly one session mode",
 		},
 		{
 			name: "seed length mismatch for session base",
@@ -207,10 +228,9 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 				"id": "bad",
 				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
-				"control": {"session_base": "group", "sessions_count": 2, "agent": "x", "seeds": [1]},
-				"treatment": {"sessions": ["b"], "agent": "y"}
+				"groups": [{"session_base": "group", "sessions_count": 2, "seat0": "x", "seeds": [1]}]
 			}`,
-			want: "control.seeds length must match sessions_count",
+			want: "seeds length must match sessions_count",
 		},
 		{
 			name: "duplicate explicit sessions",
@@ -218,22 +238,9 @@ func TestValidateRejectsInvalidDefinitions(t *testing.T) {
 				"id": "bad",
 				"model": "anthropic:claude-sonnet-4-6",
 				"hands_per_session": 25,
-				"control": {"sessions": ["dup", "dup"], "agent": "x"},
-				"treatment": {"sessions": ["b"], "agent": "y"}
+				"groups": [{"sessions": ["dup", "dup"], "seat0": "x"}]
 			}`,
 			want: "duplicates \"dup\"",
-		},
-		{
-			name: "invalid expected direction",
-			json: `{
-				"id": "bad",
-				"model": "anthropic:claude-sonnet-4-6",
-				"hands_per_session": 25,
-				"control": {"sessions": ["a"], "agent": "x"},
-				"treatment": {"sessions": ["b"], "agent": "y"},
-				"expected_direction": {"chips_per_hand": "sideways"}
-			}`,
-			want: "must be \"increase\" or \"decrease\"",
 		},
 	}
 

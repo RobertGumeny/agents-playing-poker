@@ -1,22 +1,23 @@
 {
   "id": "phase2-fullhistory-vs-akg",
-  "hypothesis": "Phase 2 cost-ceiling bracket: raw full-history prompting (llm-fullhistory) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and NON-mirror, seat-mirrored across 2 seeds (4 sessions) so positional and blind-rotation effects cancel. llm-fullhistory keeps no maintained memory - it stuffs every prior hand back into the prompt - so per-decision input tokens grow O(N) and the prompt balloons as the session runs (a prior 200-hand run was prohibitively expensive). Horizon is deliberately SHORT (80 hands) to capture the linear token-growth slope and the early curve without runaway cost; if it hits the context ceiling first, that hand count IS the result. OBSERVATIONAL (we are learning, not predicting a winner): we measure (1) profile fidelity - full-history is lossless in principle (the raw transcript is all there) but the model must re-derive everything in-context every decision, so we observe whether its stated reads stay accurate; against the AKG agent we cross-validate its self-maintained graph against engine ground truth in hands.jsonl. (2) Honest TOTAL token cost - for the AKG agent, decision-prompt tokens PLUS the post-hand update-session tokens; for full-history, the climbing decision-prompt tokens (it has no update step). Chip outcomes are DIAGNOSTIC ONLY. expected_direction is intentionally empty: reported as measured fidelity-vs-cost curves, not pass/fail predictions.",
+  "hypothesis": "Phase 2 full-history bracket: the naive strategy of stuffing all prior hands verbatim into the context window (llm-fullhistory) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and seat-mirrored across 2 seeds (4 sessions). OBSERVATIONAL: we measure (1) profile-fidelity drift — cross-validate each agent's stated opponent reads against engine ground truth; (2) honest TOTAL token cost. Full-history grows the context linearly with hand count; its breaking point (context ceiling, cost runaway, or fidelity collapse) is itself the finding. Horizon is 60 hands — beyond that full-history token cost becomes prohibitive. Chip outcomes are DIAGNOSTIC ONLY.",
   "model": "anthropic:claude-sonnet-4-6",
-  "hands_per_session": 80,
+  "hands_per_session": 60,
   "decision_deadline_seconds": 180,
-  "control": {
-    "session_base": "akg-vs-fullhistory",
-    "sessions_count": 2,
-    "agent": "llm-akg-durable",
-    "opponent": "llm-fullhistory",
-    "seeds": [1, 2]
-  },
-  "treatment": {
-    "session_base": "fullhistory-vs-akg",
-    "sessions_count": 2,
-    "agent": "llm-fullhistory",
-    "opponent": "llm-akg-durable",
-    "seeds": [1, 2]
-  },
-  "expected_direction": {}
+  "groups": [
+    {
+      "session_base": "akg-vs-fullhistory",
+      "sessions_count": 2,
+      "seat0": "llm-akg-durable",
+      "seat1": "llm-fullhistory",
+      "seeds": [1, 2]
+    },
+    {
+      "session_base": "fullhistory-vs-akg",
+      "sessions_count": 2,
+      "seat0": "llm-fullhistory",
+      "seat1": "llm-akg-durable",
+      "seeds": [1, 2]
+    }
+  ]
 }
