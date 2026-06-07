@@ -70,10 +70,11 @@ def group_session_ids(group):
 
 
 def session_ids(exp):
-    """Return [(label, session_id), ...] for all control and treatment sessions."""
+    """Return [(label, session_id), ...] for all groups."""
     results = []
-    for label in ("control", "treatment"):
-        for sid in group_session_ids(exp.get(label, {})):
+    for i, group in enumerate(exp.get("groups", [])):
+        label = f"group-{i}"
+        for sid in group_session_ids(group):
             results.append((label, sid))
     return results
 
@@ -84,9 +85,18 @@ def load_eval(session_id):
         return json.load(f)
 
 
-def find_focal_seat(ev, exp):
-    """Return the seat dict for the focal agent (treatment/control agent name)."""
-    agent_name = exp.get("treatment", {}).get("agent") or exp.get("control", {}).get("agent")
+def find_focal_seat(ev, exp, label=None):
+    """Return the seat dict for seat0 of the relevant group."""
+    groups = exp.get("groups", [])
+    group_idx = 0
+    if label and label.startswith("group-"):
+        try:
+            group_idx = int(label.split("-", 1)[1])
+        except (ValueError, IndexError):
+            pass
+    agent_name = groups[group_idx].get("seat0") if group_idx < len(groups) else None
+    if not agent_name and groups:
+        agent_name = groups[0].get("seat0")
     for seat in ev.get("seats", []):
         if seat["name"] == agent_name:
             return seat
@@ -95,9 +105,8 @@ def find_focal_seat(ev, exp):
 
 
 def build_comparison_table(exp):
-    """Return (rows, control_mean_cph, treatment_mean_cph)."""
+    """Return rows of per-session stats. Chips/hand is a sanity check, not the headline."""
     rows = []
-    group_totals = {"control": [], "treatment": []}
 
     for label, sid in session_ids(exp):
         try:
@@ -107,7 +116,7 @@ def build_comparison_table(exp):
             continue
 
         hands = ev["session"]["hand_count"]
-        seat = find_focal_seat(ev, exp)
+        seat = find_focal_seat(ev, exp, label)
         delta = seat.get("chips_delta", 0)
         cph = delta / hands if hands else 0
         sdr = ev["metrics"].get("showdown_rate", 0)
@@ -127,16 +136,11 @@ def build_comparison_table(exp):
             if (nodes or edges) else "n=0 e=0"
         )
         rows.append((label, sid, delta, hands, cph, sdr, fallbacks, mem_summary))
-        group_totals[label].append(cph)
 
-    ctrl_mean = (sum(group_totals["control"]) / len(group_totals["control"])
-                 if group_totals["control"] else 0)
-    treat_mean = (sum(group_totals["treatment"]) / len(group_totals["treatment"])
-                  if group_totals["treatment"] else 0)
-    return rows, ctrl_mean, treat_mean
+    return rows
 
 
-def format_table(rows, ctrl_mean, treat_mean):
+def format_table(rows):
     lines = []
     lines.append(f"{'Group':<12} {'Session':<45} {'chips_delta':>11} {'hands':>6} {'c/h':>7} {'sdr':>6} {'fallbacks':>10} {'memory'}")
     lines.append("-" * 120)
@@ -156,10 +160,6 @@ def format_table(rows, ctrl_mean, treat_mean):
         )
 
     lines.append("-" * 120)
-    lines.append(f"{'control mean c/h':>70}  {ctrl_mean:>+7.2f}")
-    lines.append(f"{'treatment mean c/h':>70}  {treat_mean:>+7.2f}")
-    delta_str = f"{treat_mean - ctrl_mean:>+7.2f}"
-    lines.append(f"{'delta (treatment - control)':>70}  {delta_str}")
     return "\n".join(lines)
 
 
@@ -199,7 +199,7 @@ def traces_table(exp, keyword):
     for label, sid in session_ids(exp):
         pi_path = os.path.join(
             session_dir(sid),
-            f"agents/{exp.get('treatment', {}).get('agent') or exp.get('control', {}).get('agent')}/pi-session.jsonl"
+            f"agents/{exp['groups'][0]['seat0']}/pi-session.jsonl"
         )
         mentions, total = count_reasoning_mentions(pi_path, keyword)
         if mentions is None:
@@ -242,7 +242,7 @@ def find_hand_context(session_path, hand_number):
 
 
 def hand_drill(exp, hand_number):
-    agent_name = exp.get("treatment", {}).get("agent") or exp.get("control", {}).get("agent")
+    agent_name = exp["groups"][0]["seat0"]
     lines = []
     lines.append(f"\nHand #{hand_number} context across sessions")
     for label, sid in session_ids(exp):
@@ -520,23 +520,16 @@ def main():
     global SCOPED_SESSIONS_DIR
     SCOPED_SESSIONS_DIR = resolve_scoped_sessions_dir(args.experiment_id)
     exp = load_experiment(args.experiment_id)
-    rows, ctrl_mean, treat_mean = build_comparison_table(exp)
-    table_text = format_table(rows, ctrl_mean, treat_mean)
+    rows = build_comparison_table(exp)
+    table_text = format_table(rows)
 
-    delta = treat_mean - ctrl_mean
-    direction = exp.get("expected_direction", {}).get("chips_per_hand", "?")
-    confirmed = (
-        "YES" if (direction == "increase" and delta > 0) or (direction == "decrease" and delta < 0)
-        else "NO"
-    )
+    groups = exp.get("groups", [])
+    strategies = " vs ".join(g.get("seat0", "?") for g in groups[:2])
     highlights = textwrap.dedent(f"""\
         Experiment : {args.experiment_id}
         Model      : {exp.get('model', '?')}
-        Expected   : chips/hand {direction}
-        Control    : {ctrl_mean:+.2f} c/h (mean)
-        Treatment  : {treat_mean:+.2f} c/h (mean)
-        Delta      : {delta:+.2f} c/h
-        Confirmed  : {confirmed}""")
+        Strategies : {strategies}
+        Hands/session: {exp.get('hands_per_session', '?')}""")
 
     print(highlights)
     print()

@@ -42,45 +42,43 @@ When `-model` is omitted, the runner uses the required `model` field from the ex
 
 ## Experiment definition
 
-An experiment definition is a checked-in JSON plan for a two-group comparison:
-
-- `control`
-- `treatment`
+An experiment definition is a checked-in JSON plan for a set of sessions comparing two strategies. Each group declares which strategy goes in `seat0` and `seat1`. Multiple groups with seats swapped cancel positional effects (seat mirroring).
 
 Example:
 
 ```json
 {
   "id": "my-memory-test",
-  "hypothesis": "Durable AKG memory should improve chip efficiency against stateless play.",
+  "hypothesis": "AKG durable memory vs stateless on the fidelity-vs-cost frontier.",
   "model": "anthropic:claude-sonnet-4-6",
-  "hands_per_session": 25,
-  "control": {
-    "session_base": "stateless-control",
-    "sessions_count": 5,
-    "agent": "llm-stateless",
-    "opponent": "heuristic"
-  },
-  "treatment": {
-    "session_base": "akg-durable-treatment",
-    "sessions_count": 5,
-    "agent": "llm-akg-durable",
-    "opponent": "heuristic"
-  },
-  "expected_direction": {
-    "chips_per_hand": "increase",
-    "tokens_per_hand": "decrease"
-  }
+  "hands_per_session": 60,
+  "decision_deadline_seconds": 180,
+  "groups": [
+    {
+      "session_base": "akg-vs-stateless",
+      "sessions_count": 2,
+      "seat0": "llm-akg-durable",
+      "seat1": "llm-stateless",
+      "seeds": [1, 2]
+    },
+    {
+      "session_base": "stateless-vs-akg",
+      "sessions_count": 2,
+      "seat0": "llm-stateless",
+      "seat1": "llm-akg-durable",
+      "seeds": [1, 2]
+    }
+  ]
 }
 ```
 
-The normative schema is [`experiment-definition.md`](experiment-definition.md). It defines required fields, group session modes, seed derivation, validation rules, and `expected_direction` semantics.
+The normative schema is [`experiment-definition.md`](experiment-definition.md). It defines required fields, group session modes, seed derivation, and validation rules.
 
 ## Planning and coverage
 
 Experiment planning is deterministic:
 
-- `control` sessions are planned before `treatment` sessions.
+- Groups are planned in array order: `group-0`, `group-1`, etc.
 - A group either derives sessions from `session_base` + `sessions_count` or lists explicit `sessions`.
 - Omitted seeds default positionally to `1..N`.
 - Planned session directories are under the experiment's `sessions/` subdirectory (e.g. `research/experiments/<slug>/sessions/`).
@@ -99,7 +97,7 @@ Coverage is based on `manifest.json` and `hands.jsonl`. Analysis artifacts such 
 
 The root command delegates actual single-session execution to the existing match runner binary built from `cmd/poker-run`. This preserves one implementation of match setup, agent process wiring, server-authoritative rules, artifact writing, and timeout behavior.
 
-A planned session can only be launched when the group includes `opponent` metadata. Offline analysis can sometimes infer opponents from existing artifacts, but live execution must know both seats before the run starts.
+A planned session can only be launched when the group includes `seat1` metadata. Offline analysis can sometimes infer opponents from existing artifacts, but live execution must know both seats before the run starts.
 
 Runtime-only settings such as `-model` and `-thinking-level` do not mutate the checked-in experiment definition.
 
@@ -108,7 +106,7 @@ Runtime-only settings such as `-model` and `-thinking-level` do not mutate the c
 `poker experiment analyze` performs two additive analysis steps:
 
 1. For every present planned session missing `eval.json`, collect a deterministic summary from session artifacts.
-2. Compare control and treatment summaries and write `<experiment-dir>/reports/<experiment-id>.md`.
+2. Write a flat per-session comparison table to `<experiment-dir>/reports/<experiment-id>.md`.
 
 `eval.json` is derived from:
 
@@ -120,7 +118,7 @@ Runtime-only settings such as `-model` and `-thinking-level` do not mutate the c
 
 It is safe to regenerate. It must not override primary session truth.
 
-The comparison report includes aggregate treatment/control metrics, per-session rows, tool-use metrics when observed, warnings for inconsistent observed metadata, and `expected_direction` pass/fail checks where supported.
+The report contains a flat per-session footnote table (Group | Session | Seed | Seat 0 | Seat 1 | Chips Δ | Chips/hand | Duration | Showdown), plus warnings for inconsistent observed metadata. Chips/hand is a sanity check; the primary thesis is the fidelity-vs-cost frontier measured per strategy via `analyze.py --tokens`.
 
 ## Artifact authority
 
