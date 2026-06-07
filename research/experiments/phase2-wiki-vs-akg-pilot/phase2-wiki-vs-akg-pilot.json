@@ -1,0 +1,23 @@
+{
+  "id": "phase2-wiki-vs-akg-pilot",
+  "hypothesis": "Pilot for phase2-wiki-vs-akg after tightening the llm-md-wiki memory strategy: villain.md is now a pure index (YAML frontmatter + stat lines + [[link]] directory, no per-hand narrative), pattern pages hold counts, and the decision prompt requires following links before deciding. 20-hand smoke test to measure the new token-cost slope and confirm the structural changes take effect (villain.md stays compact, md_read_page tool calls appear in pi-session.jsonl). Compare cost curve against archived pre-tightening baseline (+58.4 tok/hand decision slope, $3.44/2-session total for wiki).",
+  "model": "anthropic:claude-sonnet-4-6",
+  "hands_per_session": 20,
+  "decision_deadline_seconds": 180,
+  "groups": [
+    {
+      "session_base": "akg-vs-wiki-pilot",
+      "sessions_count": 1,
+      "seat0": "llm-akg-durable",
+      "seat1": "llm-md-wiki",
+      "seeds": [1]
+    },
+    {
+      "session_base": "wiki-vs-akg-pilot",
+      "sessions_count": 1,
+      "seat0": "llm-md-wiki",
+      "seat1": "llm-akg-durable",
+      "seeds": [1]
+    }
+  ]
+}

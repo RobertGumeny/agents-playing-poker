@@ -1,0 +1,11 @@
+{"v":1,"type":"session_ready","id":"agent-1","in_reply_to":"msg-1","payload":{"version":"llm-md-wiki/0.1.0"}}
+{"v":1,"type":"action","id":"agent-2","in_reply_to":"msg-3","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-3","in_reply_to":"msg-4","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-4","in_reply_to":"msg-5","payload":{"action":"fold"}}
+{"v":1,"type":"action","id":"agent-5","in_reply_to":"msg-8","payload":{"action":"call","amount":1}}
+{"v":1,"type":"action","id":"agent-6","in_reply_to":"msg-9","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-7","in_reply_to":"msg-10","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-8","in_reply_to":"msg-11","payload":{"action":"bet","amount":2}}
+{"v":1,"type":"action","id":"agent-9","in_reply_to":"msg-14","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-10","in_reply_to":"msg-15","payload":{"action":"check"}}
+{"v":1,"type":"action","id":"agent-11","in_reply_to":"msg-16","payload":{"action":"fold"}}
