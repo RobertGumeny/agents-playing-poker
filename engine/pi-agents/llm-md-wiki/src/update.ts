@@ -14,7 +14,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-poker/pi-agent-shared";
 
-import { ensureRootPage, listPages, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages.js";
+import { ensureRootPage, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages.js";
 import { createReadTools, createWriteTool } from "./tools.js";
 
 const STDERR_LOG = "stderr.log";
@@ -71,12 +71,9 @@ export interface WikiUpdateOptions {
   thinkingLevel?: string;
 }
 
-export function buildWikiUpdatePrompt(pages: string[], rootContent: string, handSummary: string): string {
-  const pageList = pages.length > 0 ? pages.join(", ") : "(none yet)";
+export function buildWikiUpdatePrompt(rootContent: string, handSummary: string): string {
   const root = rootContent.trim().length > 0 ? rootContent.trim() : "(empty — no notes yet)";
   return [
-    `Current pages: ${pageList}`,
-    "",
     `Current ${ROOT_PAGE}.md:`,
     root,
     "",
@@ -104,9 +101,8 @@ export async function runWikiUpdate(options: WikiUpdateOptions): Promise<void> {
     return;
   }
 
-  const pages = await listPages(dir);
   const root = await readPage(dir, ROOT_PAGE);
-  const prompt = buildWikiUpdatePrompt(pages, root.content ?? "", options.handSummary);
+  const prompt = buildWikiUpdatePrompt(root.content ?? "", options.handSummary);
 
   let session: PiSession | undefined;
   try {

@@ -91,9 +91,9 @@ describe("write tool", () => {
 });
 
 describe("buildWikiUpdatePrompt", () => {
-  it("includes the page list, current root, and the hand summary", () => {
-    const prompt = buildWikiUpdatePrompt(["villain", "patterns/folds-to-cbet"], "# villain\n\nfolds to c-bet 4/7", "hand=9 | hero_result=+5");
-    expect(prompt).toContain("Current pages: villain, patterns/folds-to-cbet");
+  it("includes the current root and the hand summary, without an eager page list", () => {
+    const prompt = buildWikiUpdatePrompt("# villain\n\nfolds to c-bet 4/7", "hand=9 | hero_result=+5");
+    expect(prompt).not.toContain("Current pages:");
     expect(prompt).toContain("folds to c-bet 4/7");
     expect(prompt).toContain("hand=9 | hero_result=+5");
   });

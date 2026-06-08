@@ -2,7 +2,7 @@ import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager, } from "@earendil-works/pi-coding-agent";
 import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-poker/pi-agent-shared";
-import { ensureRootPage, listPages, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages.js";
+import { ensureRootPage, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages.js";
 import { createReadTools, createWriteTool } from "./tools.js";
 const STDERR_LOG = "stderr.log";
 const UPDATE_LOG = "update-session.jsonl";
@@ -39,12 +39,9 @@ WORKFLOW each hand:
 6. Reply with a one-line summary of what you changed.
 
 Keep [[links]] honest. Reconcile contradictions in favor of newest evidence. Do not delete pages.`;
-export function buildWikiUpdatePrompt(pages, rootContent, handSummary) {
-    const pageList = pages.length > 0 ? pages.join(", ") : "(none yet)";
+export function buildWikiUpdatePrompt(rootContent, handSummary) {
     const root = rootContent.trim().length > 0 ? rootContent.trim() : "(empty — no notes yet)";
     return [
-        `Current pages: ${pageList}`,
-        "",
         `Current ${ROOT_PAGE}.md:`,
         root,
         "",
@@ -69,9 +66,8 @@ export async function runWikiUpdate(options) {
         });
         return;
     }
-    const pages = await listPages(dir);
     const root = await readPage(dir, ROOT_PAGE);
-    const prompt = buildWikiUpdatePrompt(pages, root.content ?? "", options.handSummary);
+    const prompt = buildWikiUpdatePrompt(root.content ?? "", options.handSummary);
     let session;
     try {
         session = await createUpdateSession({
