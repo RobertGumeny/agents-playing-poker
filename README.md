@@ -27,10 +27,10 @@ Plays a no-LLM random-vs-heuristic match and prints the session artifact paths. 
 Experiment definitions live in [`research/experiments/`](research/experiments/). Each file is a JSON plan for a control-vs-treatment comparison. Run from the repo root:
 
 ```bash
-poker experiment go test-2b-retrieval-throttle
+poker experiment go <experiment-name>
 ```
 
-`poker experiment go` does the full operator loop:
+Run `poker experiment ls` to see the names available in your checkout. `poker experiment go` does the full operator loop:
 
 1. Loads `research/experiments/<id>/<id>.json`.
 2. Checks which planned sessions are already present.
@@ -41,7 +41,7 @@ poker experiment go test-2b-retrieval-throttle
 Use `--model` to override the model for Pi-backed LLM agents:
 
 ```bash
-poker experiment go test-2b-retrieval-throttle --model anthropic:claude-sonnet-4-6
+poker experiment go <experiment-name> --model anthropic:claude-sonnet-4-6
 ```
 
 ## Draft a new experiment
@@ -86,20 +86,6 @@ poker match run --agent0 llm-akg-durable --agent1 llm-stateless --hands 25 --mod
 ```
 
 Use these when you need a single non-repeatable match outside of an experiment plan.
-
-## What is being compared?
-
-Current agent strategies:
-
-- `llm-stateless` — sees only the current hand.
-- `llm-fullhistory` — injects prior hand history into the prompt. This grows with each hand.
-- `llm-akg-recent` — shallow bounded AKG memory using recent hands and an opponent profile.
-- `llm-akg-durable` — durable structured AKG opponent memory.
-- `heuristic` and `random` — scripted non-LLM baselines.
-
-The research claim is not just "which agent wins more chips." It is whether structured memory can improve or preserve poker performance while keeping context growth bounded and inspectable.
-
-For the full framing, read [`docs/vision.md`](docs/vision.md) and [`docs/research.md`](docs/research.md).
 
 ## Outputs
 

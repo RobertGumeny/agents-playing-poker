@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added benchmark and reporting tooling, including normalized session loading, mirror validation, aggregate metrics, Markdown benchmark reviews, and a `poker-report` CLI that can target explicit session directories.
 - Added the first `poker-eval` workflow pieces: experiment initialization and listing, deterministic run planning and session derivation, dry-run config output, run delegation to `poker-run`, result collection, treatment-vs-control comparison reporting, status and coverage readouts, shared offline eval loaders, and deterministic `eval.json` generation.
 - Added non-fatal teardown exports for agent memory, plus the experiment-definition JSON contract and validation coverage.
+- Added `llm-md-single`, a prose-memory agent that keeps a single markdown notes file the model rewrites after each hand.
+- Added `llm-md-wiki`, a prose-memory agent that keeps linked markdown "wiki" pages the model maintains and retrieves on demand at decision time.
+- Added the Phase 2 experiment definitions on the fidelity-vs-cost frontier (`phase2-fullhistory-vs-akg`, `phase2-mdsingle-vs-akg`, and the headline `phase2-wiki-vs-akg`), plus shorter pilot and smoke variants.
+- Added per-decision token-cost analysis and AKG graph-replay tooling to the eval-analysis workflow, surfacing the fidelity-vs-cost frontier per strategy.
+- Added a pre-flight tripwire that fails an experiment run when a retrieval-capable agent makes zero decision-time memory reads.
+- Added per-agent decision-deadline configuration to experiment definitions.
 - Added broad test coverage across the rules engine, wire protocol, orchestration layer, demo flow, benchmark reporting, and LLM agent seams.
 
 ### Changed
@@ -28,3 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified the stable session-artifact contracts for `memory-export.json`, `eval.json`, and persisted timeout `auto_fold` entries.
 - Updated the specs, wire-protocol docs, knowledge base, and operator-facing docs to reflect `llm-fullhistory`, the shared Pi runtime seam, and the `llm-akg-recent` naming cleanup.
 - Tightened the implementer documentation for the stdio JSONL wire protocol.
+- Reworked `llm-akg-durable` to be model-maintained: the agent now writes its own memory through open-vocabulary AKG write tools after each hand, replacing the prior code-computed extraction so the comparison isolates representation rather than extraction method.
+- Restructured the experiment-definition schema to a two-group (`groups[]`, `seat0`/`seat1`) format and updated the analysis tooling to match.
+- Stated a shared memory-maintenance discipline across the wiki and AKG agent specs so the strategies differ only in memory substrate, not in how diligently they record.
+- Lifted completed-hand formatting into a shared module reused across the prose-memory agents, and bounded the `llm-akg-durable` per-hand update cost.
