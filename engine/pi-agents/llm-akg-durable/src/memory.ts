@@ -9,7 +9,7 @@ import { formatCompletedHand } from "@agent-poker/pi-agent-shared";
 import { ensureRootNode, openStore, readRootBody, ROOT_ID, ROOT_TYPE } from "./graph.js";
 import { runDurableUpdate } from "./update.js";
 
-const INDEX_HEADER = `Your opponent summary (node ${ROOT_TYPE}/${ROOT_ID}) follows — use it directly. Only if you need more than it covers, call akg_list_nodes / akg_get_node / akg_get_nodes to drill into connected nodes:`;
+const INDEX_HEADER = `Your opponent summary (node ${ROOT_TYPE}/${ROOT_ID}) follows — use it directly. Call akg_list_nodes / akg_get_node / akg_get_nodes to drill into connected nodes only if you need more than it covers:`;
 const NO_READS_SECTION = `Your opponent summary (${ROOT_TYPE}/${ROOT_ID}): no reads yet. akg_list_nodes, akg_get_node, and akg_get_nodes become useful once nodes exist.`;
 
 export class AkgDurableMemoryPolicy implements MemoryPolicy {
