@@ -11,6 +11,18 @@ vendor/
 # Archived experiments and session artifacts
 research/archive/
 
+# Heavy per-session artifacts — regenerable from the plan + seed.
+# Commit experiment definitions (<id>.json) and lightweight reports/ only.
+research/experiments/*/sessions/
+
+# Local calibration/iteration variants of the headline matchup — kept out of
+# the public set (the canonical experiments are phase2-wiki-vs-akg and the
+# fullhistory/mdsingle brackets).
+research/experiments/phase2-wiki-vs-akg-60/
+research/experiments/phase2-wiki-vs-akg-200/
+research/experiments/phase2-wiki-vs-akg-pilot/
+research/experiments/phase2-wiki-vs-akg-smoke/
+
 # Env / secrets
 .env
 .env.*
@@ -34,6 +46,9 @@ engine/.tmp/
 /engine/poker-server
 
 .doug/
+
+# Local scratch skill — divergent duplicate of .claude/skills/eval-analysis/
+.pi/skills/session-analysis/
 
 # Research reports (drafts, not checked in)
 docs/research/
