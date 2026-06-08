@@ -122,8 +122,9 @@ def build_comparison_table(exp):
         sdr = ev["metrics"].get("showdown_rate", 0)
         fallbacks = ev["metrics"].get("fallback_action_count", 0)
         mem = seat.get("memory_export") or {}
-        nodes = mem.get("NodesByType", {})
-        edges = mem.get("EdgesByRelation", {})
+        # eval.json uses snake_case; tolerate the legacy PascalCase from older artifacts.
+        nodes = mem.get("nodes_by_type", mem.get("NodesByType", {}))
+        edges = mem.get("edges_by_relation", mem.get("EdgesByRelation", {}))
         # Agents author an open vocabulary (their own node types and edge relations),
         # so show the actual histogram rather than fixed pattern/supported_by keys.
         # Totals plus the top three of each by count.

@@ -76,10 +76,10 @@ type MemoryExportEdge struct {
 }
 
 type MemoryExportSummary struct {
-	NodeCount       int
-	EdgeCount       int
-	NodesByType     map[string]int
-	EdgesByRelation map[string]int
+	NodeCount       int            `json:"node_count"`
+	EdgeCount       int            `json:"edge_count"`
+	NodesByType     map[string]int `json:"nodes_by_type"`
+	EdgesByRelation map[string]int `json:"edges_by_relation"`
 }
 
 type RetrySummary struct {

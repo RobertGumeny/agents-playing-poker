@@ -277,14 +277,14 @@ Each seat entry has this shape:
   "pi_session_present": true,
   "decision_prompt_count": 113,
   "tool_calls": {
-    "akg_get_opponent": 76,
-    "akg_list_patterns": 27,
-    "akg_get_pattern": 4
+    "akg_get_node": 76,
+    "akg_list_nodes": 27,
+    "akg_get_nodes": 4
   },
   "tool_calls_per_hand": {
-    "akg_get_opponent": 3.04,
-    "akg_list_patterns": 1.08,
-    "akg_get_pattern": 0.16
+    "akg_get_node": 3.04,
+    "akg_list_nodes": 1.08,
+    "akg_get_nodes": 0.16
   },
   "retry_metrics": {
     "attempt_failures": 2,
@@ -331,7 +331,7 @@ This summary is intentionally generic. Downstream tools that need full graph det
 
 ### Example
 
-This example is derived from the checked-in session fixture `sessions/akg-durable-prompt-test-1/` and matches the current artifact shapes in the repo:
+This example is illustrative and reflects the current artifact shapes in the repo. (Tool-call names shown are the durable agent's current open-vocabulary read tools; older archived sessions may carry the pre-rework `akg_get_opponent` / `akg_list_patterns` names.)
 
 ```json
 {
@@ -386,14 +386,14 @@ This example is derived from the checked-in session fixture `sessions/akg-durabl
       "pi_session_present": true,
       "decision_prompt_count": 113,
       "tool_calls": {
-        "akg_get_opponent": 76,
-        "akg_list_patterns": 27,
-        "akg_get_pattern": 4
+        "akg_get_node": 76,
+        "akg_list_nodes": 27,
+        "akg_get_nodes": 4
       },
       "tool_calls_per_hand": {
-        "akg_get_opponent": 3.04,
-        "akg_list_patterns": 1.08,
-        "akg_get_pattern": 0.16
+        "akg_get_node": 3.04,
+        "akg_list_nodes": 1.08,
+        "akg_get_nodes": 0.16
       },
       "retry_metrics": {
         "attempt_failures": 1,
