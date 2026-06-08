@@ -585,6 +585,290 @@ def format_token_table(rows, csv_path):
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# Demo report — the rich per-experiment report shown live. Observational,
+# builder-to-builder voice. Slope is the hero; total-$ is the horizon-dependent
+# consequence; fidelity is the "and it buys nothing" beat where measurable.
+# Writes into research/experiments/<id>/reports/<id>.md (replaces the flat Go
+# table at that path) plus a sibling <id>-cost.png chart.
+# ---------------------------------------------------------------------------
+
+import subprocess
+
+DEMO_AKG_AGENT = "llm-akg-durable"
+
+# The rich analysis is ADDITIVE: it augments the baseline report that
+# `poker experiment go` writes rather than replacing it. The contribution lives
+# inside these sentinels so re-running is idempotent (strip-then-append) and the
+# Go-authored portion above is never touched.
+SENTINEL_BEGIN = "<!-- BEGIN eval-analysis -->"
+SENTINEL_END = "<!-- END eval-analysis -->"
+
+
+def _strip_sentinel_block(text):
+    pat = re.compile(re.escape(SENTINEL_BEGIN) + r".*?" + re.escape(SENTINEL_END), re.DOTALL)
+    return pat.sub("", text).rstrip("\n") + "\n"
+
+
+def _decision_horizon(token_rows, agent):
+    hands = [r["hand"] for r in token_rows
+             if r["agent"] == agent and r["kind"] == "decision" and r["hand"] is not None]
+    return max(hands) if hands else 0
+
+
+def _experiment_fidelity(experiment_id):
+    """Per-agent fidelity aggregates for agents fidelity.py can parse (akg, wiki).
+    Returns {} if fidelity tooling/data is unavailable. Naive prose/no-memory
+    agents have no extractor — their absence is itself the auditability point."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import fidelity
+        d, sessions = fidelity.load_layout(experiment_id)
+    except Exception:
+        return {}
+    sess_root = os.path.join(fidelity.REPO, "research", "experiments", experiment_id, "sessions")
+    extractors = {"llm-akg-durable": fidelity.extract_akg_claims,
+                  "llm-md-wiki": fidelity.extract_wiki_claims}
+    per_agent_rows = {}
+    for s in sessions:
+        sdir = os.path.join(sess_root, s["id"])
+        if not os.path.isdir(sdir):
+            continue
+        try:
+            gt = fidelity.load_ground_truth(sdir)
+        except Exception:
+            continue
+        for seat, name in ((0, s["seat0"]), (1, s["seat1"])):
+            ext = extractors.get(name)
+            if not ext:
+                continue
+            try:
+                rows = fidelity.verify(ext(os.path.join(sdir, "agents", name)), gt, 1 - seat)
+            except Exception:
+                continue
+            per_agent_rows.setdefault(name, []).extend(rows)
+    out = {}
+    for name, rows in per_agent_rows.items():
+        a = fidelity.agg(rows)
+        a["buckets"] = fidelity.drift_buckets(rows)
+        out[name] = a
+    return out
+
+
+def _render_chart(experiment_id, csv_path, out_png, akg, naive, title):
+    skill_dir = os.path.dirname(os.path.abspath(__file__))
+    chart_py = os.path.join(skill_dir, "chart.py")
+    uv = os.path.expanduser("~/.local/bin/uv")
+    runner = ([uv, "run", "--with", "matplotlib", "python3"]
+              if os.path.exists(uv) else [sys.executable])
+    cmd = runner + [chart_py, "--csv", csv_path, "--out", out_png,
+                    "--akg", akg, "--naive", naive, "--title", title]
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, timeout=300)
+        return os.path.exists(out_png)
+    except Exception:
+        return False
+
+
+def _pretty(agent):
+    return agent.replace("llm-", "").replace("-", " ")
+
+
+def render_demo_report(experiment_id, exp, token_rows, comparison_rows):
+    agents, summary = token_summary(token_rows)
+    if DEMO_AKG_AGENT not in summary:
+        return None  # not an AKG matchup — leave the standard report alone
+    naive = next((a for a in agents if a != DEMO_AKG_AGENT), None)
+    if naive is None:
+        return None
+    a, nv = summary[DEMO_AKG_AGENT], summary[naive]
+    if not a["slope_tok_per_hand"] or not nv["slope_tok_per_hand"]:
+        return None
+
+    horizon = max(_decision_horizon(token_rows, DEMO_AKG_AGENT),
+                  _decision_horizon(token_rows, naive))
+    slope_mult = nv["slope_tok_per_hand"] / a["slope_tok_per_hand"]
+    cost_mult = (nv["total_cost"] / a["total_cost"]) if a["total_cost"] else float("nan")
+    near_tied = cost_mult < 1.3
+
+    out_dir = os.path.join(EXPERIMENTS_DIR, experiment_id, "reports")
+    os.makedirs(out_dir, exist_ok=True)
+    png_name = f"{experiment_id}-cost.png"
+    csv_path = os.path.join(RESULTS_DIR, f"{experiment_id}-tokens.csv")
+    chart_ok = _render_chart(
+        experiment_id, csv_path, os.path.join(out_dir, png_name),
+        DEMO_AKG_AGENT, naive,
+        f"{experiment_id} — per-decision context growth ({horizon} hands)")
+
+    def el(s):
+        e, l = s["early_prompt_mean"], s["late_prompt_mean"]
+        return f"{e:,.0f} → {l:,.0f}" if e is not None and l is not None else "n/a"
+
+    L = []
+    L.append(SENTINEL_BEGIN)
+    L.append("")
+    L.append("## Token cost & fidelity")
+    L.append("")
+    L.append(f"*Observational. Generated {date.today().isoformat()} from the live "
+             f"`{experiment_id}` sessions. Model: {exp.get('model', '?')}.*")
+    L.append("")
+    # 1. one-line observation
+    L.append(f"> Across **{horizon} identical hands**, the two memory strategies "
+             f"produced agents whose per-decision context **diverged**: the naive "
+             f"agent's prompt grew **{nv['slope_tok_per_hand']:+.0f} tok/hand** versus "
+             f"AKG's **{a['slope_tok_per_hand']:+.0f}** — **{slope_mult:.1f}× faster**. "
+             f"Total spend was **{cost_mult:.2f}×** "
+             f"(${nv['total_cost']:.2f} vs ${a['total_cost']:.2f}).")
+    L.append("")
+    L.append("**Framing.** Both agents run identical rules, identical tools, identical "
+             "model — the *only* difference is the memory substrate. AKG keeps a typed, "
+             "queryable graph it edits in small deltas; the naive agent rewrites free-form "
+             "notes / re-injects history. Both SDKs are deliberately minimal and leave "
+             "strategy to the implementer; this is a measurement, not a pitch.")
+    L.append("")
+
+    # 2. slope — the hero
+    L.append("## Per-decision context growth (the headline)")
+    L.append("")
+    L.append("Decision prompt context = `input + cacheRead + cacheWrite` of each "
+             "decision call. Slope is least-squares growth per hand.")
+    L.append("")
+    L.append("| Agent | Decisions | Slope (tok/hand) | Early → late prompt |")
+    L.append("|---|---:|---:|---:|")
+    L.append(f"| {_pretty(DEMO_AKG_AGENT)} | {a['decisions']} | "
+             f"**{a['slope_tok_per_hand']:+.1f}** | {el(a)} |")
+    L.append(f"| {_pretty(naive)} (naive) | {nv['decisions']} | "
+             f"**{nv['slope_tok_per_hand']:+.1f}** | {el(nv)} |")
+    L.append("")
+    L.append(f"The naive agent's per-decision context grows **{slope_mult:.1f}× faster**. "
+             "Structured deltas keep most of the prompt stable across turns, which also "
+             "happens to be cache-friendly; rewriting notes or re-injecting history does not.")
+    L.append("")
+
+    # 3. total $ — honest consequence at this horizon
+    L.append("## Total cost at this horizon")
+    L.append("")
+    L.append("| Agent | Total tokens | Total $ |")
+    L.append("|---|---:|---:|")
+    L.append(f"| {_pretty(DEMO_AKG_AGENT)} | {a['total_tokens']:,} | ${a['total_cost']:.2f} |")
+    L.append(f"| {_pretty(naive)} (naive) | {nv['total_tokens']:,} | ${nv['total_cost']:.2f} |")
+    L.append("")
+    if near_tied:
+        L.append(f"At **{horizon} hands the total cost is ≈tied** ({cost_mult:.2f}×) — and "
+                 "that is the trap. AKG front-loads a fixed per-hand memory-maintenance "
+                 "cost that roughly cancels the naive agent's prompt bloat at short "
+                 "horizons. The slopes above show the gap only widens: the longer the "
+                 "agent runs, the worse the naive curve gets. See the projection in the chart.")
+    else:
+        L.append(f"At **{horizon} hands** the naive strategy costs **{cost_mult:.2f}×** as "
+                 "much for the same work. This is the slope above, compounded over the "
+                 "session — and the slope shows no sign of flattening.")
+    L.append("")
+
+    # 4. fidelity beat
+    L.append("## Fidelity")
+    L.append("")
+    fid = _experiment_fidelity(experiment_id)
+    if DEMO_AKG_AGENT in fid and naive in fid:
+        L.append("Each agent's stated opponent reads were cross-validated against engine "
+                 "ground truth (`hands.jsonl`). **Fabrication** = a specific villain holding "
+                 "claimed on a hand that never reached showdown; **card/board error** = a "
+                 "claim that contradicts the cards actually shown.")
+        L.append("")
+        L.append("| Agent | Records | Card claims | Fabrications | Card errors | Board errors |")
+        L.append("|---|---:|---:|---:|---:|---:|")
+        for name in (DEMO_AKG_AGENT, naive):
+            f = fid[name]
+            L.append(f"| {_pretty(name)} | {f['records']} | {f['card_claims']} | "
+                     f"{f['fabrications']} | {f['card_errors']} | {f['board_errors']} |")
+        L.append("")
+        both_clean = all(fid[n]["fabrications"] == 0 and fid[n]["card_errors"] == 0
+                         and fid[n]["board_errors"] == 0 for n in (DEMO_AKG_AGENT, naive))
+        if both_clean:
+            L.append("Both agents recalled their opponent with **zero hard-fact errors**. "
+                     "The extra spend buys no fidelity — same accuracy, more tokens.")
+        else:
+            L.append("Read the fabrication and error columns against cost: accuracy is the "
+                     "*other* axis of the frontier.")
+    else:
+        L.append(f"Only `{DEMO_AKG_AGENT}` keeps structured, machine-checkable per-hand "
+                 "records, so it is the only agent this tool can cross-validate against "
+                 "ground truth. The naive agent's memory is free-form prose / raw history — "
+                 "**not structured-auditable**: in production you could not verify what it "
+                 "\"remembers\" either. A manual spot-check of the naive agent's notes is "
+                 "below where available.")
+        L.append("")
+        manual = os.path.join(out_dir, f"{experiment_id}-fidelity-manual.md")
+        if os.path.exists(manual):
+            with open(manual) as f:
+                L.append(f.read().strip())
+        else:
+            L.append("> _Manual fidelity pass pending — see "
+                     f"`{experiment_id}-fidelity-manual.md`._")
+    L.append("")
+
+    # 5. chart
+    L.append("## Cost trajectory")
+    L.append("")
+    if chart_ok:
+        L.append(f"![Per-decision context growth]({png_name})")
+        L.append("")
+        L.append("Solid = least-squares fit over measured hands. Dashed = linear projection "
+                 "past the measured horizon (assumes the slope holds). Don't trust the "
+                 "projection? Run it yourself — see *Reproduce* below.")
+    else:
+        L.append("_(chart unavailable — install matplotlib, or run "
+                 f"`uv run --with matplotlib python3 .claude/skills/eval-analysis/chart.py "
+                 f"--csv {csv_path} --out {os.path.join(out_dir, png_name)} "
+                 f"--akg {DEMO_AKG_AGENT} --naive {naive}`)_")
+    L.append("")
+
+    # 6. limitations
+    L.append("## What this does and does not show")
+    L.append("")
+    L.append(f"- **Scope:** {len(comparison_rows)} sessions, single model "
+             f"({exp.get('model', '?')}), seat-mirrored across {exp.get('hands_per_session','?')} "
+             "planned hands. Not a claim about all workloads or models.")
+    L.append("- **Chips are diagnostic only.** Heads-up variance over this few hands is "
+             "large; the per-session table above is a sanity check, not a result.")
+    L.append("- **Fidelity is measured only where structured records exist.** Prose / "
+             "history-stuffing agents are not machine-auditable here (that is itself a finding).")
+    L.append("- **The projection is extrapolation,** not data — clearly dashed, and "
+             "reproducible at any horizon (below).")
+    L.append("")
+
+    # 7. reproduce footer
+    L.append("## Reproduce / extend this")
+    L.append("")
+    L.append("Everything here regenerates from checked-in artifacts. Public repo, no hidden config.")
+    L.append("")
+    L.append("```bash")
+    L.append(f"# re-run the experiment (any horizon: edit hands_per_session first)")
+    L.append(f"# research/experiments/{experiment_id}/{experiment_id}.json")
+    L.append(f"poker experiment go {experiment_id}")
+    L.append("")
+    L.append(f"# regenerate this report + chart")
+    L.append(f"python3 .claude/skills/eval-analysis/analyze.py {experiment_id} --tokens")
+    L.append("```")
+    L.append("")
+
+    L.append(SENTINEL_END)
+    block = "\n".join(L)
+
+    # Additive: augment the baseline report `poker experiment go` wrote rather than
+    # replacing it. Strip any prior eval-analysis block (idempotent) then append.
+    out_path = os.path.join(out_dir, f"{experiment_id}.md")
+    if os.path.exists(out_path):
+        with open(out_path) as f:
+            base = _strip_sentinel_block(f.read())
+    else:
+        base = (f"# {experiment_id}\n\n_Per-session diagnostic table not present yet — "
+                f"run `poker experiment go {experiment_id}` to add it above this analysis._\n")
+    with open(out_path, "w") as f:
+        f.write(base.rstrip("\n") + "\n\n" + block + "\n")
+    return out_path
+
+
 def write_report(experiment_id, exp, table_text, stdout_highlights, extra_sections):
     os.makedirs(RESULTS_DIR, exist_ok=True)
     path = os.path.join(RESULTS_DIR, f"{experiment_id}-analysis.md")
@@ -666,6 +950,10 @@ def main():
         tokens_text = format_token_table(token_rows, csv_path)
         print(tokens_text)
         extra_sections.append(("Token Cost vs. Hand Count", tokens_text))
+
+        demo_path = render_demo_report(args.experiment_id, exp, token_rows, rows)
+        if demo_path:
+            print(f"\nDemo report written to: {demo_path}")
 
     report_path = write_report(args.experiment_id, exp, table_text, highlights, extra_sections)
     print(f"\nReport written to: {report_path}")

@@ -37,6 +37,13 @@ research/experiments/phase2-wiki-vs-akg-smoke/
 # Node (Pi agents will eventually pull in node_modules)
 node_modules/
 
+# Python
+__pycache__/
+*.py[cod]
+
+# Claude/Pi local runtime state
+.claude/scheduled_tasks.lock
+
 # Build artifacts
 engine/bin/
 engine/.tmp/
