@@ -163,6 +163,113 @@ def format_table(rows):
     return "\n".join(lines)
 
 
+# --- Pre-flight tripwire ------------------------------------------------------
+# Guards the one failure that an expensive run can hide: a retrieval-memory agent
+# that never opens its own memory (write-only graph), or an index that bloats into
+# an O(hands) narrative instead of staying a slim pointer set. Both happened in the
+# (now archived) phase2-wiki-vs-akg-150 run and went unnoticed for 3 hours.
+#
+# Runs by default (not behind a flag) — it is the safety net. read_calls == 0 is the
+# load-bearing, hard-fail check; index_lines is a softer bloat warning.
+
+# Decision-time read tools, per substrate. These are counted from eval.json
+# seats[].tool_calls, which collect.go populates from the DECISION session only
+# (pi-session.jsonl), not the update session — so a non-zero count means the agent
+# actually drilled into its memory while deciding.
+READ_TOOLS = {
+    "akg_get_node", "akg_get_nodes", "akg_list_nodes",  # llm-akg-durable
+    "md_read_page", "md_list_pages",                     # llm-md-wiki
+}
+# Agents that are SUPPOSED to retrieve. Non-retrieval strategies legitimately make
+# zero read calls, so flagging them would be noise.
+RETRIEVAL_STRATEGIES = {"llm-akg-durable", "llm-md-wiki"}
+# Soft bloat threshold for the index body, in lines. The agents' prompts budget the
+# index at ~25 lines of body; villain.md also carries YAML frontmatter + headers, so
+# we warn only on clear narrative accumulation, not borderline.
+INDEX_LINE_WARN = 40
+
+
+def index_line_count(sid, seat_name):
+    """Lines in the agent's root-index body. AKG: opponent/villain node body from
+    memory-export.json. Wiki: wiki/villain.md. Returns None if unavailable."""
+    base = os.path.join(session_dir(sid), "agents", seat_name)
+    export = os.path.join(base, "memory-export.json")
+    if os.path.exists(export):
+        try:
+            with open(export) as f:
+                doc = json.load(f)
+            for node in doc.get("nodes", []):
+                if node.get("type") == "opponent" and node.get("id") == "villain":
+                    return len((node.get("body") or "").splitlines())
+        except (json.JSONDecodeError, OSError):
+            return None
+    villain = os.path.join(base, "wiki", "villain.md")
+    if os.path.exists(villain):
+        try:
+            with open(villain) as f:
+                return len(f.read().splitlines())
+        except OSError:
+            return None
+    return None
+
+
+def tripwire_rows(exp):
+    """Per (session, retrieval-seat) read-usage + index-size diagnostics."""
+    rows = []
+    for label, sid in session_ids(exp):
+        try:
+            ev = load_eval(sid)
+        except FileNotFoundError:
+            rows.append({"label": label, "sid": sid, "seat": "-", "missing": True})
+            continue
+        for seat in ev.get("seats", []):
+            name = seat.get("name", "")
+            if name not in RETRIEVAL_STRATEGIES:
+                continue
+            tool_calls = seat.get("tool_calls") or {}
+            reads = sum(c for t, c in tool_calls.items() if t in READ_TOOLS)
+            idx = index_line_count(sid, name)
+            flags = []
+            if reads == 0:
+                flags.append("ZERO-READS")
+            if idx is not None and idx > INDEX_LINE_WARN:
+                flags.append(f"INDEX>{INDEX_LINE_WARN}L")
+            rows.append({
+                "label": label, "sid": sid, "seat": name,
+                "reads": reads, "index_lines": idx, "flags": flags,
+            })
+    return rows
+
+
+def format_tripwire(rows):
+    hard = any("ZERO-READS" in r.get("flags", []) for r in rows if not r.get("missing"))
+    soft = any(f.startswith("INDEX>") for r in rows if not r.get("missing") for f in r.get("flags", []))
+    checked = [r for r in rows if not r.get("missing") and r.get("seat") != "-"]
+    if not checked:
+        verdict = "NO RETRIEVAL-MEMORY SEATS FOUND (nothing to check)"
+    elif hard:
+        verdict = "FAIL — a retrieval agent made ZERO decision-time reads (memory is write-only)"
+    elif soft:
+        verdict = "WARN — index body over budget (accumulating narrative)"
+    else:
+        verdict = "PASS — all retrieval agents read their memory; indexes within budget"
+
+    lines = [f"TRIPWIRE: {verdict}", ""]
+    lines.append(f"{'Group':<10} {'Session':<40} {'Seat':<18} {'reads':>6} {'idx_lines':>9}  flags")
+    lines.append("-" * 100)
+    for r in rows:
+        if r.get("missing"):
+            lines.append(f"{r['label']:<10} {r['sid']:<40} {'(eval.json MISSING)'}")
+            continue
+        idx = "?" if r["index_lines"] is None else str(r["index_lines"])
+        flags = ",".join(r["flags"]) if r["flags"] else "ok"
+        lines.append(
+            f"{r['label']:<10} {r['sid']:<40} {r['seat']:<18} {r['reads']:>6} {idx:>9}  {flags}"
+        )
+    lines.append("-" * 100)
+    return "\n".join(lines)
+
+
 def count_reasoning_mentions(session_path, keyword):
     mentions = 0
     total_turns = 0
@@ -531,11 +638,15 @@ def main():
         Strategies : {strategies}
         Hands/session: {exp.get('hands_per_session', '?')}""")
 
+    tripwire_text = format_tripwire(tripwire_rows(exp))
+
     print(highlights)
+    print()
+    print(tripwire_text)
     print()
     print(table_text)
 
-    extra_sections = []
+    extra_sections = [("Tripwire (read-usage + index size)", tripwire_text)]
 
     if args.traces is not None:
         keyword = args.traces if args.traces != "pattern" else "pattern"
