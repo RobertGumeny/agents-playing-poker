@@ -109,9 +109,11 @@ The only write happens after a completed hand, in `MemoryPolicy.afterHandEnd`:
 
 1. Build a short, plain summary of the completed hand from `CompletedHandContext` (reuse
    `llm-fullhistory`'s hand formatting).
-2. Start a fresh session and give it the page list, the current root page, the hand
-   summary, and the same page-reading tool the decision agent uses, so it can pull up the
-   specific pages it needs to change.
+2. Start a fresh session and give it the current root page and the hand summary, plus the same
+   page-reading tools the decision agent uses (`md_list_pages` / `md_read_page`), so it can
+   discover and pull up the specific pages it needs to change. The update prompt injects only the
+   root page and the hand summary — not an eager page list; the model discovers pages on demand,
+   symmetric with the active-retrieval decision path and with `llm-akg-durable-spec.md`.
 3. The model returns a set of page writes (create/replace by page name): update the root
    summary, update or create the relevant pattern pages, optionally add a hand page, and
    keep the `[[links]]` between them.

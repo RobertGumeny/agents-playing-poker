@@ -81,9 +81,24 @@ not a schema the runtime enforces or fills in.
 Identity: `opponent/villain`
 
 The runtime seeds this node (with a `(no reads yet)` body) so the model always has a stable
-index to start from, mirroring the wiki agent's seeded `villain.md`. The model is told to keep
-this node's body as a current opponent summary and to connect deeper nodes to it with edges.
-`beforeDecision` injects this node's body as the decision-time index.
+index to start from, mirroring the wiki agent's seeded `villain.md`. `beforeDecision` injects
+this node's body — and only this node's body — as the decision-time index.
+
+This node is a **pure index**, exactly as `villain.md` is in `llm-md-wiki-spec.md`; the two
+agents follow the same discipline and differ only in substrate. Allowed content only:
+
+- a short **stats** summary (body lines or `meta`): up to ~10 one-line tendencies, each naming
+  the tendency node it points to (the AKG analogue of the wiki's `## Stats` bullets with
+  `[[links]]`);
+- a **directory** of the nodes that exist, one line each with a one-sentence description;
+- optional **notable-hand** pointers (edges to hand nodes) only for hands that changed the
+  model — a first observation, a contradiction, or an unusual showdown.
+
+**Forbidden in the index node**: per-hand narratives, action logs, hand histories, routine
+evidence entries. If the index body exceeds ~25 lines the model is accumulating narrative and
+must move detail into tendency nodes. This bound is what keeps the injected decision-time
+payload flat instead of growing O(hands); detail lives in the tendency nodes and is reached by
+drilling in (see *Decision-time retrieval tools*).
 
 ### Model-authored nodes and edges
 
@@ -111,6 +126,14 @@ open vocabulary they could not describe):
 
 Builtin Pi tools are disabled for this agent. Tool results are JSON-serializable and
 deterministic for empty/unknown cases (missing nodes return `found:false`).
+
+The decision system prompt requires **active retrieval**, mirroring the wiki agent's mandatory
+link-following: the inline index is an index, not the answer. Before deciding, the model follows
+the index's edges and reads the relevant tendency nodes with `akg_get_node` / `akg_get_nodes`
+(using `akg_list_nodes` to discover what else is recorded), rather than relying on the inline
+index summary alone. The root body is already injected, so the model does not re-fetch it. This
+keeps the index slim and the per-decision cost bounded, since detail is pulled on demand only
+for spots that need it — the graph analogue of `md_read_page` in `llm-md-wiki-spec.md`.
 
 ## Post-hand update tools and inconsistency diagnostics
 
