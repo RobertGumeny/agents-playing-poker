@@ -112,6 +112,13 @@ The headline matchup is teed up as a checked-in pairwise definition at `research
 
 The output of this phase is the **frontier baseline** that Phase 3 must beat.
 
+> **🚧 Headline result — `phase2-wiki-vs-akg` (to fill in after tonight's run).**
+>
+> _Summarize the fidelity-vs-cost frontier for `llm-md-wiki` vs `llm-akg-durable` once the run completes. Pull from the generated report at `research/experiments/phase2-wiki-vs-akg/reports/`. Cover:_
+> - _Profile fidelity vs. hand count — did the linked-prose wiki hold opponent-model accuracy, or did it drift, and where did it peel away from ground truth?_
+> - _Tokens per decision vs. hand count — flat for AKG vs. growth for the wiki?_
+> - _The one-line takeaway: can a knowledge graph faked in linked prose match a typed, queryable one — and at what cost?_
+
 ### Phase 3 — Can AKG evolve to react to a *shifting* opponent? 🔬 After Phase 2
 
 Today's durable agent profiles an opponent's all-time *average*, so it structurally cannot notice an opponent changing gears. This phase asks whether AKG can — and splits cleanly into two halves:
