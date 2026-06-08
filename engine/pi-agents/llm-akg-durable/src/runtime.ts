@@ -1,3 +1,6 @@
+// Decision-session wiring for the durable agent: builds the Pi session factory that registers
+// the read-only AKG query tools and the active-retrieval decision prompt.
+
 import {
   type AgentSessionEvent,
   AuthStorage,

@@ -1,3 +1,7 @@
+// Post-hand update session for the durable agent: a fresh one-shot Pi session with the AKG
+// read+write tools that lets the model fold the finished hand into the graph. Records the
+// update transcript and the graph-rot diagnostic separately from decision-time cost.
+
 import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 

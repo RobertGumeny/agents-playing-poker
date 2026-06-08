@@ -1,3 +1,6 @@
+// AKG tool definitions for the durable agent: read-only graph queries used at decision time,
+// plus the write tools registered only for the post-hand update session.
+
 import { Type } from "typebox";
 import { defineTool, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 import type { Edge, Node, Store } from "akg-ts";

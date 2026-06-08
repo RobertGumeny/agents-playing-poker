@@ -1,3 +1,6 @@
+// Durable AKG memory policy: injects the opponent graph's root index before each decision,
+// and on hand end hands the completed hand to the model-driven post-hand graph update.
+
 import { type Store } from "akg-ts";
 
 import type { CompletedHandContext, DecisionContext, MemoryPolicy, PromptAugmentation } from "@agent-poker/pi-agent-shared";

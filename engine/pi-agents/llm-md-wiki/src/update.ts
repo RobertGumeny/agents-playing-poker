@@ -1,3 +1,7 @@
+// Post-hand update session for the wiki agent: a fresh one-shot Pi session with the page
+// read+write tools that lets the model fold the finished hand into the linked pages. Records
+// the update transcript separately from decision-time cost.
+
 import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 

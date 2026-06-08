@@ -1,3 +1,6 @@
+// Decision-session wiring for the wiki agent: builds the Pi session factory that registers the
+// read-only page-reading tools and the link-following decision prompt.
+
 import {
   type AgentSessionEvent,
   AuthStorage,

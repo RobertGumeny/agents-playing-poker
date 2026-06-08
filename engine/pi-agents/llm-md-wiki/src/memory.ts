@@ -1,3 +1,6 @@
+// Linked-markdown ("wiki") memory policy: injects only the root index page before each
+// decision, and on hand end hands the completed hand to the model-driven post-hand page update.
+
 import type { CompletedHandContext, DecisionContext, MemoryPolicy, PromptAugmentation } from "@agent-poker/pi-agent-shared";
 import { formatCompletedHand } from "@agent-poker/pi-agent-shared";
 

@@ -1,3 +1,6 @@
+// Markdown page tool definitions for the wiki agent: read-only page list/read used at decision
+// time, plus the page-write tool registered only for the post-hand update session.
+
 import { Type } from "typebox";
 import { defineTool, type ToolDefinition } from "@earendil-works/pi-coding-agent";
 
