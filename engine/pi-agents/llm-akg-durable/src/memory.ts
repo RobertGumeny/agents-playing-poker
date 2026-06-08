@@ -21,6 +21,7 @@ export class AkgDurableMemoryPolicy implements MemoryPolicy {
     return this.serverMemoryDir;
   }
 
+  // Before each decision, inject the opponent index node's body as a system prompt section. This keeps it front and center for the model, and encourages the model to use the AKG tools to explore it further if needed — instead of trying to keep the whole graph in its head for every single hand.
   async beforeDecision(context: DecisionContext): Promise<PromptAugmentation> {
     this.serverMemoryDir = context.state.session?.memoryDir;
     const store = await this.getStore(this.serverMemoryDir);
@@ -37,6 +38,7 @@ export class AkgDurableMemoryPolicy implements MemoryPolicy {
     return { sections: [INDEX_HEADER, body] };
   }
 
+  // After each hand, run a durable update that hands off the completed hand data, which the agent can process and use to update their opponent profile. This keeps the graph up to date with the latest tendencies for the opponent, without needing to wait for the (potentially slow) graph update to complete during the critical decision-making phase of the next hand.
   async afterHandEnd(context: CompletedHandContext): Promise<void> {
     const memoryDir = context.state.session?.memoryDir ?? this.serverMemoryDir;
     this.serverMemoryDir = memoryDir;
