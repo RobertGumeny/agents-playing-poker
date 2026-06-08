@@ -14,7 +14,7 @@ In the ladder documented in [`research.md`](research.md):
 - `llm-md-single` keeps one whole-file blob the model rewrites each hand.
 - `llm-md-wiki` splits the notes into **linked pages the agent pulls up on demand** —
   better structure, still prose.
-- `llm-akg-durable` is the typed, queryable graph with **computed** counts.
+- `llm-akg-durable` is the typed, queryable graph — the same model-maintained counts, but stored as queryable fields instead of re-tallied prose.
 
 The headline experiment of the whole project is **`llm-md-wiki` vs `llm-akg-durable`**:
 if a linked pile of markdown can hold an accurate, cheap-to-look-up opponent model as
@@ -57,6 +57,8 @@ Important files:
 - `src/tools.ts` — read-only page-reading Pi tools
 - `src/update.ts` — builds the update session and the prompt that asks the model to
   update the pages
+- `src/runtime.ts` — decision engine and `sessionFactory` (the custom-tools path,
+  mirroring `llm-akg-durable`)
 - `test/` — unit coverage (page read/list tools, root injection, update-prompt assembly,
   link-extraction helper, fake-decision smoke)
 

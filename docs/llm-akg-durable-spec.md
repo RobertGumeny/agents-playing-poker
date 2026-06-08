@@ -23,6 +23,7 @@ Important files:
 - `src/memory.ts` — durable memory policy and post-hand writes
 - `src/tools.ts` — AKG read-tool definitions
 - `src/runtime.ts` — Pi session creation and prompt contract
+- `src/update.ts` — post-hand update session, write-tool wiring, and the graph-rot diagnostic
 - `test/` — deterministic unit and subprocess coverage
 
 The stable executable name is `poker-agent-llm-akg-durable`. The Go runner resolves the strategy alias `llm-akg-durable` for experiment sessions.
