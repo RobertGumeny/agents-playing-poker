@@ -74,9 +74,10 @@ type PiSessionMessage struct {
 }
 
 type PiSessionContentItem struct {
-	Type string `json:"type"`
-	Name string `json:"name,omitempty"`
-	Text string `json:"text,omitempty"`
+	Type     string `json:"type"`
+	Name     string `json:"name,omitempty"`
+	Text     string `json:"text,omitempty"`
+	Thinking string `json:"thinking,omitempty"` // reasoning text on thinking-type items
 }
 
 type PiUsage struct {

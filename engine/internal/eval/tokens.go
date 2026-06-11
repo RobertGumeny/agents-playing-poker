@@ -40,6 +40,23 @@ var (
 	streetRE       = regexp.MustCompile(`Street:\s*(\w+)`)
 )
 
+// ParseDecisionHandStreet extracts the hand number and street from a decision
+// prompt's prose ("Hand: N", "Street: <street>"). hand is nil when absent. It is
+// the legacy-trace fallback for hand attribution (modern traces carry an explicit
+// hand_boundary marker); shared by token attribution and the replay gatherer so
+// the regexes do not drift between the two readers.
+func ParseDecisionHandStreet(text string) (hand *int, street string) {
+	if m := handDecisionRE.FindStringSubmatch(text); m != nil {
+		if n, err := strconv.Atoi(m[1]); err == nil {
+			hand = &n
+		}
+	}
+	if m := streetRE.FindStringSubmatch(text); m != nil {
+		street = m[1]
+	}
+	return hand, street
+}
+
 // TokenCalls returns one row per Pi sub-session that carried assistant usage.
 // Sub-sessions are delimited by {"type":"session"} lines; a preceding
 // {"type":"hand_boundary"} marker carries the hand number for the group that
@@ -81,21 +98,18 @@ func buildTokenCall(sub []PiSessionEvent, kind string, markerHand *int) (TokenCa
 	}
 	text := firstUserText(sub)
 	hand := markerHand
-	if hand == nil {
-		handRE := handDecisionRE
-		if kind != "decision" {
-			handRE = handUpdateRE
+	street := ""
+	if kind == "decision" {
+		h, s := ParseDecisionHandStreet(text)
+		if hand == nil {
+			hand = h
 		}
-		if m := handRE.FindStringSubmatch(text); m != nil {
+		street = s
+	} else if hand == nil {
+		if m := handUpdateRE.FindStringSubmatch(text); m != nil {
 			if n, err := strconv.Atoi(m[1]); err == nil {
 				hand = &n
 			}
-		}
-	}
-	street := ""
-	if kind == "decision" {
-		if m := streetRE.FindStringSubmatch(text); m != nil {
-			street = m[1]
 		}
 	}
 	row := TokenCall{
