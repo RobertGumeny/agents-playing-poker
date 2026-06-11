@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Replay — {{.Title}}</title>
+<style>
+  body { font-family: ui-monospace, monospace; margin: 1.5rem; background: #f4f4f4; color: #111; }
+  h1 { font-size: 1.1rem; }
+  #transport { margin: 0.5rem 0 1rem; }
+  #transport button { font: inherit; padding: 0.25rem 0.6rem; margin-right: 0.3rem; }
+  #readout { margin-left: 0.5rem; color: #444; }
+  #table { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-width: 640px; }
+  .seat { border: 2px solid #999; padding: 0.6rem; background: #fff; }
+  .seat.acting { border-color: #c0392b; box-shadow: 0 0 0 2px #c0392b33; }
+  #board, #pot { grid-column: 1 / 3; border: 1px dashed #999; padding: 0.5rem; background: #fff; }
+  .card { display: inline-block; border: 1px solid #555; padding: 0.1rem 0.35rem; background: #eee; margin-right: 0.2rem; }
+  #thinking-panel { margin-top: 1rem; max-width: 640px; border: 1px solid #bbb; padding: 0.75rem; background: #fff; min-height: 4rem; }
+  .badge { display: inline-block; padding: 0.15rem 0.5rem; font-weight: bold; color: #fff; border-radius: 3px; }
+  .badge.recalling { background: #2c7; }
+  .badge.deciding { background: #888; }
+  .bubble { margin-top: 0.6rem; padding: 0.5rem; background: #eef6ff; border-left: 3px solid #39f; white-space: pre-wrap; }
+  .snap { margin-top: 0.6rem; color: #999; font-style: italic; }
+  .recalled { margin-top: 0.6rem; padding: 0.5rem; background: #f7f0d8; border-left: 3px solid #ca3; white-space: pre-wrap; overflow-x: auto; }
+  details { margin-top: 0.6rem; }
+  details pre { white-space: pre-wrap; }
+  #summary { margin-top: 1.5rem; max-width: 720px; border-top: 2px solid #999; padding-top: 0.75rem; }
+  #summary h2 { font-size: 1rem; }
+  table.score { border-collapse: collapse; margin: 0.5rem 0; }
+  table.score th, table.score td { border: 1px solid #bbb; padding: 0.25rem 0.55rem; text-align: right; }
+  table.score th:first-child, table.score td:first-child { text-align: left; }
+  table.score th { background: #eee; }
+  .pos { color: #2a7; } .neg { color: #c0392b; }
+  #chart { border: 1px solid #bbb; background: #fff; margin-top: 0.5rem; }
+  #chart polyline { fill: none; stroke-width: 1.5; }
+  .legend span { display: inline-block; margin-right: 1rem; }
+  .swatch { display: inline-block; width: 0.8rem; height: 0.8rem; vertical-align: middle; margin-right: 0.25rem; }
+</style>
+</head>
+<body>
+<h1>Poker replay (graybox) — session <span id="sid"></span></h1>
+<div id="transport">
+  <button id="prevHand">⬅ hand</button>
+  <button id="nextHand">hand ➡</button>
+  <button id="prevAction">⬅ action</button>
+  <button id="nextAction">action ➡</button>
+  <span id="readout"></span>
+  <a href="#summary" style="margin-left:0.75rem">▾ summary</a>
+</div>
+<div id="table">
+  <div class="seat" id="seat0"></div>
+  <div class="seat" id="seat1"></div>
+  <div id="board"></div>
+  <div id="pot"></div>
+</div>
+<div id="thinking-panel"></div>
+
+<div id="summary">
+  <h2>Session summary</h2>
+  <div id="summary-meta"></div>
+  <table class="score" id="scoreboard"></table>
+  <div class="legend" id="chart-legend"></div>
+  <svg id="chart" width="700" height="240" viewBox="0 0 700 240"></svg>
+  <div id="chart-caption" style="color:#666"></div>
+</div>
+
+<script type="application/json" id="replay-model">{{.ModelJSON}}</script>
+<script>
+const model = JSON.parse(document.getElementById('replay-model').textContent);
+const seats = model.session.seats;
+let handIdx = 0, actionIdx = 0;
+
+document.getElementById('sid').textContent = model.session.sessionId;
+
+const STREET_BOARD = { preflop: 0, flop: 3, turn: 4, river: 5 };
+const SEAT_COLORS = ['#39f', '#c0392b', '#2a7', '#e90'];
+
+function currentHand() { return model.hands[handIdx]; }
+function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+function render() {
+  const hand = currentHand();
+  const actions = hand.actions || [];
+  if (actionIdx >= actions.length) actionIdx = Math.max(0, actions.length - 1);
+  if (actionIdx < 0) actionIdx = 0;
+  const act = actions[actionIdx] || { street: 'preflop', action: '—', seat: -1 };
+
+  document.getElementById('readout').textContent =
+    `hand ${handIdx + 1}/${model.hands.length} — action ${actions.length ? actionIdx + 1 : 0}/${actions.length}` +
+    ` (${act.street} ${act.action}${act.amount != null ? ' ' + act.amount : ''})`;
+
+  seats.forEach(s => {
+    const el = document.getElementById('seat' + s.seat);
+    if (!el) return;
+    const hole = (hand.holeCards[s.seat] || []).join(' ');
+    const stack = hand.stacksStart[s.seat];
+    const dealer = hand.dealerSeat === s.seat ? ' (D)' : '';
+    el.className = 'seat' + (act.seat === s.seat ? ' acting' : '');
+    el.innerHTML = `<b>${escapeHtml(s.name)}</b>${dealer}<br>stack ${stack}<br>cards ${hole || '—'}`;
+  });
+
+  const reveal = STREET_BOARD[act.street] != null ? STREET_BOARD[act.street] : (hand.board || []).length;
+  const cards = (hand.board || []).slice(0, reveal);
+  document.getElementById('board').innerHTML =
+    'board: ' + (cards.length ? cards.map(c => `<span class="card">${escapeHtml(c)}</span>`).join('') : '—');
+  document.getElementById('pot').textContent = 'gross pot: ' + hand.grossPotSize;
+
+  renderOverlay(act);
+}
+
+function renderOverlay(act) {
+  const panel = document.getElementById('thinking-panel');
+  if (act.action === 'post_blind') { panel.innerHTML = '<i>blind — no decision</i>'; return; }
+  const o = act.overlay;
+  if (!o) { panel.innerHTML = '<i>no decision overlay aligned to this action</i>'; return; }
+  let html = `<span class="badge ${o.memoryIndicator}">${o.memoryIndicator.toUpperCase()}</span>`;
+  if (o.thinkingText) html += `<div class="bubble">💭 ${escapeHtml(o.thinkingText)}</div>`;
+  else html += `<div class="snap">(snap action — no reasoning recorded)</div>`;
+  if (o.recalledFact) html += `<pre class="recalled">📓 ${escapeHtml(o.recalledFact)}</pre>`;
+  if (o.injectedSummaryGist) html += `<details><summary>injected summary (in prompt)</summary><pre>${escapeHtml(o.injectedSummaryGist)}</pre></details>`;
+  panel.innerHTML = html;
+}
+
+function renderSummary() {
+  const s = model.summary;
+  if (!s || !s.seats || !s.seats.length) { document.getElementById('summary').style.display = 'none'; return; }
+  document.getElementById('summary-meta').innerHTML =
+    `hands ${s.handCount} · showdown rate ${(s.showdownRate * 100).toFixed(1)}%` +
+    ` · preflop-only ${(s.preflopOnlyRate * 100).toFixed(1)}% · biggest swing hand #${s.biggestSwingHand}`;
+
+  let rows = '<tr><th>agent</th><th>chips Δ</th><th>read cov.</th><th>reads</th><th>fidelity err</th><th>cost $</th></tr>';
+  s.seats.forEach(seat => {
+    const cls = seat.chipsDelta >= 0 ? 'pos' : 'neg';
+    rows += `<tr><td>${escapeHtml(seat.name)}</td>` +
+      `<td class="${cls}">${seat.chipsDelta >= 0 ? '+' : ''}${seat.chipsDelta}</td>` +
+      `<td>${(seat.readCoverage * 100).toFixed(0)}% (${seat.decisionsWithRead}/${seat.decisions})</td>` +
+      `<td>${seat.totalReads}</td>` +
+      `<td>${seat.fidelityErrors}/${seat.fidelityChecked}</td>` +
+      `<td>${seat.totalCost.toFixed(3)}</td></tr>`;
+  });
+  document.getElementById('scoreboard').innerHTML = rows;
+  renderChart(s.seats);
+}
+
+function renderChart(seats) {
+  const svg = document.getElementById('chart');
+  const W = 700, H = 240, pad = { l: 55, r: 10, t: 10, b: 28 };
+  let maxHand = 1, maxTok = 1;
+  seats.forEach(seat => (seat.costPoints || []).forEach(p => { maxHand = Math.max(maxHand, p.hand); maxTok = Math.max(maxTok, p.promptTokens); }));
+  const x = h => pad.l + (W - pad.l - pad.r) * (h - 1) / Math.max(1, maxHand - 1);
+  const y = t => H - pad.b - (H - pad.t - pad.b) * t / maxTok;
+  const parts = [];
+  parts.push(`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${H - pad.b}" stroke="#999"/>`);
+  parts.push(`<line x1="${pad.l}" y1="${H - pad.b}" x2="${W - pad.r}" y2="${H - pad.b}" stroke="#999"/>`);
+  parts.push(`<text x="${pad.l - 6}" y="${H - pad.b}" text-anchor="end" font-size="10">0</text>`);
+  parts.push(`<text x="${pad.l - 6}" y="${pad.t + 8}" text-anchor="end" font-size="10">${maxTok}</text>`);
+  parts.push(`<text x="${pad.l}" y="${H - pad.b + 14}" text-anchor="middle" font-size="10">1</text>`);
+  parts.push(`<text x="${W - pad.r}" y="${H - pad.b + 14}" text-anchor="end" font-size="10">${maxHand}</text>`);
+  parts.push(`<text x="14" y="${H / 2}" font-size="10" transform="rotate(-90 14 ${H / 2})" text-anchor="middle">prompt tokens</text>`);
+  const legend = [];
+  seats.forEach((seat, i) => {
+    const color = SEAT_COLORS[i % SEAT_COLORS.length];
+    const pts = (seat.costPoints || []).slice().sort((a, b) => a.hand - b.hand)
+      .map(p => `${x(p.hand).toFixed(1)},${y(p.promptTokens).toFixed(1)}`).join(' ');
+    if (pts) parts.push(`<polyline points="${pts}" stroke="${color}"/>`);
+    legend.push(`<span><span class="swatch" style="background:${color}"></span>${escapeHtml(seat.name)}</span>`);
+  });
+  svg.innerHTML = parts.join('');
+  document.getElementById('chart-legend').innerHTML = legend.join('');
+  document.getElementById('chart-caption').textContent =
+    'per-decision prompt context (tokens) vs hand number — steeper = context grows faster';
+}
+
+document.getElementById('prevHand').onclick = () => { if (handIdx > 0) { handIdx--; actionIdx = 0; render(); } };
+document.getElementById('nextHand').onclick = () => { if (handIdx < model.hands.length - 1) { handIdx++; actionIdx = 0; render(); } };
+document.getElementById('prevAction').onclick = () => { if (actionIdx > 0) { actionIdx--; render(); } };
+document.getElementById('nextAction').onclick = () => { if (actionIdx < currentHand().actions.length - 1) { actionIdx++; render(); } };
+render();
+renderSummary();
+</script>
+</body>
+</html>

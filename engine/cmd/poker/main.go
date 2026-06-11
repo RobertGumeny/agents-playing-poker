@@ -33,6 +33,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runStrategy(args[1:], stdout, stderr)
 	case "analyze":
 		return runAnalyze(args[1:], stdout, stderr)
+	case "replay":
+		return runReplay(args[1:], stdout, stderr)
 	default:
 		return fmt.Errorf("unknown subcommand %q — run 'poker help' for usage", args[0])
 	}
@@ -61,6 +63,8 @@ COMMANDS
 
   analyze hand <N> <session|trace>        show the trace context around hand N
   analyze traces <keyword> <session|trace> show assistant turns mentioning keyword
+
+  replay <session-dir> [-o out.html]      generate a self-contained HTML table replay
 
 QUICKSTART
   make install                            build and install the poker binary (one-time)
