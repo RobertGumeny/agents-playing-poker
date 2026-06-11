@@ -227,7 +227,7 @@ describe("llm-fullhistory package wiring", () => {
       payload: { action: "check" },
     });
 
-    const sessionLog = await readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8");
+    const sessionLog = await readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8");
     const lines = sessionLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(lines).toHaveLength(2);
     expect(lines[0]).toMatchObject({ session_scope: "hand", session_number: 1, hand_number: 1 });

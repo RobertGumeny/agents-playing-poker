@@ -1,3 +1,6 @@
+// Post-hand update session for the wiki agent: a fresh one-shot Pi session with the page
+// read+write tools that lets the model fold the finished hand into the linked pages. Records
+// the update transcript separately from decision-time cost.
 import { appendFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager, } from "@earendil-works/pi-coding-agent";
@@ -5,7 +8,7 @@ import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-p
 import { ensureRootPage, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages.js";
 import { createReadTools, createWriteTool } from "./tools.js";
 const STDERR_LOG = "stderr.log";
-const UPDATE_LOG = "update-session.jsonl";
+const UPDATE_LOG = "session-updates.jsonl";
 export const WIKI_UPDATE_SYSTEM_PROMPT = `You maintain a small wiki of linked markdown pages modeling one opponent in heads-up no-limit Texas Hold'em.
 Pages use YAML frontmatter and are connected by [[wiki links]].
 
@@ -165,7 +168,7 @@ async function createUpdateSession(options) {
 let updateExportCount = 0;
 async function exportUpdateLog(session, memoryDir) {
     await mkdir(memoryDir, { recursive: true });
-    const exportPath = path.join(memoryDir, `update-session-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
+    const exportPath = path.join(memoryDir, `session-updates-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
     const canonicalPath = path.join(memoryDir, UPDATE_LOG);
     session.exportToJsonl(exportPath);
     try {

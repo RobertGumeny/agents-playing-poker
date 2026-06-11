@@ -23,7 +23,7 @@ import { ensureRootNode, ROOT_ID, ROOT_TYPE } from "./graph.js";
 import { createReadTools, createWriteTools, type StoreProvider } from "./tools.js";
 
 const STDERR_LOG = "stderr.log";
-const UPDATE_LOG = "update-session.jsonl";
+const UPDATE_LOG = "session-updates.jsonl";
 
 export const DURABLE_UPDATE_SYSTEM_PROMPT = [
   "You maintain an AKG knowledge graph modeling one opponent in heads-up no-limit Texas Hold'em.",
@@ -213,7 +213,7 @@ let updateExportCount = 0;
 
 async function exportUpdateLog(session: PiSession, memoryDir: string): Promise<void> {
   await mkdir(memoryDir, { recursive: true });
-  const exportPath = path.join(memoryDir, `update-session-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
+  const exportPath = path.join(memoryDir, `session-updates-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
   const canonicalPath = path.join(memoryDir, UPDATE_LOG);
   session.exportToJsonl(exportPath);
   try {

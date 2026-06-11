@@ -162,6 +162,6 @@ describe("llm-stateless package wiring", () => {
       in_reply_to: "msg-3",
       payload: { action: "call", amount: 2 },
     });
-    await expect(readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8")).resolves.toContain('"type":"fake_pi_session"');
+    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toContain('"type":"fake_pi_session"');
   });
 });

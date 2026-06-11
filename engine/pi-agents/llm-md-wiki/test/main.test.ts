@@ -217,11 +217,11 @@ describe("llm-md-wiki package wiring", () => {
     expect(handPage.content).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
 
     // Update transcript is kept separate from the decision transcript.
-    const updateLog = await readFile(path.join(sessionDir, "update-session.jsonl"), "utf8");
+    const updateLog = await readFile(path.join(sessionDir, "session-updates.jsonl"), "utf8");
     expect(updateLog.trim().split("\n").filter((l) => l.length > 0).length).toBeGreaterThanOrEqual(1);
 
     // The second decision prompt injects the updated root index (which links to hand-1).
-    const sessionLog = await readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8");
+    const sessionLog = await readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8");
     const lines = sessionLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(lines).toHaveLength(2);
     expect(String(lines[1].prompt)).toContain("[[hands/hand-1]]");

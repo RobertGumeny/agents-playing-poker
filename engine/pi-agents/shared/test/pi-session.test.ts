@@ -42,11 +42,11 @@ describe("PiDecisionEngine", () => {
 
     expect(sessionFactory).toHaveBeenCalledTimes(2);
     expect(exportedPaths).toEqual([
-      path.join(sessionDir, "pi-session-export-0001.jsonl"),
-      path.join(sessionDir, "pi-session-export-0002.jsonl"),
+      path.join(sessionDir, "session-decisions-export-0001.jsonl"),
+      path.join(sessionDir, "session-decisions-export-0002.jsonl"),
     ]);
-    await expect(readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8")).resolves.toBe('{"decision":1}\n{"decision":2}\n');
-    await expect(readdir(sessionDir)).resolves.toEqual(["pi-session.jsonl"]);
+    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"decision":1}\n{"decision":2}\n');
+    await expect(readdir(sessionDir)).resolves.toEqual(["session-decisions.jsonl"]);
   });
 
   it("reuses one Pi session across multiple decisions in a hand and resets it at hand end", async () => {
@@ -91,10 +91,10 @@ describe("PiDecisionEngine", () => {
     await engine.onSessionEnd?.();
 
     expect(exportedPaths).toEqual([
-      path.join(sessionDir, "pi-session-export-0001.jsonl"),
-      path.join(sessionDir, "pi-session-export-0002.jsonl"),
+      path.join(sessionDir, "session-decisions-export-0001.jsonl"),
+      path.join(sessionDir, "session-decisions-export-0002.jsonl"),
     ]);
-    await expect(readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8")).resolves.toBe('{"session":1}\n{"session":2}\n');
+    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"session":1}\n{"session":2}\n');
   });
 
   it("falls back to streamed assistant text when needed and surfaces malformed JSON", async () => {

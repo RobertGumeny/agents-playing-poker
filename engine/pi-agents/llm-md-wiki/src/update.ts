@@ -22,7 +22,7 @@ import { ensureRootPage, readPage, ROOT_PAGE, wikiDir, writePage } from "./pages
 import { createReadTools, createWriteTool } from "./tools.js";
 
 const STDERR_LOG = "stderr.log";
-const UPDATE_LOG = "update-session.jsonl";
+const UPDATE_LOG = "session-updates.jsonl";
 
 export const WIKI_UPDATE_SYSTEM_PROMPT = `You maintain a small wiki of linked markdown pages modeling one opponent in heads-up no-limit Texas Hold'em.
 Pages use YAML frontmatter and are connected by [[wiki links]].
@@ -212,7 +212,7 @@ let updateExportCount = 0;
 
 async function exportUpdateLog(session: PiSession, memoryDir: string): Promise<void> {
   await mkdir(memoryDir, { recursive: true });
-  const exportPath = path.join(memoryDir, `update-session-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
+  const exportPath = path.join(memoryDir, `session-updates-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
   const canonicalPath = path.join(memoryDir, UPDATE_LOG);
   session.exportToJsonl(exportPath);
   try {

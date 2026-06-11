@@ -26,7 +26,7 @@ func TestCollectSessionFromFixtureArtifacts(t *testing.T) {
 	if summary.SourceArtifacts.Manifest != "manifest.json" || summary.SourceArtifacts.Hands != "hands.jsonl" {
 		t.Fatalf("source artifacts = %#v, want manifest/hands relative paths", summary.SourceArtifacts)
 	}
-	if got := summary.SourceArtifacts.Agents["memory-agent"]; got.PiSession == nil || *got.PiSession != "agents/memory-agent/pi-session.jsonl" || got.MemoryExport == nil || *got.MemoryExport != "agents/memory-agent/memory-export.json" || got.Stderr == nil || *got.Stderr != "agents/memory-agent/stderr.log" {
+	if got := summary.SourceArtifacts.Agents["memory-agent"]; got.PiSession == nil || *got.PiSession != "agents/memory-agent/session-decisions.jsonl" || got.MemoryExport == nil || *got.MemoryExport != "agents/memory-agent/memory-export.json" || got.Stderr == nil || *got.Stderr != "agents/memory-agent/stderr.log" {
 		t.Fatalf("memory-agent source artifacts = %#v, want relative pi/memory/stderr paths", got)
 	}
 	if got := summary.SourceArtifacts.Agents["plain-agent"]; got.PiSession != nil || got.MemoryExport != nil || got.Stderr != nil {

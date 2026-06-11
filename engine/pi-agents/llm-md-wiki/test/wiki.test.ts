@@ -141,7 +141,7 @@ describe("runWikiUpdate scripted (fake) mode", () => {
 
     expect(await listPages(wikiDir(dir))).toEqual(["hands/hand-1", "villain"]);
 
-    const updateLog = await readFile(path.join(dir, "update-session.jsonl"), "utf8");
+    const updateLog = await readFile(path.join(dir, "session-updates.jsonl"), "utf8");
     const entries = updateLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(entries[0]).toMatchObject({ type: "fake_update_session", hand_number: 1 });
   });

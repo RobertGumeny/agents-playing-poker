@@ -243,7 +243,7 @@ describe("runDurableUpdate scripted (fake) mode", () => {
     expect(reopened.getNode(ROOT_TYPE, ROOT_ID)!.body).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
     expect(reopened.outboundEdges({ type: ROOT_TYPE, id: ROOT_ID }, "has_hand")).toHaveLength(1);
 
-    const updateLog = await readFile(join(tmpDir, "update-session.jsonl"), "utf8");
+    const updateLog = await readFile(join(tmpDir, "session-updates.jsonl"), "utf8");
     const entries = updateLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(entries[0]).toMatchObject({ type: "fake_update_session", hand_number: 1 });
   });

@@ -4,7 +4,7 @@ import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, Mo
 import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-poker/pi-agent-shared";
 export const NOTES_FILENAME = "notes.md";
 const STDERR_LOG = "stderr.log";
-const UPDATE_LOG = "update-session.jsonl";
+const UPDATE_LOG = "session-updates.jsonl";
 export const UPDATE_SYSTEM_PROMPT = [
     "You maintain a single markdown file of notes about one opponent in heads-up no-limit Texas Hold'em.",
     "You are given your current notes and a plain summary of the hand that just finished.",
@@ -151,7 +151,7 @@ async function createUpdateSession(options) {
 }
 async function exportUpdateLog(session, memoryDir) {
     await mkdir(memoryDir, { recursive: true });
-    const exportPath = path.join(memoryDir, `update-session-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
+    const exportPath = path.join(memoryDir, `session-updates-export-${String(++updateExportCount).padStart(4, "0")}.jsonl`);
     const canonicalPath = path.join(memoryDir, UPDATE_LOG);
     session.exportToJsonl(exportPath);
     try {

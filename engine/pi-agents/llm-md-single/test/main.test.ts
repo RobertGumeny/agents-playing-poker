@@ -210,12 +210,12 @@ describe("llm-md-single package wiring", () => {
     expect(notes).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
 
     // The update transcript is kept separate from the decision transcript.
-    const updateLog = await readFile(path.join(sessionDir, "update-session.jsonl"), "utf8");
+    const updateLog = await readFile(path.join(sessionDir, "session-updates.jsonl"), "utf8");
     const updateEntries = updateLog.trim().split("\n").filter((l) => l.length > 0);
     expect(updateEntries.length).toBeGreaterThanOrEqual(1);
 
     // The second decision prompt contains the notes rewritten after hand 1.
-    const sessionLog = await readFile(path.join(sessionDir, "pi-session.jsonl"), "utf8");
+    const sessionLog = await readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8");
     const lines = sessionLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(lines).toHaveLength(2);
     expect(String(lines[0].prompt)).toContain("none yet.");

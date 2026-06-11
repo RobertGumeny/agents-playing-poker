@@ -229,7 +229,7 @@ export class ScriptedDecisionEngine implements DecisionEngine {
 
     await mkdir(sessionDir, { recursive: true });
     await appendFile(
-      path.join(sessionDir, "pi-session.jsonl"),
+      path.join(sessionDir, "session-decisions.jsonl"),
       `${JSON.stringify({
         type: "fake_pi_session",
         session_scope: this.options.sessionScope ?? "decision",
@@ -315,8 +315,8 @@ async function persistSessionLog(session: PiSession, sessionDir: string | undefi
   if (!sessionDir) return;
 
   await mkdir(sessionDir, { recursive: true });
-  const exportPath = path.join(sessionDir, `pi-session-export-${String(exportCount).padStart(4, "0")}.jsonl`);
-  const canonicalPath = path.join(sessionDir, "pi-session.jsonl");
+  const exportPath = path.join(sessionDir, `session-decisions-export-${String(exportCount).padStart(4, "0")}.jsonl`);
+  const canonicalPath = path.join(sessionDir, "session-decisions.jsonl");
   session.exportToJsonl(exportPath);
   const exported = await readFile(exportPath, "utf8");
   if (exported.length > 0) {

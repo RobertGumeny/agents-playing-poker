@@ -108,7 +108,7 @@ describe("runNotesUpdate scripted (fake) mode", () => {
     expect(notes).toContain("## Hand 1");
     expect(notes).toContain("hand=1 | hero_pos=sb/button | hero_hole=As Kh");
 
-    const updateLog = await readFile(path.join(dir, "update-session.jsonl"), "utf8");
+    const updateLog = await readFile(path.join(dir, "session-updates.jsonl"), "utf8");
     const entries = updateLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ type: "fake_update_session", hand_number: 1, notes_written: true });

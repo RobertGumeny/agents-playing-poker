@@ -1,8 +1,6 @@
 package eval
 
 import (
-	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -12,8 +10,8 @@ import (
 // loadUpdateTokenCalls reads the optional post-hand update trace and extracts its
 // token calls. Missing/unreadable files yield no rows (non-fatal).
 func loadUpdateTokenCalls(agentDir string) []TokenCall {
-	path := filepath.Join(agentDir, updateSessionFileName)
-	if _, err := os.Stat(path); err != nil {
+	path := resolveAgentArtifact(agentDir, updateSessionFileName, legacyUpdateFileName)
+	if path == "" {
 		return nil
 	}
 	log, err := ReadPiSessionLog(path)

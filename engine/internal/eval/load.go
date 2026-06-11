@@ -14,11 +14,26 @@ import (
 )
 
 const (
-	piSessionFileName     = "pi-session.jsonl"
-	updateSessionFileName = "update-session.jsonl"
-	memoryExportFileName  = "memory-export.json"
-	stderrFileName        = "stderr.log"
+	piSessionFileName       = "session-decisions.jsonl"
+	legacyPiSessionFileName = "pi-session.jsonl"
+	updateSessionFileName   = "session-updates.jsonl"
+	legacyUpdateFileName    = "update-session.jsonl"
+	memoryExportFileName    = "memory-export.json"
+	stderrFileName          = "stderr.log"
 )
+
+// resolveAgentArtifact returns the path to an agent artifact, preferring the
+// current name and falling back to the legacy name so archived (pre-rename)
+// sessions still load. Returns "" if neither exists.
+func resolveAgentArtifact(agentDir, current, legacy string) string {
+	for _, name := range []string{current, legacy} {
+		path := filepath.Join(agentDir, name)
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
+}
 
 type SessionArtifacts struct {
 	SessionDir string
@@ -143,16 +158,13 @@ func loadAgentArtifacts(agentDir string, seat sessionlog.ManifestSeat) (AgentArt
 		Dir:  agentDir,
 	}
 
-	piSessionPath := filepath.Join(agentDir, piSessionFileName)
-	if _, err := os.Stat(piSessionPath); err == nil {
+	if piSessionPath := resolveAgentArtifact(agentDir, piSessionFileName, legacyPiSessionFileName); piSessionPath != "" {
 		log, err := ReadPiSessionLog(piSessionPath)
 		if err != nil {
 			return AgentArtifacts{}, fmt.Errorf("load eval agent %q: %w", seat.Name, err)
 		}
 		agent.PiSessionPath = piSessionPath
 		agent.PiSession = &log
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return AgentArtifacts{}, fmt.Errorf("load eval agent %q: stat %s: %w", seat.Name, piSessionPath, err)
 	}
 
 	memoryExportPath := filepath.Join(agentDir, memoryExportFileName)
