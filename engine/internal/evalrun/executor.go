@@ -51,6 +51,7 @@ func (e *Executor) Execute(ctx context.Context, cfg ExecuteConfig) error {
 		"-session-id", cfg.SessionID,
 		"-sessions-dir", cfg.SessionsDir,
 		"-thinking-level", cfg.ThinkingLevel,
+		"-in-experiment",
 	}
 	if cfg.Model != "" {
 		args = append(args, "-model", cfg.Model)

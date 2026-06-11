@@ -19,12 +19,11 @@ import {
 import { parseFakeDecisions, parsePiThinkingLevel, resolveModel } from "@agent-poker/pi-agent-shared";
 import type { Store } from "akg-ts";
 
-import { countGraphRot, ensureRootNode, ROOT_ID, ROOT_TYPE } from "./graph.js";
+import { ensureRootNode, ROOT_ID, ROOT_TYPE } from "./graph.js";
 import { createReadTools, createWriteTools, type StoreProvider } from "./tools.js";
 
 const STDERR_LOG = "stderr.log";
 const UPDATE_LOG = "update-session.jsonl";
-const DIAGNOSTICS_LOG = "diagnostics.jsonl";
 
 export const DURABLE_UPDATE_SYSTEM_PROMPT = [
   "You maintain an AKG knowledge graph modeling one opponent in heads-up no-limit Texas Hold'em.",
@@ -103,7 +102,6 @@ export async function runDurableUpdate(options: DurableUpdateOptions): Promise<v
   if (parseFakeDecisions(process.env.PI_POKER_FAKE_DECISIONS_JSON)) {
     const handId = applyScriptedUpdate(store, options);
     await store.commit();
-    await appendRotDiagnostic(store, options.memoryDir, options.handNumber);
     await appendUpdateLog(options.memoryDir, {
       type: "fake_update_session",
       hand_number: options.handNumber,
@@ -137,8 +135,6 @@ export async function runDurableUpdate(options: DurableUpdateOptions): Promise<v
       session.dispose();
     }
   }
-
-  await appendRotDiagnostic(store, options.memoryDir, options.handNumber);
 }
 
 function applyScriptedUpdate(store: Store, options: DurableUpdateOptions): string {
@@ -233,22 +229,6 @@ async function exportUpdateLog(session: PiSession, memoryDir: string): Promise<v
 async function appendUpdateLog(memoryDir: string, entry: Record<string, unknown>): Promise<void> {
   await mkdir(memoryDir, { recursive: true });
   await appendFile(path.join(memoryDir, UPDATE_LOG), `${JSON.stringify(entry)}\n`, "utf8");
-}
-
-// Best-effort structural diagnostic; counts rot, never repairs it, and never throws out of
-// the update path.
-async function appendRotDiagnostic(store: Store, memoryDir: string, handNumber: number): Promise<void> {
-  try {
-    const rot = countGraphRot(store);
-    await mkdir(memoryDir, { recursive: true });
-    await appendFile(
-      path.join(memoryDir, DIAGNOSTICS_LOG),
-      `${JSON.stringify({ type: "graph_rot", hand_number: handNumber, ...rot })}\n`,
-      "utf8",
-    );
-  } catch {
-    // diagnostics are best-effort
-  }
 }
 
 async function logStderr(memoryDir: string, message: string): Promise<void> {

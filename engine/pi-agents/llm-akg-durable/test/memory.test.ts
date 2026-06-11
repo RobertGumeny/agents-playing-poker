@@ -246,10 +246,5 @@ describe("runDurableUpdate scripted (fake) mode", () => {
     const updateLog = await readFile(join(tmpDir, "update-session.jsonl"), "utf8");
     const entries = updateLog.trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(entries[0]).toMatchObject({ type: "fake_update_session", hand_number: 1 });
-
-    const diagnostics = await readFile(join(tmpDir, "diagnostics.jsonl"), "utf8");
-    const diag = JSON.parse(diagnostics.trim().split("\n")[0]) as Record<string, unknown>;
-    expect(diag).toMatchObject({ type: "graph_rot", hand_number: 1 });
-    expect(diag.orphan_nodes).toBe(0);
   });
 });

@@ -15,6 +15,10 @@ research/archive/
 # Commit experiment definitions (<id>.json) and lightweight reports/ only.
 research/experiments/*/sessions/
 
+# Transient Pi session-export scratch (written, appended into the canonical log,
+# then rm'd; a surviving file is only crash debris).
+*-export-*.jsonl
+
 # Local calibration/iteration variants of the headline matchup — kept out of
 # the public set (the canonical experiments are phase2-wiki-vs-akg and the
 # fullhistory/mdsingle brackets).

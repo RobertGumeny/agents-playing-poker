@@ -46,6 +46,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	var hands int
 	var seed int64
 	var decisionDeadline time.Duration
+	var inExperiment bool
 
 	fs.StringVar(&agent0, "agent0", "", "seat 0 agent key")
 	fs.StringVar(&agent1, "agent1", "", "seat 1 agent key")
@@ -56,6 +57,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	fs.StringVar(&model, "model", "", "optional PI_POKER_MODEL for Pi agents")
 	fs.StringVar(&thinkingLevel, "thinking-level", "low", "PI_POKER_THINKING_LEVEL for Pi agents")
 	fs.DurationVar(&decisionDeadline, "decision-deadline", 30*time.Second, "per-decision deadline (e.g. 180s)")
+	fs.BoolVar(&inExperiment, "in-experiment", false, "running under an experiment; suppress the per-session report (the experiment report subsumes it)")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -102,7 +104,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if result.Completed {
+	if result.Completed && !inExperiment {
 		if reportErr := sessionreport.Generate(result.SessionDir); reportErr != nil {
 			fmt.Fprintf(os.Stderr, "warning: report generation failed: %v\n", reportErr)
 		}

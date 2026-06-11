@@ -430,6 +430,7 @@ func buildHandRecord(matchID string, hand *rules.HandState, actions []sessionlog
 		Actions:         actions,
 		ShowdownReached: hand.Result.Showdown,
 		Result:          chipDeltasToSessionLog(hand.Result.Deltas),
+		GrossPotSize:    hand.Pot(),
 	}
 }
 

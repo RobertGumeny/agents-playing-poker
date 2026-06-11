@@ -21,7 +21,7 @@ func Generate(sessionDir string) error {
 		return fmt.Errorf("generate report: %w", err)
 	}
 	md := buildMarkdown(manifest, hands)
-	if err := os.WriteFile(filepath.Join(sessionDir, "report.md"), []byte(md), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(sessionDir, "session-report.md"), []byte(md), 0o644); err != nil {
 		return fmt.Errorf("generate report: write: %w", err)
 	}
 	return nil

@@ -74,6 +74,7 @@ type HandRecord struct {
 	Actions         []HandAction     `json:"actions"`
 	ShowdownReached bool             `json:"showdown_reached"`
 	Result          []HandResult     `json:"result"`
+	GrossPotSize    int              `json:"gross_pot_size"`
 }
 
 type Writer struct {
