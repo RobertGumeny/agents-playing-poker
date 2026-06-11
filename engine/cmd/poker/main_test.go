@@ -26,8 +26,10 @@ func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 2,
-		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
-		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
+		Groups: []experiment.Group{
+			{SessionBase: "control", SessionsCount: 1, Seat0: "llm-stateless", Seat1: "heuristic"},
+			{SessionBase: "treatment", SessionsCount: 1, Seat0: "llm-akg-recent", Seat1: "heuristic"},
+		},
 	})
 	createSessionFixture(t, sessionsDir, "control-1", fixtureOptions{Seed: 1, HandCount: 2, Completed: true, Seats: []string{"llm-stateless", "heuristic"}, HandsWritten: 2})
 
@@ -40,8 +42,8 @@ func TestStatusPrintsCoverageAndNextStep(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"experiment=bench planned=2 present=1 missing=1 incomplete=0",
-		"group_summary group=control planned=1 present=1 missing=0 incomplete=0",
-		"group_summary group=treatment planned=1 present=0 missing=1 incomplete=0",
+		"group_summary group=group-0 planned=1 present=1 missing=0 incomplete=0",
+		"group_summary group=group-1 planned=1 present=0 missing=1 incomplete=0",
 		"next=run",
 	} {
 		if !strings.Contains(got, want) {
@@ -64,8 +66,10 @@ func TestStatusNextStepIsAnalyzeWhenAllPresent(t *testing.T) {
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 2,
-		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "llm-stateless", Opponent: "heuristic"},
-		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "llm-akg-recent", Opponent: "heuristic"},
+		Groups: []experiment.Group{
+			{SessionBase: "control", SessionsCount: 1, Seat0: "llm-stateless", Seat1: "heuristic"},
+			{SessionBase: "treatment", SessionsCount: 1, Seat0: "llm-akg-recent", Seat1: "heuristic"},
+		},
 	})
 	createSessionFixture(t, sessionsDir, "control-1", fixtureOptions{Seed: 1, HandCount: 2, Completed: true, Seats: []string{"llm-stateless", "heuristic"}, HandsWritten: 2})
 	createSessionFixture(t, sessionsDir, "treatment-1", fixtureOptions{Seed: 1, HandCount: 2, Completed: true, Seats: []string{"llm-akg-recent", "heuristic"}, HandsWritten: 2})
@@ -96,17 +100,9 @@ func TestAnalyzeWritesReport(t *testing.T) {
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
-		Control: experiment.Group{
-			SessionBase:   "control",
-			SessionsCount: 1,
-			Agent:         "control-agent",
-			Opponent:      "villain",
-		},
-		Treatment: experiment.Group{
-			SessionBase:   "treatment",
-			SessionsCount: 1,
-			Agent:         "treatment-agent",
-			Opponent:      "villain",
+		Groups: []experiment.Group{
+			{SessionBase: "control", SessionsCount: 1, Seat0: "control-agent", Seat1: "villain"},
+			{SessionBase: "treatment", SessionsCount: 1, Seat0: "treatment-agent", Seat1: "villain"},
 		},
 	})
 
@@ -154,8 +150,10 @@ func TestAnalyzeWritesReportToExplicitDir(t *testing.T) {
 		ID:              "bench",
 		Model:           "anthropic:claude-sonnet-4-6",
 		HandsPerSession: 5,
-		Control:         experiment.Group{SessionBase: "control", SessionsCount: 1, Agent: "control-agent", Opponent: "villain"},
-		Treatment:       experiment.Group{SessionBase: "treatment", SessionsCount: 1, Agent: "treatment-agent", Opponent: "villain"},
+		Groups: []experiment.Group{
+			{SessionBase: "control", SessionsCount: 1, Seat0: "control-agent", Seat1: "villain"},
+			{SessionBase: "treatment", SessionsCount: 1, Seat0: "treatment-agent", Seat1: "villain"},
+		},
 	})
 
 	writeEvalSummaryFixture(t, filepath.Join(sessionsDir, "control-1"), compareSummaryFixture(compareSummaryConfig{
