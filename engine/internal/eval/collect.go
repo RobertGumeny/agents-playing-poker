@@ -71,6 +71,7 @@ type SeatSummary struct {
 	ToolCallsPerHand    map[string]float64   `json:"tool_calls_per_hand"`
 	RetryMetrics        RetryMetrics         `json:"retry_metrics"`
 	MemoryExport        *MemoryExportSummary `json:"memory_export"`
+	MemoryEngagement    *MemoryEngagement    `json:"memory_engagement,omitempty"`
 	TokenCalls          []TokenCall          `json:"token_calls,omitempty"`
 	FidelityRows        []FidelityRow        `json:"fidelity_rows,omitempty"`
 }
@@ -152,6 +153,8 @@ func CollectSession(sessionDir string) (Summary, error) {
 			calls := agent.PiSession.TokenCalls("decision")
 			calls = append(calls, loadUpdateTokenCalls(agent.Dir)...)
 			seatSummary.TokenCalls = calls
+			engagement := agent.PiSession.MemoryEngagement()
+			seatSummary.MemoryEngagement = &engagement
 		}
 		if agent.MemoryExport != nil {
 			memorySummary := agent.MemoryExport.Summary()

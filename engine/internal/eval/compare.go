@@ -12,14 +12,15 @@ import (
 )
 
 type Comparison struct {
-	ExperimentID    string
-	Hypothesis      string
-	HandsPerSession int
-	Sessions        []ComparedSession
-	Warnings        []string
-	TokenAgents     []TokenAgentSummary
-	FidelityAgents  []FidelityAgentSummary
-	TokenCSVRows    []TokenCSVRow
+	ExperimentID     string
+	Hypothesis       string
+	HandsPerSession  int
+	Sessions         []ComparedSession
+	Warnings         []string
+	TokenAgents      []TokenAgentSummary
+	FidelityAgents   []FidelityAgentSummary
+	EngagementAgents []EngagementAgentSummary
+	TokenCSVRows     []TokenCSVRow
 }
 
 // FidelityAgentSummary is the per-agent fidelity aggregate plus drift buckets,
@@ -71,6 +72,7 @@ func Compare(def experiment.Definition, sessionsDir string) (Comparison, error) 
 	warnings := map[string]struct{}{}
 	tokensByAgent := map[string][]TokenCall{}
 	fidelityByAgent := map[string][]FidelityRow{}
+	engagementByAgent := map[string]*EngagementAgentSummary{}
 
 	for _, planned := range plan.PlannedSessions {
 		summaryPath := filepath.Join(planned.SessionDir, "eval.json")
@@ -87,6 +89,7 @@ func Compare(def experiment.Definition, sessionsDir string) (Comparison, error) 
 		for _, seat := range summary.Seats {
 			tokensByAgent[seat.Name] = append(tokensByAgent[seat.Name], seat.TokenCalls...)
 			fidelityByAgent[seat.Name] = append(fidelityByAgent[seat.Name], seat.FidelityRows...)
+			accumulateEngagement(engagementByAgent, seat, planned.SessionID)
 			for _, call := range seat.TokenCalls {
 				comparison.TokenCSVRows = append(comparison.TokenCSVRows, TokenCSVRow{
 					Group:   planned.GroupLabel,
@@ -100,6 +103,13 @@ func Compare(def experiment.Definition, sessionsDir string) (Comparison, error) 
 
 	comparison.TokenAgents = summarizeTokens(tokensByAgent)
 	comparison.FidelityAgents = summarizeFidelity(fidelityByAgent)
+	comparison.EngagementAgents = finalizeEngagement(engagementByAgent)
+	for _, agent := range comparison.EngagementAgents {
+		if agent.TripwireFail() {
+			warnings[fmt.Sprintf("TRIPWIRE FAIL: retrieval agent %q made zero decision-time reads (memory write-only) in session(s): %s",
+				agent.Agent, strings.Join(agent.ZeroReadSessions, ", "))] = struct{}{}
+		}
+	}
 
 	sort.Slice(comparison.Sessions, func(i, j int) bool {
 		if comparison.Sessions[i].GroupLabel != comparison.Sessions[j].GroupLabel {
@@ -171,6 +181,7 @@ func RenderComparisonMarkdown(c Comparison) string {
 	}
 	b.WriteString("\n")
 	appendTokenSection(&b, c.TokenAgents)
+	appendEngagementSection(&b, c.EngagementAgents)
 	appendFidelitySection(&b, c.FidelityAgents)
 	return b.String()
 }

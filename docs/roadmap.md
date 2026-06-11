@@ -190,19 +190,27 @@ sessions/<id>/
   qualitative agent — ties a trace segment to a hand by reading a field, not parsing prose. This
   single field also unlocks clean per-hand token bucketing and the replay overlay's
   per-decision lookup.
-- **Deterministic memory-use counts (nearly free once `hand_number` lands).** The retrieval
-  reads are already structured `toolCall` content in the decision trace; with per-decision
-  attribution, Go can compute with zero fuzziness: **reads-per-decision** and **did the agent
-  read memory *before* it acted** (presence + ordering). This is a new memory-engagement metric
-  and makes the "retrieval agent made zero decision-time reads" tripwire a literal Go assertion.
-  (The fuzzy half — did the recall *inform* the action — stays with the parked qualitative
-  layer.)
+- **Deterministic memory-use counts (DONE 2026-06-11).** New `eval.MemoryEngagement` metric:
+  segments the decision trace on `user` messages (`toolResult` is its own role, so this is clean
+  in both decision- and hand-scope traces) and computes **reads-per-decision**, **read coverage**
+  (decisions with ≥1 read before acting — ordering is automatic since the action is the terminal
+  assistant text), and `reads_by_tool`. Substrate-neutral: every decision-trace tool call is a
+  read (write tools are update-session only), so no per-agent tool table. Lands in
+  `seats[].memory_engagement` (eval.json, additive) and a "Memory Engagement" report section. The
+  "retrieval agent made zero decision-time reads" tripwire is now a literal Go assertion
+  (`EngagementAgentSummary.TripwireFail`, scoped per session so one clean session can't mask a
+  broken one) that raises a `TRIPWIRE FAIL` warning; retrieval classification ported from
+  analyze.py's `RETRIEVAL_STRATEGIES`. The Python tripwire stays until a later cleanup. (The fuzzy
+  half — did the recall *inform* the action — stays with the parked qualitative layer.)
 - **Gross pot size in `hands.jsonl`.** `eval.json` currently reports *swing*, not reconstructed
   pot size (`biggest_swing_hand` comment). Have the server stamp gross pot per hand so the
   deterministic eval reports true pots instead of a proxy. Small server-side add.
-- **Promote `session-artifacts.md` to a complete artifact map** — every file type with
-  owner/scope/writer/consumer, plus a schema for `session-decisions.jsonl` (today's
-  load-bearing-but-undocumented `pi-session.jsonl`).
+- **Promote `session-artifacts.md` to a complete artifact map (DONE 2026-06-11)** — added the
+  full owner/scope/writer/consumer map, the `session-decisions.jsonl` schema (incl. the
+  `hand_boundary` marker and `toolResult` role), and the `seats[].memory_engagement` contract.
+  `decision_index` remains explicitly deferred there (per-decision attribution is already
+  recoverable by segmenting on `user` messages; held until the Track B replay overlay needs a
+  stable anchor).
 
 ### A4. Smaller ergonomic wins (opportunistic)
 

@@ -58,6 +58,60 @@ func appendTokenSection(b *strings.Builder, agents []TokenAgentSummary) {
 	b.WriteString("\n")
 }
 
+func appendEngagementSection(b *strings.Builder, agents []EngagementAgentSummary) {
+	hasData := false
+	for _, a := range agents {
+		if a.Decisions > 0 {
+			hasData = true
+			break
+		}
+	}
+	if !hasData {
+		return
+	}
+	fmt.Fprintf(b, "## Memory Engagement\n\n")
+	fmt.Fprintf(b, "Decision-time retrieval reads, attributed per decision (one user prompt + the "+
+		"assistant turns up to its action). Every tool call in a decision trace is a memory read — "+
+		"write tools live only in the post-hand update session. **Coverage** is the share of decisions "+
+		"with ≥1 read before acting. For **retrieval** agents (`llm-akg-durable`, `llm-md-wiki`) zero "+
+		"reads is a hard fail (memory is write-only); other strategies inject memory into the prompt and "+
+		"read nothing by design.\n\n")
+	fmt.Fprintf(b, "| Agent | Retrieval | Decisions | Reads/decision | Coverage | Total reads | Reads by tool | Tripwire |\n")
+	fmt.Fprintf(b, "|---|:--:|---:|---:|---:|---:|---|:--:|\n")
+	for _, a := range agents {
+		tripwire := "—"
+		if a.Retrieval {
+			tripwire = "PASS"
+			if a.TripwireFail() {
+				tripwire = "**FAIL**"
+			}
+		}
+		fmt.Fprintf(b, "| %s | %s | %d | %.2f | %.0f%% | %d | %s | %s |\n",
+			a.Agent, yesNo(a.Retrieval), a.Decisions, a.ReadsPerDecision(),
+			a.ReadCoverage()*100, a.TotalReads, formatReadsByTool(a), tripwire)
+	}
+	b.WriteString("\n")
+}
+
+func yesNo(v bool) string {
+	if v {
+		return "yes"
+	}
+	return "no"
+}
+
+func formatReadsByTool(a EngagementAgentSummary) string {
+	names := a.sortedToolReads()
+	if len(names) == 0 {
+		return "—"
+	}
+	parts := make([]string, 0, len(names))
+	for _, name := range names {
+		parts = append(parts, fmt.Sprintf("%s:%d", name, a.ReadsByTool[name]))
+	}
+	return strings.Join(parts, ", ")
+}
+
 func appendFidelitySection(b *strings.Builder, agents []FidelityAgentSummary) {
 	if len(agents) == 0 {
 		return
