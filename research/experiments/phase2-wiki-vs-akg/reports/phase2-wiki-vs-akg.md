@@ -1,6 +1,6 @@
 # Experiment: phase2-wiki-vs-akg
 
-**Hypothesis:** Phase 2 linked-markdown bracket: a multi-file wiki where each page can link to others (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and seat-mirrored across 2 seeds (4 sessions). OBSERVATIONAL: we measure (1) profile-fidelity drift — cross-validate each agent's stated opponent reads against engine ground truth; (2) honest TOTAL token cost. Wiki grows with the number and size of linked pages; its cost curve is expected to be between flat AKG and linear full-history. Horizon is 150 hands — wiki is more token-efficient than single-file or full-history so we run it longer to observe fidelity drift at scale. Chip outcomes are DIAGNOSTIC ONLY.
+**Hypothesis:** Phase 2 linked-markdown bracket: a multi-file wiki where each page can link to others (llm-md-wiki) versus a typed, queryable AKG graph (llm-akg-durable), heads-up and seat-mirrored across 2 seeds (4 sessions). OBSERVATIONAL: we measure (1) profile-fidelity drift, cross-validating each agent's stated opponent reads against engine ground truth; (2) honest TOTAL token cost. Wiki grows with the number and size of linked pages; its cost curve is expected to be between flat AKG and linear full-history. Horizon is 150 hands — wiki is more token-efficient than single-file or full-history so we run it longer to observe fidelity drift at scale. Chip outcomes are DIAGNOSTIC ONLY.
 
 ## Per-Session Results
 
