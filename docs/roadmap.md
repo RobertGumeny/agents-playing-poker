@@ -219,32 +219,85 @@ sessions/<id>/
 
 ## Track B — Headline feature: poker-table HTML replay (Phase 2, ~days 3–5)
 
-**The pitch.** This project is not about poker, it's about **memory**. So the replay is not a
-generic poker viewer — it is a poker table *plus a "what each agent knew" panel*. The money
-shot: watch the AKG agent recall "opponent folds to c-bets 70% (n=14)" and fire the bluff,
-while the stateless agent walks into the same spot blind.
+**The pitch.** This project is not about poker, it's about **memory**. The replay is a
+*cinematic* one: a simple poker table is the stage, and when an agent stops to think — and
+especially when it *recalls a stored fact and acts on it* — that reasoning surfaces inline, at
+the moment of decision. The money shot: watch the AKG agent pull up *"villain check-folded to a
+3bb bet on a similar turn"* and fire the bluff, while the stateless agent walks into the same
+spot blind. Then a closing **summary screen** delivers the verdict (who won, why memory
+mattered, the cost-vs-fidelity frontier).
+
+This framing supersedes the earlier "side-by-side *what each agent knew* panel" idea: the
+reasoning reveal is **inline on the table in time**, not a static two-column spreadsheet —
+stronger as a GIF-able narrative. (Owner framing, 2026-06-11.)
 
 **Decision (resolved 2026-06-10).** **Self-contained HTML page.** Go generates a standalone
-`.html` from `hands.jsonl` + `session-decisions.jsonl` (+ `memory-export.json`). Opens in any browser,
-no server, hostable on GitHub Pages, linkable from the README, trivially screenshot/GIF-able
-for a launch thread. Chosen over a terminal TUI for shareability.
+`.html` from `hands.jsonl` + `session-decisions.jsonl` + `eval.json` (+ `memory-export.json`).
+Opens in any browser, no server, hostable on GitHub Pages, linkable from the README, trivially
+screenshot/GIF-able for a launch thread. Chosen over a terminal TUI for shareability.
 
-**Two halves:**
-- *Table* (expected): cards, board, pots, animated betting, transport controls (step / play /
-  scrub across hands). Table stakes.
-- *Memory overlay* (the headline): per-decision, what each agent recalled and reasoned, pulled
-  from `session-decisions.jsonl`.
-- *Cost chart* (folded in here, not in the report): the per-decision token-cost / fidelity-vs-cost
-  chart renders client-side via `chart.js` over the per-call CSV Go already writes — this is why
-  A1 deliberately drops the standalone PNG path.
+**Three acts (one page):**
+- *The table* (the stage): cards, board, one chip = bet / one chip = pot, hands dealt in
+  sequence, transport controls (step / play / scrub across hands). Table stakes.
+- *The thinking reveal* (the hook): two **orthogonal** per-decision signals, surfaced inline
+  over the acting player. The trace supplies each independently, so the cross-product falls out
+  without special-casing:
+  - **Memory indicator** (binary, driven by `toolCall` presence) — *actively recalling* (a read
+    is in flight; render the recalled fact that justified the action — the loud, money-shot
+    case) vs. *deciding on available info* (no read this decision). The read count is exactly
+    the Track A `seats[].memory_engagement` metric — the replay *renders* what the eval *counts*.
+  - **Thought bubble** (present-or-absent, driven by `thinking` block presence) — surface the
+    agent's reasoning when it deliberated; no bubble on a snap action.
 
-**Load-bearing risk to check at Phase-2 kickoff.** The overlay rests on
-`session-decisions.jsonl` (was `pi-session.jsonl`) actually containing each agent's reasoning
-text and memory reads *attributable to a specific hand/decision*. The logic that became the
-`poker analyze` CLI already parses per-decision reasoning and tool calls from that file
-(originally `find_hand_context`, `extract_calls`, `_assistant_usages` in `analyze.py`), so the
-data almost certainly exists — but **eyeball a real `session-decisions.jsonl` before committing
-to the panel design**, since what's in there dictates how rich the overlay can be.
+  Honest by construction: "deciding on available info" claims nothing about *what* was available
+  (injected opponent summary, just hole cards, or — for a memoryless agent — nothing), so it
+  needs no caveat on the now-public repo. The stateless-vs-memory contrast emerges on its own —
+  a memoryless agent simply never lights the *recalling* indicator while the AKG/wiki agents do;
+  no decision needs to be labelled "blind." A bare snap action (no read, no thinking) is just
+  the empty cell of the cross-product, not a special state.
+- *The summary screen* (the verdict): who won, chips/hand, showdown rate, **memory engagement**,
+  **fidelity**, and the **per-decision cost-vs-fidelity chart** — the centerpiece thesis result.
+  This is the destination A1 cleared the runway for by dropping the standalone report PNG. All
+  of it renders straight from `eval.json` (which inlines `token_calls` + `fidelity_rows` +
+  `memory_export` shape + chips), so the chart needs no separate CSV in-page; `chart.js` over
+  the inlined token rows.
+
+**Architecture — the one league-aware seam (see [`project_poker_league_north_star`]).** Put a
+clean Go **view-model boundary** between *gather the data* (read artifacts → a `ReplayModel`
+Go type: hands, players, whose-turn, per-decision thinking/reads/action, summary metrics) and
+*render the HTML* (template the view-model into the self-contained page). This is the **only**
+concession to the long-term "Agent Poker League by AKG" vision (live hosted BYO-agent league,
+fidelity + chip leaderboards) allowed into v0 scope: it costs ~nothing now and means going live
+later is "feed the view-model from a websocket instead of a file." Everything else the league
+needs — agent submission, untrusted-code sandboxing, auth, hosting, cross-match leaderboards —
+stays **explicitly parked** (`AGENTS.md` scope discipline). Do not pre-build it.
+
+**Generator home (proposed).** A new `poker replay <session-dir>` subcommand (`cmd/poker/`,
+sibling to `analyze`/`experiment`), emitting the self-contained `.html`. Consistent with the
+harness-neutral-CLI principle; not auto-welded into `experiment go`.
+
+**Build order — vertical slice first.** Prove the whole loop on the smallest unit — one hand
+dealt on the table, with one thinking reveal at one decision, both seats present — before adding
+breadth (scrub across all hands, animation polish). The summary screen is comparatively cheap
+(pure `eval.json` rendering) and slots in as act two, not act one.
+
+**Kickoff eyeball — DONE (2026-06-11), data confirmed rich.** Traced a real AKG-vs-wiki session
+(`phase2-wiki-vs-akg/.../akg-vs-wiki-1`). Findings that pin the design:
+- Every layer the reveal needs is present and **substrate-symmetric**: game state + injected
+  memory summary in the `user` prompt; reasoning in `assistant` `thinking` blocks (~326–330 per
+  session); drill-in reads as `toolCall`→`toolResult` pairs (AKG `akg_get_node`/`akg_get_nodes`,
+  wiki `md_read_page`); action in the terminal assistant `text`. The `toolResult` carries the
+  full recalled fact (the stored hand body) — that's the money-shot content.
+- **Legacy traces have no `hand_boundary` marker** — it's `Hand: N` prose. All archived
+  phase-2 brackets (the replay's showcase material) predate Track A's marker, so the generator
+  **must implement `Hand: N` prose fallback on day one** (the dual-read contract already allows
+  this; just don't treat it as optional).
+- `decision_index` stays **derived in Go at build time** (segment each hand-scope group on
+  `user` messages → ordinal); no TS/wire-contract change. The `session-artifacts.md` deferral
+  note explicitly permits this — promote to a first-class field only if the overlay later needs
+  a stable cross-tool anchor, which the self-contained page does not.
+- Many decisions are **bare** (`{"action":"call"}`, no thinking/reads) — expected; that absence
+  *is* the stateless-vs-memory contrast, render it as such.
 
 ## Track C — Writeups (parked, angles locked)
 
@@ -273,9 +326,30 @@ to change). Writeups run in the background whenever there's a spare slot.
   reading `session-decisions` + `session-updates` + `hands.jsonl`. Keep it **separate** from
   fidelity, which stays deterministic for reproducibility and to avoid the tautological-grader
   confound (Track C #1). Not in this iteration; recorded so it isn't silently folded into A1.
+  - **Candidate hypothesis (surfaced 2026-06-11 via the Track B replay): does reasoning
+    *soundness* decay as context grows?** Spotted in `akg-vs-wiki-1` replay — the agent reasoned
+    about a "flush draw on the turn" holding only 3 of a suit (impossible: one card to come). That
+    is a *soundness* failure (an invalid live-hand inference), categorically distinct from
+    *fidelity* (a misremembered stored fact) — no fidelity check would ever flag it. The question:
+    does the rate of such errors *rise with the agent's context size*? Methodology notes:
+    - **X-axis is already free** — per-decision context size is logged (`token_calls[].prompt_tokens`,
+      grows ~×1.6–2.1 across a single 150-hand session even for the *bounded*-memory agents).
+      Regress on measured prompt tokens, not hand index, to control for situation complexity.
+    - **Y-axis is the blocker** — any single error class is far too sparse to trend (only ~2
+      "flush draw" mentions in a whole 150-hand session). Needs either a deterministic multi-class
+      live-claim detector (flush/straight-draw validity vs `hands.jsonl`, "top pair" vs board,
+      pot-odds arithmetic — cheap, reproducible, but aggregate across brackets for N) or the
+      LLM-judge soundness layer above (broad coverage, API cost, keep separate from fidelity).
+    - **The headline comparison** — bounded-memory (`akg`, context plateaus) vs unbounded
+      (`fullhistory`, context balloons): thesis prediction is `fullhistory` soundness degrades while
+      `akg` stays flat. Falsifiable both ways.
+    - **Requires a long horizon** — the divergence only opens once `fullhistory` climbs well past
+      `akg` and crosses its context-ceiling/compaction threshold (the intended degradation signal).
+      Wants a *few* long (500+ hand) `fullhistory-vs-akg` sessions, not one ultra-long n=1 run.
 - A4 contents — what else earns a slot once A1–A3 are underway.
-- Replay panel design — pinned to the `session-decisions.jsonl` (was `pi-session.jsonl`)
-  eyeball check above.
+- (Resolved 2026-06-11) Replay design — the kickoff eyeball is done; design is the cinematic
+  table + inline two-tier thinking reveal + summary screen, behind a Go view-model seam (see
+  Track B above). Remaining detail-level open questions surface during the vertical slice.
 - A1-Q4 (fidelity ports cleanly) and A1-Q5 (Go-CSV ⇄ `chart.py` schema) — tracked under A1.
 - (Resolved/dropped) Where the relocated analysis scripts land — dissolved by Track A's
   "computation is Go, the skill stops computing" principle; nothing computational relocates.
