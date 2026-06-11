@@ -87,7 +87,7 @@ It is intentionally small for v0 and delegates orchestration behavior to `intern
 
 Still out of scope here:
 - strategy details for the `random` and `heuristic` Go agents
-- Pi session log capture (`pi-session.jsonl`)
+- Pi session log capture (`session-decisions.jsonl`)
 - multiplayer orchestration
 - tournament scheduling / budget gates
 

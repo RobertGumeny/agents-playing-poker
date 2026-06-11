@@ -89,7 +89,7 @@ Coverage inspection classifies each planned session as:
 - `missing` — no usable session directory exists
 - `incomplete` — a directory exists, but primary artifacts are absent, mismatched, or incomplete
 
-Coverage is based on `manifest.json` and `hands.jsonl`. Analysis artifacts such as `report.md`, `eval.json`, and `memory-export.json` do not decide whether a planned session is complete.
+Coverage is based on `manifest.json` and `hands.jsonl`. Analysis artifacts such as `session-report.md`, `eval.json`, and `memory-export.json` do not decide whether a planned session is complete.
 
 ## Execution
 
@@ -112,13 +112,13 @@ Runtime-only settings such as `-model` and `-thinking-level` do not mutate the c
 
 - `manifest.json`
 - `hands.jsonl`
-- optional `pi-session.jsonl`
+- optional `session-decisions.jsonl`
 - optional `stderr.log`
 - optional `memory-export.json`
 
 It is safe to regenerate. It must not override primary session truth.
 
-The report contains a flat per-session footnote table (Group | Session | Seed | Seat 0 | Seat 1 | Chips Δ | Chips/hand | Duration | Showdown), plus warnings for inconsistent observed metadata. Chips/hand is a sanity check; the primary thesis is the fidelity-vs-cost frontier measured per strategy via `analyze.py --tokens`.
+The report contains a flat per-session footnote table (Group | Session | Seed | Seat 0 | Seat 1 | Chips Δ | Chips/hand | Duration | Showdown), plus warnings for inconsistent observed metadata. Chips/hand is a sanity check; the primary thesis is the fidelity-vs-cost frontier, emitted natively by `poker experiment go` as Token Cost and Fidelity sections plus a per-call `reports/<id>-tokens.csv` (the former `analyze.py --tokens` path is retired).
 
 ## Artifact authority
 
@@ -133,9 +133,9 @@ Primary agent memory authority:
 
 Additive analysis and observability artifacts:
 
-- `report.md`
+- `session-report.md` (standalone runs only)
 - `eval.json`
-- `agents/<name>/pi-session.jsonl`
+- `agents/<name>/session-decisions.jsonl`
 - `agents/<name>/stderr.log`
 - `agents/<name>/memory-export.json`
 

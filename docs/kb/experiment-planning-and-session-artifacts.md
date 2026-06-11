@@ -65,9 +65,9 @@ Primary agent memory artifact:
 
 Derived/additive artifacts:
 
-- `report.md`
+- `session-report.md` (standalone runs only)
 - `eval.json`
-- `agents/<name>/pi-session.jsonl`
+- `agents/<name>/session-decisions.jsonl`
 - `agents/<name>/memory-export.json`
 - `agents/<name>/stderr.log`
 

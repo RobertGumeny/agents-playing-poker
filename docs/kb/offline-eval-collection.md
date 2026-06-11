@@ -32,7 +32,7 @@ Current behavior:
 - `LoadSession(sessionDir)` requires readable `manifest.json` and `hands.jsonl`.
 - v0 sessions are expected to contain one match in `manifest.matches[0]`.
 - per-seat agent artifact discovery follows manifest seat order under `agents/<seat.Name>/`.
-- `pi-session.jsonl`, `memory-export.json`, and `stderr.log` are optional per seat.
+- `session-decisions.jsonl`, `memory-export.json`, and `stderr.log` are optional per seat (the Go reader also accepts the legacy `pi-session.jsonl` name in archived sessions).
 - optional artifacts fail collection if present but malformed or unreadable.
 
 Collection never opens `memory.akg` directly and does not depend on the AKG SDK. Memory analysis comes from `memory-export.json` when that additive export exists.

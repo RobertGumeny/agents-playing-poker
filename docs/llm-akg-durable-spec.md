@@ -56,7 +56,7 @@ Behavior:
 - The model writes its changes with AKG write tools, batched into a single `akg_apply` call.
 - The store is committed after the update session finishes. A failed update keeps the prior
   graph (it never corrupts or truncates it) and logs to `stderr.log`.
-- The update transcript is written to a separate `update-session.jsonl` so update cost is
+- The update transcript is written to a separate `session-updates.jsonl` so update cost is
   measurable apart from decision cost.
 
 **Open vocabulary.** The model authors its own graph: it invents and names its own node types,
@@ -154,11 +154,10 @@ pages"): the model retires stale state by overwriting a node body or authoring a
 edge. All write tools return structured `{written:false, error}` results on malformed input
 or a missing edge endpoint, rather than throwing.
 
-After each update the runtime records a best-effort **graph-rot diagnostic** to
-`diagnostics.jsonl` (node count, edge count, and orphan-node count — non-root nodes with no
-edges). This only *counts* structural rot; it never repairs it, symmetric with the wiki
-agent's link-rot policy. (Because the SDK refuses edges to missing endpoints, truly dangling
-edges cannot form.)
+The runtime does not repair structural rot (e.g. orphan nodes — non-root nodes with no
+edges), symmetric with the wiki agent's link-rot policy. (Because the SDK refuses edges to
+missing endpoints, truly dangling edges cannot form.) Node/edge counts surface in the
+experiment report's per-session diagnostic table rather than a per-hand log file.
 
 The model may call tools before returning its poker action. The final response must still be JSON only:
 
@@ -207,9 +206,8 @@ A durable-agent session can produce:
 
 - `agents/<name>/memory.akg` — authoritative durable graph memory
 - `agents/<name>/memory-export.json` — additive JSON export for offline analysis
-- `agents/<name>/pi-session.jsonl` — decision Pi transcript / observability log
-- `agents/<name>/update-session.jsonl` — post-hand update transcript (separate from decisions)
-- `agents/<name>/diagnostics.jsonl` — per-hand graph-rot counts (count-only, no repair)
+- `agents/<name>/session-decisions.jsonl` — decision Pi transcript / observability log
+- `agents/<name>/session-updates.jsonl` — post-hand update transcript (separate from decisions)
 - `agents/<name>/stderr.log` — update-failure and fallback diagnostics
 
 `memory.akg` is the primary memory store. `memory-export.json` is an analysis artifact and should not be treated as the source of truth when it disagrees with `memory.akg`.

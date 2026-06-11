@@ -103,9 +103,9 @@ Each session writes a bundle under `research/experiments/<id>/sessions/<session-
 - `manifest.json` — match metadata, agent names, chip totals, and completion status.
 - `hands.jsonl` — server-authoritative hand log.
 - `eval.json` — normalized per-session summary used by experiment reports.
-- `report.md` — single-session report.
+- `session-report.md` — single-session report (standalone runs only).
 - `agents/<name>/stdout.log` and `stderr.log` — agent process logs.
-- `agents/<name>/pi-session.jsonl` — Pi transcript for Pi-backed agents.
+- `agents/<name>/session-decisions.jsonl` — decision-phase Pi transcript for Pi-backed agents.
 - `agents/<name>/memory.akg` — durable AKG memory file for memory-capable agents.
 - `agents/<name>/memory-export.json` — optional JSON export of memory artifacts.
 

@@ -55,7 +55,7 @@ The headline comparison the lineup is built toward is **`llm-md-wiki` vs `llm-ak
 **Primary lens — the fidelity-vs-cost frontier.** The thesis lives on two low-variance curves, both extractable from existing artifacts. These are what experiments should report first.
 
 1. **Profile fidelity vs. hand count.** Cross-validate what the agent *states* it knows about the opponent against engine ground truth in `hands.jsonl` (VPIP, PFR, fold-to-c-bet, river aggression, 3-bet counts, showdown record). The "matches to the digit at 500 hands" result belonged to the *former code-computed* `llm-akg-durable` and was tautological (the extractor and the validation read the same action log — see [`research/llm-akg-durable-rework.md`](research/llm-akg-durable-rework.md)). Now that the durable agent is model-maintained, it is expected to *drift* like the prose rungs, and this check measures that drift against ground truth — exposing where each representation's accuracy decays, "where the patterns fall apart." *(Instrumentation note: this cross-validation has been done ad hoc against `hands.jsonl` + `memory-export.json`; folding it into the eval tooling as a standard analysis is pending.)*
-2. **Tokens per decision vs. hand count.** From the prompts in `pi-session.jsonl`: per-decision input tokens and their growth slope. AKG should be ~flat; full-history linear; markdown-rewrite scaling with file size. This is where a *cost* win is demonstrated.
+2. **Tokens per decision vs. hand count.** From the prompts in `session-decisions.jsonl`: per-decision input tokens and their growth slope. AKG should be ~flat; full-history linear; markdown-rewrite scaling with file size. This is where a *cost* win is demonstrated.
 
 **Secondary — poker performance (diagnostic).** Chip delta, chips/BB per hand, treatment/control deltas, showdown vs non-showdown behavior. Treat single-session chip outcomes as diagnostics, not proof; they are high-variance and, in near-mirror matchups, uninformative without large samples. Prefer non-mirror matchups across the ladder, multiple seeds, and mirrored seat assignments to cancel positional effects.
 
@@ -76,9 +76,9 @@ Authoritative session records (primary truth for game results):
 
 Derived or agent-side records (additive analysis; regenerable without changing outcomes):
 
-- `report.md`
+- `session-report.md` (standalone runs only)
 - `eval.json`
-- `agents/<name>/pi-session.jsonl`
+- `agents/<name>/session-decisions.jsonl`
 - `agents/<name>/stderr.log`
 - `agents/<name>/memory.akg`
 - `agents/<name>/memory-export.json`

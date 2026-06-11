@@ -31,7 +31,7 @@ The shared runtime boundary is important: `pi-agents/shared/` owns protocol hand
   `formatCompletedHand` summary of the just-finished hand
 - runs a fresh one-shot Pi update session (same model/thinking level as decisions) with read +
   write tools, lets the **model** decide what to write, then commits
-- exports the update transcript to a separate `update-session.jsonl`
+- exports the update transcript to a separate `session-updates.jsonl`
 - on failure, keeps the prior graph and logs to `stderr.log`
 
 In fake-decision mode (no live model) it applies a deterministic scripted update (writes a
@@ -73,8 +73,9 @@ for empty/unknown lookups; write tools return structured `{written:false, error}
 
 The model may inspect AKG before returning its final action JSON. It must still choose from server-advertised legal actions, and the shared runner still validates and falls back safely on malformed or illegal output.
 
-After each update the runtime writes a count-only `diagnostics.jsonl` line (nodes, edges,
-orphan nodes); it never repairs rot, symmetric with the wiki link-rot policy.
+The runtime never repairs structural rot (orphan nodes), symmetric with the wiki link-rot
+policy. Node/edge counts surface in the experiment report's per-session diagnostic table
+rather than a per-hand log file.
 
 ## Prompt and session contract
 
@@ -115,7 +116,7 @@ Automated coverage proves:
   (missing edge endpoint, invalid type name) instead of throwing
 - the update prompt includes the node list, current root body, and hand summary
 - scripted (fake) update writes a hand node + root edge, updates the root body, and logs a
-  separate `update-session.jsonl` transcript and a `diagnostics.jsonl` rot line
+  separate `session-updates.jsonl` transcript
 - the subprocess command speaks the protocol through `session_end`, and the second decision
   prompt injects the root body updated by the first hand
 

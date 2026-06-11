@@ -182,9 +182,9 @@ A `llm-md-wiki` session can produce:
 
 - `agents/<name>/wiki/` — the linked-page memory (the source of truth for what it
   remembers)
-- `agents/<name>/update-session.jsonl` — transcript of the after-hand updates, kept
+- `agents/<name>/session-updates.jsonl` — transcript of the after-hand updates, kept
   separate from decisions so update cost is measurable on its own
-- `agents/<name>/pi-session.jsonl` — decision transcript / observability log
+- `agents/<name>/session-decisions.jsonl` — decision transcript / observability log
 - `agents/<name>/stderr.log` — retry, fallback, update-failure, and link diagnostics
 
 The two transcripts together give per-hand token cost (decision reads + updates).

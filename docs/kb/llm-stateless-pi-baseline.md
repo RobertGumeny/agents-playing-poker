@@ -20,7 +20,7 @@ It now provides:
 - a real Pi SDK decision path that creates a fresh in-memory Pi session for every `your_turn`
 - optional Pi model and thinking configuration through environment variables rather than hard-coded model selection
 - deterministic safe fallback behavior when Pi replies are malformed, illegal, or exhausted their retry budget
-- canonical Pi observability logs written to `pi-session.jsonl` in the agent session directory when one is available
+- canonical Pi observability logs written to `session-decisions.jsonl` in the agent session directory when one is available
 
 ## Normative sources
 
@@ -87,7 +87,7 @@ EPIC-7 made an important distinction that later work should preserve:
 Current persistence behavior:
 - when `session_init.memory_dir` is present, `llm-stateless` uses it as the default session-log directory
 - `PI_POKER_PI_SESSION_DIR` can override that location explicitly
-- each decision's exported Pi JSONL is appended into one canonical `pi-session.jsonl`
+- each decision's exported Pi JSONL is appended into one canonical `session-decisions.jsonl`
 - the temporary per-decision export file is removed after append
 
 This keeps Pi artifacts aligned with the existing `sessions/<id>/agents/<name>/` bundle layout instead of introducing a parallel artifact convention.
@@ -112,7 +112,7 @@ Automated coverage includes:
 - retry exhaustion logs to stderr and still returns a safe legal action
 - the published `poker-agent-llm-stateless` bin is stable for subprocess launching
 - the built package can run as a child process with repeated extra args and still speak the Go server contract
-- subprocess execution can write the canonical `pi-session.jsonl` artifact without live credentials or billable model calls
+- subprocess execution can write the canonical `session-decisions.jsonl` artifact without live credentials or billable model calls
 
 ## Current boundaries
 

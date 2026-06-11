@@ -130,9 +130,9 @@ return the complete file.
 A `llm-md-single` session can produce:
 
 - `agents/<name>/notes.md` — the memory file (the source of truth for what it remembers)
-- `agents/<name>/update-session.jsonl` — transcript of the after-hand updates, kept
+- `agents/<name>/session-updates.jsonl` — transcript of the after-hand updates, kept
   **separate** from the decision transcript so update cost is measurable on its own
-- `agents/<name>/pi-session.jsonl` — decision transcript / observability log
+- `agents/<name>/session-decisions.jsonl` — decision transcript / observability log
 - `agents/<name>/stderr.log` — retry, fallback, and update-failure diagnostics
 
 The two transcripts together give the full per-hand token cost (decision read + rewrite).
