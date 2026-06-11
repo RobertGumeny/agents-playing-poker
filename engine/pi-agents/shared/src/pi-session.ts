@@ -86,7 +86,7 @@ export class PiDecisionEngine implements DecisionEngine {
     try {
       return await this.promptSession(session, request.prompt);
     } finally {
-      await this.persistAndDispose(session);
+      await this.persistAndDispose(session, request.context.handNumber);
     }
   }
 
@@ -96,15 +96,16 @@ export class PiDecisionEngine implements DecisionEngine {
 
     const session = this.activeHandSession.session;
     this.activeHandSession = undefined;
-    await this.persistAndDispose(session);
+    await this.persistAndDispose(session, context.handNumber);
   }
 
   async onSessionEnd(): Promise<void> {
     if (!this.activeHandSession) return;
 
     const session = this.activeHandSession.session;
+    const handNumber = this.activeHandSession.handNumber;
     this.activeHandSession = undefined;
-    await this.persistAndDispose(session);
+    await this.persistAndDispose(session, handNumber);
   }
 
   private async ensureHandSession(handNumber: number): Promise<PiSession> {
@@ -114,8 +115,9 @@ export class PiDecisionEngine implements DecisionEngine {
 
     if (this.activeHandSession) {
       const session = this.activeHandSession.session;
+      const priorHand = this.activeHandSession.handNumber;
       this.activeHandSession = undefined;
-      await this.persistAndDispose(session);
+      await this.persistAndDispose(session, priorHand);
     }
 
     const session = await this.createSession();
@@ -160,10 +162,10 @@ export class PiDecisionEngine implements DecisionEngine {
     }
   }
 
-  private async persistAndDispose(session: PiSession): Promise<void> {
+  private async persistAndDispose(session: PiSession, handNumber: number): Promise<void> {
     try {
       const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
-      await persistSessionLog(session, sessionDir, ++this.exportCount);
+      await persistSessionLog(session, sessionDir, ++this.exportCount, handNumber);
     } finally {
       session.dispose();
     }
@@ -311,7 +313,7 @@ export function resolveModel(spec: string | undefined, modelRegistry: ModelRegis
   throw new Error(`unknown Pi model ${JSON.stringify(spec)}`);
 }
 
-async function persistSessionLog(session: PiSession, sessionDir: string | undefined, exportCount: number): Promise<void> {
+async function persistSessionLog(session: PiSession, sessionDir: string | undefined, exportCount: number, handNumber: number): Promise<void> {
   if (!sessionDir) return;
 
   await mkdir(sessionDir, { recursive: true });
@@ -320,6 +322,9 @@ async function persistSessionLog(session: PiSession, sessionDir: string | undefi
   session.exportToJsonl(exportPath);
   const exported = await readFile(exportPath, "utf8");
   if (exported.length > 0) {
+    // First-class hand attribution: a structured boundary marker precedes each
+    // persisted transcript so offline tools key off the field, not prose "Hand: N".
+    await appendFile(canonicalPath, `${JSON.stringify({ type: "hand_boundary", hand_number: handNumber })}\n`);
     await appendFile(canonicalPath, exported);
   }
   await rm(exportPath, { force: true });

@@ -40,74 +40,77 @@ var (
 	streetRE       = regexp.MustCompile(`Street:\s*(\w+)`)
 )
 
-// TokenCalls splits the log into Pi sub-sessions (delimited by {"type":"session"}
-// boundary lines) and returns one row per sub-session that carried assistant
-// usage. kind is "decision" or "update" and selects the hand-number marker.
+// TokenCalls returns one row per Pi sub-session that carried assistant usage.
+// Sub-sessions are delimited by {"type":"session"} lines; a preceding
+// {"type":"hand_boundary"} marker carries the hand number for the group that
+// follows. kind is "decision" or "update".
 func (l PiSessionLog) TokenCalls(kind string) []TokenCall {
 	var rows []TokenCall
-	for _, sub := range l.subSessions() {
-		usages := assistantUsages(sub)
-		if len(usages) == 0 {
-			continue
+	var cur []PiSessionEvent
+	var markerHand *int
+	flush := func() {
+		if row, ok := buildTokenCall(cur, kind, markerHand); ok {
+			rows = append(rows, row)
 		}
-		text := firstUserText(sub)
+		cur = nil
+	}
+	for _, ev := range l.Events {
+		switch ev.Type {
+		case "hand_boundary":
+			flush() // close the prior group with its own marker before advancing
+			h := ev.HandNumber
+			markerHand = &h
+		case "session":
+			flush()
+		default:
+			cur = append(cur, ev)
+		}
+	}
+	flush()
+	return rows
+}
+
+// buildTokenCall builds one row from a sub-session's events. Hand attribution
+// prefers the explicit hand_boundary marker; legacy traces without markers fall
+// back to parsing the prompt prose ("Hand: N" / "hand=N"). Returns false when the
+// sub-session carried no assistant usage.
+func buildTokenCall(sub []PiSessionEvent, kind string, markerHand *int) (TokenCall, bool) {
+	usages := assistantUsages(sub)
+	if len(usages) == 0 {
+		return TokenCall{}, false
+	}
+	text := firstUserText(sub)
+	hand := markerHand
+	if hand == nil {
 		handRE := handDecisionRE
 		if kind != "decision" {
 			handRE = handUpdateRE
 		}
-		var hand *int
 		if m := handRE.FindStringSubmatch(text); m != nil {
 			if n, err := strconv.Atoi(m[1]); err == nil {
 				hand = &n
 			}
 		}
-		street := ""
-		if kind == "decision" {
-			if m := streetRE.FindStringSubmatch(text); m != nil {
-				street = m[1]
-			}
-		}
-		row := TokenCall{
-			Kind:         kind,
-			Hand:         hand,
-			Street:       street,
-			PromptTokens: usages[0].Input + usages[0].CacheRead + usages[0].CacheWrite,
-		}
-		for _, u := range usages {
-			row.TotalTokens += u.TotalTokens
-			if u.Cost != nil {
-				row.Cost += u.Cost.Total
-			}
-		}
-		rows = append(rows, row)
 	}
-	return rows
-}
-
-// subSessions groups events into Pi sub-sessions, splitting on {"type":"session"}
-// boundary lines (mirrors analyze.py iter_subsessions).
-func (l PiSessionLog) subSessions() [][]PiSessionEvent {
-	var subs [][]PiSessionEvent
-	var cur []PiSessionEvent
-	started := false
-	for _, ev := range l.Events {
-		if ev.Type == "session" {
-			if len(cur) > 0 {
-				subs = append(subs, cur)
-			}
-			cur = nil
-			started = true
-			continue
+	street := ""
+	if kind == "decision" {
+		if m := streetRE.FindStringSubmatch(text); m != nil {
+			street = m[1]
 		}
-		if !started {
-			started = true
+	}
+	row := TokenCall{
+		Kind:         kind,
+		Hand:         hand,
+		Street:       street,
+		PromptTokens: usages[0].Input + usages[0].CacheRead + usages[0].CacheWrite,
+	}
+	for _, u := range usages {
+		row.TotalTokens += u.TotalTokens
+		if u.Cost != nil {
+			row.Cost += u.Cost.Total
 		}
-		cur = append(cur, ev)
 	}
-	if len(cur) > 0 {
-		subs = append(subs, cur)
-	}
-	return subs
+	return row, true
 }
 
 func firstUserText(sub []PiSessionEvent) string {

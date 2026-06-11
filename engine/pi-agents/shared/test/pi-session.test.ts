@@ -45,7 +45,7 @@ describe("PiDecisionEngine", () => {
       path.join(sessionDir, "session-decisions-export-0001.jsonl"),
       path.join(sessionDir, "session-decisions-export-0002.jsonl"),
     ]);
-    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"decision":1}\n{"decision":2}\n');
+    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"type":"hand_boundary","hand_number":1}\n{"decision":1}\n{"type":"hand_boundary","hand_number":2}\n{"decision":2}\n');
     await expect(readdir(sessionDir)).resolves.toEqual(["session-decisions.jsonl"]);
   });
 
@@ -94,7 +94,7 @@ describe("PiDecisionEngine", () => {
       path.join(sessionDir, "session-decisions-export-0001.jsonl"),
       path.join(sessionDir, "session-decisions-export-0002.jsonl"),
     ]);
-    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"session":1}\n{"session":2}\n');
+    await expect(readFile(path.join(sessionDir, "session-decisions.jsonl"), "utf8")).resolves.toBe('{"type":"hand_boundary","hand_number":7}\n{"session":1}\n{"type":"hand_boundary","hand_number":8}\n{"session":2}\n');
   });
 
   it("falls back to streamed assistant text when needed and surfaces malformed JSON", async () => {

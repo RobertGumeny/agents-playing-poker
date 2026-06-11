@@ -31,7 +31,7 @@ export class PiDecisionEngine {
             return await this.promptSession(session, request.prompt);
         }
         finally {
-            await this.persistAndDispose(session);
+            await this.persistAndDispose(session, request.context.handNumber);
         }
     }
     async onHandEnd(context) {
@@ -41,14 +41,15 @@ export class PiDecisionEngine {
             return;
         const session = this.activeHandSession.session;
         this.activeHandSession = undefined;
-        await this.persistAndDispose(session);
+        await this.persistAndDispose(session, context.handNumber);
     }
     async onSessionEnd() {
         if (!this.activeHandSession)
             return;
         const session = this.activeHandSession.session;
+        const handNumber = this.activeHandSession.handNumber;
         this.activeHandSession = undefined;
-        await this.persistAndDispose(session);
+        await this.persistAndDispose(session, handNumber);
     }
     async ensureHandSession(handNumber) {
         if (this.activeHandSession?.handNumber === handNumber) {
@@ -56,8 +57,9 @@ export class PiDecisionEngine {
         }
         if (this.activeHandSession) {
             const session = this.activeHandSession.session;
+            const priorHand = this.activeHandSession.handNumber;
             this.activeHandSession = undefined;
-            await this.persistAndDispose(session);
+            await this.persistAndDispose(session, priorHand);
         }
         const session = await this.createSession();
         this.activeHandSession = { handNumber, session };
@@ -96,10 +98,10 @@ export class PiDecisionEngine {
             unsubscribe();
         }
     }
-    async persistAndDispose(session) {
+    async persistAndDispose(session, handNumber) {
         try {
             const sessionDir = this.options.sessionDirProvider?.() ?? this.options.sessionDir;
-            await persistSessionLog(session, sessionDir, ++this.exportCount);
+            await persistSessionLog(session, sessionDir, ++this.exportCount, handNumber);
         }
         finally {
             session.dispose();
@@ -225,7 +227,7 @@ export function resolveModel(spec, modelRegistry) {
     }
     throw new Error(`unknown Pi model ${JSON.stringify(spec)}`);
 }
-async function persistSessionLog(session, sessionDir, exportCount) {
+async function persistSessionLog(session, sessionDir, exportCount, handNumber) {
     if (!sessionDir)
         return;
     await mkdir(sessionDir, { recursive: true });
@@ -234,6 +236,9 @@ async function persistSessionLog(session, sessionDir, exportCount) {
     session.exportToJsonl(exportPath);
     const exported = await readFile(exportPath, "utf8");
     if (exported.length > 0) {
+        // First-class hand attribution: a structured boundary marker precedes each
+        // persisted transcript so offline tools key off the field, not prose "Hand: N".
+        await appendFile(canonicalPath, `${JSON.stringify({ type: "hand_boundary", hand_number: handNumber })}\n`);
         await appendFile(canonicalPath, exported);
     }
     await rm(exportPath, { force: true });
