@@ -31,6 +31,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runMatch(args[1:], stdout, stderr)
 	case "strategy":
 		return runStrategy(args[1:], stdout, stderr)
+	case "analyze":
+		return runAnalyze(args[1:], stdout, stderr)
 	default:
 		return fmt.Errorf("unknown subcommand %q — run 'poker help' for usage", args[0])
 	}
@@ -56,6 +58,9 @@ COMMANDS
   strategy new <key>                      scaffold a new TypeScript memory strategy
 
   match run --agent0 X --agent1 Y [opts]  run a single ad-hoc match
+
+  analyze hand <N> <session|trace>        show the trace context around hand N
+  analyze traces <keyword> <session|trace> show assistant turns mentioning keyword
 
 QUICKSTART
   make install                            build and install the poker binary (one-time)

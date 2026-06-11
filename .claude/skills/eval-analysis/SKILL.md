@@ -15,9 +15,33 @@ The user will typically name the experiment. If ambiguous, list available experi
 ls research/experiments/
 ```
 
-## Step 2: Run the analysis script
+## Preferred: the harness-neutral `poker` CLI
 
-Run from the repository root. The script reads the experiment definition JSON, loads `eval.json` for every session (control and treatment), and writes a report.
+The analysis capability lives in the `poker` binary — plain commands any agent harness (not just Claude) can run. This skill is just discoverability; prefer these over the Python script.
+
+- **Full comparison report** (per-session table + Token Cost + Fidelity sections, writes `reports/<id>.md` and `reports/<id>-tokens.csv`):
+
+  ```bash
+  poker experiment analyze <experiment-id>
+  ```
+
+- **Drill into a hand** — streams the decision trace and returns only the context around hand N (so you never slurp the multi-MB file into context):
+
+  ```bash
+  poker analyze hand <N> <session-dir-or-trace.jsonl>
+  ```
+
+- **Search reasoning** — assistant turns mentioning a keyword, with a mention rate:
+
+  ```bash
+  poker analyze traces <keyword> <session-dir-or-trace.jsonl>
+  ```
+
+`chart.py` and `replay.py` in this directory are local dev tools only, not part of any shipped path.
+
+## Step 2 (legacy): the Python analysis script
+
+The Python script predates the Go CLI and still offers the cross-session comparison table plus a read-usage/index-size tripwire not yet ported to Go. Run from the repository root.
 
 **Basic comparison table:**
 
