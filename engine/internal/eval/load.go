@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	piSessionFileName    = "pi-session.jsonl"
-	memoryExportFileName = "memory-export.json"
-	stderrFileName       = "stderr.log"
+	piSessionFileName     = "pi-session.jsonl"
+	updateSessionFileName = "update-session.jsonl"
+	memoryExportFileName  = "memory-export.json"
+	stderrFileName        = "stderr.log"
 )
 
 type SessionArtifacts struct {
@@ -54,11 +55,26 @@ type PiSessionEvent struct {
 type PiSessionMessage struct {
 	Role    string                 `json:"role"`
 	Content []PiSessionContentItem `json:"content,omitempty"`
+	Usage   *PiUsage               `json:"usage,omitempty"`
 }
 
 type PiSessionContentItem struct {
 	Type string `json:"type"`
 	Name string `json:"name,omitempty"`
+	Text string `json:"text,omitempty"`
+}
+
+type PiUsage struct {
+	Input       int     `json:"input"`
+	Output      int     `json:"output"`
+	CacheRead   int     `json:"cacheRead"`
+	CacheWrite  int     `json:"cacheWrite"`
+	TotalTokens int     `json:"totalTokens"`
+	Cost        *PiCost `json:"cost,omitempty"`
+}
+
+type PiCost struct {
+	Total float64 `json:"total"`
 }
 
 type MemoryExport struct {
@@ -69,6 +85,7 @@ type MemoryExport struct {
 type MemoryExportNode struct {
 	Type string `json:"type"`
 	ID   string `json:"id"`
+	Body string `json:"body,omitempty"`
 }
 
 type MemoryExportEdge struct {

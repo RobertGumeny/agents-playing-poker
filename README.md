@@ -46,19 +46,12 @@ poker experiment go <experiment-name> --model anthropic:claude-sonnet-4-6
 
 ## Deeper analysis: token cost and memory fidelity
 
-`poker experiment go` writes a per-session summary table. To add the token-cost and memory-fidelity analysis on top of it, run:
+`poker experiment go` writes the full report itself — no extra step, no Python. Alongside the per-session summary table, the same report (`research/experiments/<id>/reports/<id>.md`) includes:
 
-```bash
-python3 .claude/skills/eval-analysis/analyze.py <experiment-name> --tokens
-```
+- **Token cost** — total dollars and tokens per strategy, and how fast each agent's per-decision prompt grows as the match goes on (least-squares slope in tokens/hand).
+- **Fidelity** — for agents that keep structured memory, a deterministic check of every opponent read against the cards actually dealt (fabrications, card errors, board errors), bucketed by hand number.
 
-This appends a section to the same report (`research/experiments/<id>/reports/<id>.md`) covering:
-
-- **Token cost** — total dollars and tokens per strategy, and how fast each agent's per-decision prompt grows as the match goes on.
-- **Fidelity** — for agents that keep structured memory, a check of every opponent read against the cards actually dealt.
-- **A chart** — per-decision prompt size over the match, saved next to the report.
-
-It only adds to the report, so your summary table stays put, and you can re-run it any time. The text analysis needs only Python 3. The chart is drawn with matplotlib — if you have [`uv`](https://docs.astral.sh/uv/) installed it is fetched automatically; otherwise install matplotlib, or skip it (the analysis still runs and notes that the chart was skipped).
+It also writes the per-call series to `research/experiments/<id>/reports/<id>-tokens.csv` for plotting. Everything is native Go — no API key or Node required.
 
 ## Draft a new experiment
 

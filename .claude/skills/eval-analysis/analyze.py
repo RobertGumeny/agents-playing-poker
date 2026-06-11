@@ -905,8 +905,6 @@ def main():
                         help="Analyze assistant reasoning mentions for KEYWORD (default: 'pattern')")
     parser.add_argument("--hand", type=int, metavar="N",
                         help="Drill into hand number N across all sessions")
-    parser.add_argument("--tokens", action="store_true",
-                        help="Per-decision token-cost growth vs hand count (+CSV series)")
     args = parser.parse_args()
 
     global SCOPED_SESSIONS_DIR
@@ -944,17 +942,10 @@ def main():
         print(drill_text)
         extra_sections.append((f"Hand {args.hand} Context", drill_text))
 
-    if args.tokens:
-        token_rows = collect_token_rows(exp)
-        csv_path = write_token_csv(args.experiment_id, token_rows)
-        tokens_text = format_token_table(token_rows, csv_path)
-        print(tokens_text)
-        extra_sections.append(("Token Cost vs. Hand Count", tokens_text))
-
-        demo_path = render_demo_report(args.experiment_id, exp, token_rows, rows)
-        if demo_path:
-            print(f"\nDemo report written to: {demo_path}")
-
+    # NOTE: token-cost + fidelity analysis moved to native Go (`poker experiment go`
+    # folds them into the report). The former `--tokens` path is retired; its now-dead
+    # helper functions below get removed when this script is slimmed to the
+    # `poker analyze` wrapper (roadmap Track A, Stage 3).
     report_path = write_report(args.experiment_id, exp, table_text, highlights, extra_sections)
     print(f"\nReport written to: {report_path}")
 

@@ -71,6 +71,8 @@ type SeatSummary struct {
 	ToolCallsPerHand    map[string]float64   `json:"tool_calls_per_hand"`
 	RetryMetrics        RetryMetrics         `json:"retry_metrics"`
 	MemoryExport        *MemoryExportSummary `json:"memory_export"`
+	TokenCalls          []TokenCall          `json:"token_calls,omitempty"`
+	FidelityRows        []FidelityRow        `json:"fidelity_rows,omitempty"`
 }
 
 type RetryMetrics struct {
@@ -117,6 +119,7 @@ func CollectSession(sessionDir string) (Summary, error) {
 		Seats:   make([]SeatSummary, 0, len(artifacts.Agents)),
 	}
 
+	groundTruth := groundTruthFromHands(artifacts.Hands)
 	for _, agent := range artifacts.Agents {
 		source := AgentSourceArtifacts{
 			PiSession:    optionalRelPath(sessionDir, agent.PiSessionPath),
@@ -146,11 +149,15 @@ func CollectSession(sessionDir string) (Summary, error) {
 			for name, count := range seatSummary.ToolCalls {
 				seatSummary.ToolCallsPerHand[name] = safeRate(count, artifacts.Manifest.HandCount)
 			}
+			calls := agent.PiSession.TokenCalls("decision")
+			calls = append(calls, loadUpdateTokenCalls(agent.Dir)...)
+			seatSummary.TokenCalls = calls
 		}
 		if agent.MemoryExport != nil {
 			memorySummary := agent.MemoryExport.Summary()
 			seatSummary.MemoryExport = &memorySummary
 		}
+		seatSummary.FidelityRows = fidelityRows(agent, groundTruth)
 		summary.Seats = append(summary.Seats, seatSummary)
 	}
 

@@ -1,6 +1,6 @@
 ---
 name: "eval-analysis"
-description: "Analyze experiment results across sessions. Reads eval.json for each session in an experiment, builds a comparison table (chips/hand, showdown rate, memory graph shape), and writes a markdown report. Optional --traces flag analyzes pattern-reasoning mentions in pi-session.jsonl; optional --hand N drills into a specific hand across all sessions; optional --tokens flag charts per-decision token-cost growth vs hand count (the fidelity-vs-cost frontier) and writes a per-call CSV."
+description: "Analyze experiment results across sessions. Reads eval.json for each session in an experiment, builds a comparison table (chips/hand, showdown rate, memory graph shape), and writes a markdown report. Optional --traces flag analyzes pattern-reasoning mentions in pi-session.jsonl; optional --hand N drills into a specific hand across all sessions. Token-cost growth and memory fidelity are produced natively by `poker experiment go`, not this skill."
 ---
 
 # Eval Analysis Workflow
@@ -39,17 +39,7 @@ python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --traces <keywor
 python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --hand <N>
 ```
 
-**With token-cost growth** (the fidelity-vs-**cost** frontier, metric #2 in `research.md`):
-
-```bash
-python3 .claude/skills/eval-analysis/analyze.py <experiment-id> --tokens
-```
-
-Extracts, per agent, the per-decision prompt **context size** (`input + cacheRead + cacheWrite` of each decision call's first assistant turn) versus hand number, plus the post-hand update-session cost. Prints a per-agent summary — decision count, update count, least-squares **slope in tokens/hand**, early→late mean prompt size, mean update-prompt size, total tokens, total cost — and writes a per-call CSV to `docs/research/results/<experiment-id>-tokens.csv` (columns: `group,session,agent,kind,hand,street,prompt_tokens,total_tokens,cost`) for plotting.
-
-Reads `agents/<name>/pi-session.jsonl` (decision calls, prompt header `Hand: N`) and `agents/<name>/update-session.jsonl` (post-hand model-maintained updates, summary token `hand=N`). Agents are aggregated by name across both seats, so a seat-mirrored strategy's two appearances fold into one curve. **Interpretation:** a flat slope is the structured-memory cost win (AKG holds context roughly constant as the session grows); a steep positive slope is the context ballooning expected from `llm-fullhistory` and, more mildly, the markdown-rewrite agents. Requires the agents' `pi-session.jsonl` to be retained in the session dir — some committed test sessions strip it to save space, leaving only `memory-export.json`.
-
-**Additive demo report (AKG matchups only).** When the experiment pairs `llm-akg-durable` against a naive strategy, `--tokens` also augments `research/experiments/<id>/reports/<id>.md` with a rich, demo-ready analysis (one-line cost observation, per-decision context-growth slope, total-$ at this horizon, fidelity head-to-head where structured records exist, an embedded `<id>-cost.png` slope-vs-projection chart, limitations, and a reproduce footer). It is **additive, not destructive**: the contribution is wrapped in `<!-- BEGIN eval-analysis -->`…`<!-- END eval-analysis -->` sentinels and appended below whatever `poker experiment go` wrote (the per-session diagnostic table). Re-running `--tokens` strips and rewrites only that block (idempotent); re-running `poker experiment go` overwrites the file and drops the block (re-run `--tokens` to restore it). The chart is rendered by `chart.py` via `uv run --with matplotlib` if available, and degrades to a text note if matplotlib cannot be loaded. Fidelity for prose/no-memory agents (`llm-md-single`, `llm-fullhistory`) is not machine-extractable; a manual pass can be dropped into `reports/<id>-fidelity-manual.md` and the renderer will inject it.
+**Token-cost growth and memory fidelity** (the fidelity-vs-**cost** frontier, metric #2 in `research.md`) are now produced by **native Go**: `poker experiment go` folds a Token Cost section, a Fidelity section, and a per-call `reports/<id>-tokens.csv` directly into the comparison report — no Python step. The former `--tokens` flag is retired.
 
 Flags are combinable.
 

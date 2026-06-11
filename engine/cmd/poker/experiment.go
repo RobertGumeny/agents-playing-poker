@@ -394,8 +394,15 @@ func execAnalyze(ef experimentFlags, stdout io.Writer) error {
 	if err := os.WriteFile(reportPath, []byte(eval.RenderComparisonMarkdown(report)), 0o644); err != nil {
 		return fmt.Errorf("write report %s: %w", reportPath, err)
 	}
-
 	_, _ = fmt.Fprintf(stdout, "report=%s\n", reportPath)
+
+	if len(report.TokenCSVRows) > 0 {
+		csvPath := filepath.Join(reportDir, reportID+"-tokens.csv")
+		if err := eval.WriteTokenCSV(csvPath, report.TokenCSVRows); err != nil {
+			return fmt.Errorf("write token csv %s: %w", csvPath, err)
+		}
+		_, _ = fmt.Fprintf(stdout, "tokens_csv=%s\n", csvPath)
+	}
 	return nil
 }
 

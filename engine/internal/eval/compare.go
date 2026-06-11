@@ -17,6 +17,26 @@ type Comparison struct {
 	HandsPerSession int
 	Sessions        []ComparedSession
 	Warnings        []string
+	TokenAgents     []TokenAgentSummary
+	FidelityAgents  []FidelityAgentSummary
+	TokenCSVRows    []TokenCSVRow
+}
+
+// FidelityAgentSummary is the per-agent fidelity aggregate plus drift buckets,
+// aggregated across every session an agent name appears in.
+type FidelityAgentSummary struct {
+	Agent   string
+	Overall FidelityAgg
+	Buckets []FidelityBucket
+}
+
+// TokenCSVRow is one per-call row written to <id>-tokens.csv (the series the
+// Track B replay chart reads).
+type TokenCSVRow struct {
+	Group   string
+	Session string
+	Agent   string
+	Call    TokenCall
 }
 
 type ComparedSession struct {
@@ -49,6 +69,8 @@ func Compare(def experiment.Definition, sessionsDir string) (Comparison, error) 
 	}
 
 	warnings := map[string]struct{}{}
+	tokensByAgent := map[string][]TokenCall{}
+	fidelityByAgent := map[string][]FidelityRow{}
 
 	for _, planned := range plan.PlannedSessions {
 		summaryPath := filepath.Join(planned.SessionDir, "eval.json")
@@ -61,7 +83,23 @@ func Compare(def experiment.Definition, sessionsDir string) (Comparison, error) 
 			return Comparison{}, fmt.Errorf("compare experiment %q: %w", def.ID, err)
 		}
 		comparison.Sessions = append(comparison.Sessions, session)
+
+		for _, seat := range summary.Seats {
+			tokensByAgent[seat.Name] = append(tokensByAgent[seat.Name], seat.TokenCalls...)
+			fidelityByAgent[seat.Name] = append(fidelityByAgent[seat.Name], seat.FidelityRows...)
+			for _, call := range seat.TokenCalls {
+				comparison.TokenCSVRows = append(comparison.TokenCSVRows, TokenCSVRow{
+					Group:   planned.GroupLabel,
+					Session: planned.SessionID,
+					Agent:   seat.Name,
+					Call:    call,
+				})
+			}
+		}
 	}
+
+	comparison.TokenAgents = summarizeTokens(tokensByAgent)
+	comparison.FidelityAgents = summarizeFidelity(fidelityByAgent)
 
 	sort.Slice(comparison.Sessions, func(i, j int) bool {
 		if comparison.Sessions[i].GroupLabel != comparison.Sessions[j].GroupLabel {
@@ -132,6 +170,8 @@ func RenderComparisonMarkdown(c Comparison) string {
 		)
 	}
 	b.WriteString("\n")
+	appendTokenSection(&b, c.TokenAgents)
+	appendFidelitySection(&b, c.FidelityAgents)
 	return b.String()
 }
 
