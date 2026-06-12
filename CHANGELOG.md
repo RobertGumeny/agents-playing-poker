@@ -23,13 +23,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added non-fatal teardown exports for agent memory, plus the experiment-definition JSON contract and validation coverage.
 - Added `llm-md-single`, a prose-memory agent that keeps a single markdown notes file the model rewrites after each hand.
 - Added `llm-md-wiki`, a prose-memory agent that keeps linked markdown "wiki" pages the model maintains and retrieves on demand at decision time.
-- Added the Phase 2 experiment definitions on the fidelity-vs-cost frontier (`phase2-fullhistory-vs-akg`, `phase2-mdsingle-vs-akg`, and the headline `phase2-wiki-vs-akg`), plus shorter pilot and smoke variants.
+- Added the memory-strategy experiment definitions on the fidelity-vs-cost frontier (`phase2-fullhistory-vs-akg`, `phase2-mdsingle-vs-akg`, and the headline `phase2-wiki-vs-akg`), plus shorter pilot and smoke variants.
 - Added per-decision token-cost analysis and AKG graph-replay tooling to the eval-analysis workflow, surfacing the fidelity-vs-cost frontier per strategy.
 - Added a pre-flight tripwire that fails an experiment run when a retrieval-capable agent makes zero decision-time memory reads.
 - Added per-agent decision-deadline configuration to experiment definitions.
+- Added `poker replay`, which renders a finished session as a self-contained HTML poker-table replay: a felt-layout reconstruction of each hand's table state (stacks, pot, community cards, betting actions) with per-decision agent thinking text, a memory-engagement indicator, and a per-decision context-size series.
+- Added one-step onboarding: the TypeScript LLM agents now build automatically the first time a match or experiment needs them, and `make setup` pre-builds the CLI and agents together. A fresh checkout needs only Go for `poker demo` and additionally Node and a model-provider API key (Anthropic by default; any Pi-supported provider works via `--model`) for the LLM agents, all documented in the README.
 - Added broad test coverage across the rules engine, wire protocol, orchestration layer, demo flow, benchmark reporting, and LLM agent seams.
 
 ### Changed
+- Switched the build to depend on the published `akg-go` SDK (`v0.2.0`) instead of a local filesystem path, so a fresh clone builds without a sibling checkout.
 - Reworked the documentation to better explain the end-to-end experiment workflow, command-line surface area, and the implemented reporting/evaluation flow.
 - Clarified the stable session-artifact contracts for `memory-export.json`, `eval.json`, and persisted timeout `auto_fold` entries.
 - Updated the specs, wire-protocol docs, knowledge base, and operator-facing docs to reflect `llm-fullhistory`, the shared Pi runtime seam, and the `llm-akg-recent` naming cleanup.

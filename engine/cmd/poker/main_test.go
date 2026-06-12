@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -209,6 +210,35 @@ func TestResolveExperimentErrorsWhenMissing(t *testing.T) {
 	_, err := resolveExperiment("nonexistent", rootDir)
 	if err == nil || !strings.Contains(err.Error(), "not found") {
 		t.Fatalf("resolveExperiment() error = %v, want not found", err)
+	}
+}
+
+func TestEnsurePiAgentsBuiltNoopWhenBuilt(t *testing.T) {
+	engineDir := t.TempDir()
+	piDir := filepath.Join(engineDir, "pi-agents")
+	if err := os.MkdirAll(filepath.Join(piDir, "node_modules"), 0o755); err != nil {
+		t.Fatalf("MkdirAll node_modules: %v", err)
+	}
+	registry := `{"strategies":[` +
+		`{"key":"llm-stateless","type":"pi-agent"},` +
+		`{"key":"heuristic","type":"go-agent","pkg":"./cmd/heuristic-agent"}]}`
+	if err := os.WriteFile(filepath.Join(piDir, "registry.json"), []byte(registry), 0o644); err != nil {
+		t.Fatalf("WriteFile registry: %v", err)
+	}
+	distDir := filepath.Join(piDir, "llm-stateless", "dist")
+	if err := os.MkdirAll(distDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll dist: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(distDir, "main.js"), []byte("// built"), 0o644); err != nil {
+		t.Fatalf("WriteFile main.js: %v", err)
+	}
+
+	// node_modules and every pi-agent entrypoint exist, so this must fast-path
+	// to nil without shelling out to npm. If it regressed and tried to build,
+	// `npm ci` in this fixture dir (no package.json) would error.
+	r := &agentResolver{engineDir: engineDir, lookPath: exec.LookPath}
+	if err := r.ensurePiAgentsBuilt(); err != nil {
+		t.Fatalf("ensurePiAgentsBuilt() error = %v, want nil", err)
 	}
 }
 

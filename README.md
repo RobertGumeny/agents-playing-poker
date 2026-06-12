@@ -4,6 +4,14 @@
 
 Agents Playing Poker is a research harness, inspired by the classic painting "Dogs Playing Poker", for testing agentic memory strategies and patterns. The project runs deterministic heads-up no-limit Texas Hold'em matches between agents, coordinated by a Go game server. The cards, blinds, and rules are fixed by seed; the variable under test is the agent strategy, especially its memory strategy.
 
+## Requirements
+
+- **Go 1.25+** — builds and runs the `poker` CLI, the game server, and the no-LLM agents.
+- **Node 22.19+ and npm** — only needed for the LLM (Pi) agents; not required for `poker demo`.
+- **A model-provider API key** — only needed to run LLM agents. The bundled experiments default to Anthropic (`ANTHROPIC_API_KEY`), but any provider the Pi runtime supports works by passing `--model provider:model` and setting that provider's key (see [Authentication](#authentication)).
+
+`make install` places `poker` in `~/go/bin/`, which should be on your `PATH`.
+
 ## Setup
 
 Install the `poker` CLI once from the `engine/` directory:
@@ -12,7 +20,44 @@ Install the `poker` CLI once from the `engine/` directory:
 cd engine && make install
 ```
 
-This builds and places `poker` in `~/go/bin/` (which should already be on your PATH). All further commands use `poker` directly from the repo root.
+All further commands use `poker` directly from the repo root.
+
+That is everything you need for `poker demo`. The LLM agents are TypeScript and
+build automatically the first time a match or experiment needs them, so no extra
+step is required. To pre-build them up front (and catch any Node/npm problems
+early), run:
+
+```bash
+cd engine && make setup
+```
+
+## Authentication
+
+The LLM agents authenticate through the Pi runtime, which reads provider API
+keys from the environment. The provider is whatever the model string names
+(`provider:model`), so you only need a key for the provider you actually use.
+
+The bundled experiments and the `experiment new` default both use
+`anthropic:claude-sonnet-4-6`, so reproducing them out of the box needs:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+To use a different provider, pass `--model` (or edit an experiment's `model`
+field) and export that provider's key instead — for example:
+
+```bash
+export OPENAI_API_KEY=sk-...
+poker match run --agent0 llm-akg-durable --agent1 llm-stateless --hands 25 --model openai:<model-id>
+```
+
+The `<model-id>` must be one Pi's model registry knows for that provider;
+an unknown `provider:model` fails fast with an `unknown Pi model` error. Pi
+supports many providers (Anthropic, OpenAI, Gemini, Mistral, Groq, xAI, and
+more); the key name follows each provider's convention (`ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, …). No key is needed for `poker demo` or any
+all-`go-agent` (random/heuristic) match.
 
 ## Quick start: no API key needed
 

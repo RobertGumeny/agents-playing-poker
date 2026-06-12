@@ -194,7 +194,7 @@ Field semantics:
 
 A decision is one `user` message plus the assistant/`toolResult` turns up to the next `user` message. Because the action is the terminal assistant text, any read in a decision necessarily precedes it — this is what makes the deterministic memory-engagement metric (`seats[].memory_engagement` below) and the zero-reads tripwire computable without prose parsing.
 
-> **Deferred:** a first-class `decision_index` field (per-decision addressing within a hand-scope group). Per-decision attribution is already recoverable by segmenting on `user` messages, so this is held until the Track B replay overlay needs a stable per-decision anchor.
+> **Deferred:** a first-class `decision_index` field (per-decision addressing within a hand-scope group). Per-decision attribution is already recoverable by segmenting on `user` messages, so this is held until the HTML replay overlay needs a stable per-decision anchor.
 
 ## `eval.json`
 

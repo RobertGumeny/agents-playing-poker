@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -297,6 +298,13 @@ func execRun(ef experimentFlags, model, thinkingLevel string, decisionDeadline t
 
 	// build the binary once before spawning parallel sessions
 	if _, err := executor.PrepareBinary(); err != nil {
+		return err
+	}
+
+	// build the Pi agents once before the parallel fan-out so concurrent
+	// sessions don't race the same npm build (each session resolves its own
+	// agents in a subprocess and would otherwise trigger this independently).
+	if err := (&agentResolver{engineDir: engDir, lookPath: exec.LookPath, logw: stderr}).ensurePiAgentsBuilt(); err != nil {
 		return err
 	}
 

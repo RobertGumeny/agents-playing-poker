@@ -31,6 +31,8 @@ The current harness runs heads-up no-limit Texas Hold'em.
 
 The experiment definition pins hand count, seeds, strategies, and model, making each comparison reproducible from the checked-in plan.
 
+**Reproduce vs. explore.** The model is part of the pinned plan: the checked-in `phase2-*` experiments all specify `anthropic:claude-sonnet-4-6`, so reproducing the published results requires that model (and an `ANTHROPIC_API_KEY`). The harness itself is not Anthropic-specific — any provider the Pi runtime knows works via `provider:model` (e.g. `--model openai:<model-id>` with `OPENAI_API_KEY`). Use the pinned model to reproduce; change it freely to explore how a different model shifts the fidelity-vs-cost frontier, but treat results under a different model as a separate experiment, not a comparison against the published ones.
+
 ## Strategy lineup
 
 All LLM agents in a benchmark use the same model and runtime settings unless those settings are the explicit variable under test. The difference under test is **memory policy**. The lineup is a ladder of increasing structure (see [`vision.md`](vision.md) for the conceptual argument); each rung is expected to fail differently, and that failure mode is what we measure.

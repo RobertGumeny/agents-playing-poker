@@ -29,7 +29,7 @@ func runMatch(args []string, stdout, stderr io.Writer) error {
 	}
 }
 
-func runMatchRun(args []string, stdout, _ io.Writer) error {
+func runMatchRun(args []string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet("poker match run", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
@@ -72,6 +72,7 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 	resolver := &agentResolver{
 		engineDir: engDir,
 		lookPath:  exec.LookPath,
+		logw:      stderr,
 	}
 
 	spec0, err := resolver.resolve(agent0, model, thinkingLevel)
@@ -117,6 +118,9 @@ func runMatchRun(args []string, stdout, _ io.Writer) error {
 type agentResolver struct {
 	engineDir string
 	lookPath  func(string) (string, error)
+	// logw receives one-time progress lines (e.g. a first-run agent build). May
+	// be nil for callers that only inspect the registry.
+	logw io.Writer
 }
 
 type registryFile struct {
@@ -179,9 +183,12 @@ func (r *agentResolver) resolvePiAgent(key, model, thinkingLevel string) (match.
 		return match.AgentSpec{}, fmt.Errorf("absolute node path: %w", err)
 	}
 
+	if err := r.ensurePiAgentsBuilt(); err != nil {
+		return match.AgentSpec{}, err
+	}
 	scriptPath := filepath.Join(r.engineDir, "pi-agents", key, "dist", "main.js")
 	if _, err := os.Stat(scriptPath); err != nil {
-		return match.AgentSpec{}, fmt.Errorf("stat %s: %w\nhint: build with: cd %s && npm run build", scriptPath, err, filepath.Join(r.engineDir, "pi-agents"))
+		return match.AgentSpec{}, fmt.Errorf("pi-agent %q entrypoint missing after build: %s: %w", key, scriptPath, err)
 	}
 
 	env := []string{
@@ -223,6 +230,67 @@ func buildGoAgentBinary(engineDir, pkg, outputPath string) error {
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("build %s: %w\n%s%s", pkg, err, string(outBuf), string(errBuf))
+	}
+	return nil
+}
+
+// ensurePiAgentsBuilt compiles the Pi agent workspace on demand so a fresh
+// checkout runs without a manual npm step. It is idempotent and cheap once
+// built: it shells out only when node_modules or a registered agent's compiled
+// entrypoint is missing. `npm run build` compiles every workspace at once, so
+// the first resolve in a run builds all agents and later resolves fast-path.
+//
+// Callers that fan out parallel sessions must invoke this once before the
+// fan-out (as the experiment runner does) so concurrent resolves don't race the
+// same npm build.
+func (r *agentResolver) ensurePiAgentsBuilt() error {
+	entries, err := r.loadRegistry()
+	if err != nil {
+		return err
+	}
+	piDir := filepath.Join(r.engineDir, "pi-agents")
+
+	needBuild := false
+	for _, e := range entries {
+		if e.Type != "pi-agent" {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(piDir, e.Key, "dist", "main.js")); err != nil {
+			needBuild = true
+			break
+		}
+	}
+	_, depsErr := os.Stat(filepath.Join(piDir, "node_modules"))
+	needInstall := depsErr != nil
+	if !needBuild && !needInstall {
+		return nil
+	}
+
+	if r.logw != nil {
+		_, _ = fmt.Fprintln(r.logw, "Building Pi agents (first run; this may take a minute)...")
+	}
+	if needInstall {
+		if err := runNpm(piDir, "ci"); err != nil {
+			return err
+		}
+	}
+	return runNpm(piDir, "run", "build")
+}
+
+func runNpm(dir string, args ...string) error {
+	npmPath, err := exec.LookPath("npm")
+	if err != nil {
+		return fmt.Errorf("npm not found on PATH (required to build Pi agents): %w", err)
+	}
+	cmd := exec.Command(npmPath, args...)
+	cmd.Dir = dir
+
+	var outBuf, errBuf []byte
+	cmd.Stdout = &byteWriter{b: &outBuf}
+	cmd.Stderr = &byteWriter{b: &errBuf}
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("npm %s in %s: %w\n%s%s", strings.Join(args, " "), dir, err, string(outBuf), string(errBuf))
 	}
 	return nil
 }
