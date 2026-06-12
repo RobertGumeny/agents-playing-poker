@@ -20,9 +20,10 @@ func BuildModel(sessionDir string) (ReplayModel, []string, error) {
 		return ReplayModel{}, nil, err
 	}
 
+	session := buildSessionMeta(art.Manifest)
 	model := ReplayModel{
-		Session: buildSessionMeta(art.Manifest),
-		Hands:   buildHands(art.Hands),
+		Session: session,
+		Hands:   buildHands(art.Hands, session.Blinds.BB),
 	}
 
 	var warnings []string
@@ -103,7 +104,7 @@ func buildSessionMeta(m sessionlog.Manifest) SessionMeta {
 	}
 }
 
-func buildHands(hands []sessionlog.HandRecord) []HandView {
+func buildHands(hands []sessionlog.HandRecord, bigBlind int) []HandView {
 	out := make([]HandView, 0, len(hands))
 	for _, h := range hands {
 		results := make(map[int]int, len(h.Result))
@@ -120,7 +121,7 @@ func buildHands(hands []sessionlog.HandRecord) []HandView {
 				ForcedReason: a.ForcedReason,
 			})
 		}
-		out = append(out, HandView{
+		hv := HandView{
 			HandNumber:      h.HandNumber,
 			DealerSeat:      h.DealerSeat,
 			StacksStart:     h.StacksStart,
@@ -130,9 +131,90 @@ func buildHands(hands []sessionlog.HandRecord) []HandView {
 			Results:         results,
 			GrossPotSize:    h.GrossPotSize,
 			Actions:         actions,
-		})
+		}
+		computeStates(&hv, bigBlind)
+		out = append(out, hv)
 	}
 	return out
+}
+
+// computeStates reconstructs the running table state after each action, stamping
+// ChipsAdded / Label / State onto every ActionView. It mirrors the commit logic in
+// rules/game.go (~240–272): blind/call amounts are chips added, bet/raise amounts
+// are the to-total (added = amount − the seat's street commitment). Reconstructing
+// the pot here also frees the renderer from gross_pot_size, which is absent in
+// archived sessions.
+func computeStates(h *HandView, bigBlind int) {
+	stacks := make(map[int]int, len(h.StacksStart))
+	for seat, s := range h.StacksStart {
+		stacks[seat] = s
+	}
+	streetCommitted := map[int]int{}
+	folded := map[int]bool{}
+	lastAction := map[int]string{}
+	pot := 0
+	curStreet := ""
+
+	for i := range h.Actions {
+		a := &h.Actions[i]
+		if a.Street != curStreet {
+			streetCommitted = map[int]int{}
+			curStreet = a.Street
+		}
+		amount := 0
+		if a.Amount != nil {
+			amount = *a.Amount
+		}
+		added := 0
+		label := ""
+		switch a.Action {
+		case "post_blind":
+			added = amount
+			if amount >= bigBlind {
+				label = fmt.Sprintf("BB %d", amount)
+			} else {
+				label = fmt.Sprintf("SB %d", amount)
+			}
+		case "call":
+			added = amount
+			label = "CALL"
+		case "bet":
+			added = amount
+			label = fmt.Sprintf("BET %d", amount)
+		case "raise":
+			added = amount - streetCommitted[a.Seat]
+			label = fmt.Sprintf("RAISE to %d", amount)
+		case "check":
+			label = "CHECK"
+		case "fold":
+			folded[a.Seat] = true
+			label = "FOLD"
+		default:
+			label = strings.ToUpper(a.Action)
+		}
+
+		stacks[a.Seat] -= added
+		streetCommitted[a.Seat] += added
+		pot += added
+		lastAction[a.Seat] = label
+
+		a.ChipsAdded = added
+		a.Label = label
+		a.State = snapshotState(pot, stacks, streetCommitted, folded, lastAction)
+	}
+}
+
+func snapshotState(pot int, stacks, streetCommitted map[int]int, folded map[int]bool, lastAction map[int]string) *TableState {
+	seats := make(map[int]SeatState, len(stacks))
+	for seat, stack := range stacks {
+		seats[seat] = SeatState{
+			Stack:           stack,
+			StreetCommitted: streetCommitted[seat],
+			Folded:          folded[seat],
+			LastAction:      lastAction[seat],
+		}
+	}
+	return &TableState{Pot: pot, Seats: seats}
 }
 
 // decision is one segmented decision from an agent's trace.

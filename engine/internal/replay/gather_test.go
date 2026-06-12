@@ -130,6 +130,75 @@ func TestBuildModelSummary(t *testing.T) {
 	}
 }
 
+// Multi-street hand exercising the running-state reconstruction: blinds, a call,
+// a raise (to-total encoding), a street change (commitment reset), a bet, a fold.
+const fixtureStateManifest = `{"session_id":"st","seed":1,"hand_count":1,"variant":"heads-up-nlhe","starting_stack":200,"blinds":{"sb":1,"bb":2},"matches":[{"match_id":"m1","seats":[{"seat":0,"name":"a"},{"seat":1,"name":"b"}],"result":{"0":{"chips_delta":4}},"completed":true}]}`
+const fixtureStateHands = `{"match_id":"m1","hand_number":1,"dealer_seat":0,"stacks_start":{"0":200,"1":200},"blinds_posted":[{"seat":0,"amount":1},{"seat":1,"amount":2}],"hole_cards":{"0":["As","Ks"],"1":["2d","7h"]},"board":["5c","Ks","Qc","3h"],"actions":[{"seat":0,"action":"post_blind","amount":1,"street":"preflop"},{"seat":1,"action":"post_blind","amount":2,"street":"preflop"},{"seat":0,"action":"raise","amount":8,"street":"preflop"},{"seat":1,"action":"call","amount":6,"street":"preflop"},{"seat":0,"action":"bet","amount":10,"street":"flop"},{"seat":1,"action":"fold","amount":null,"street":"flop"}],"showdown_reached":false,"result":[{"seat":0,"chips_delta":4},{"seat":1,"chips_delta":-4}],"gross_pot_size":0}
+`
+
+func TestComputeStatesTimeline(t *testing.T) {
+	dir := t.TempDir()
+	// reuse a minimal trace for seat "a" so BuildModel runs; state recon is what we test.
+	writeFixtureTwoSeat(t, dir, fixtureStateManifest, fixtureStateHands)
+
+	model, _, err := BuildModel(dir)
+	if err != nil {
+		t.Fatalf("BuildModel: %v", err)
+	}
+	acts := model.Hands[0].Actions
+	// expected per-action: label, chipsAdded, pot
+	want := []struct {
+		label              string
+		added              int
+		pot                int
+		s0commit, s1commit int
+		s0stack, s1stack   int
+	}{
+		{"SB 1", 1, 1, 1, 0, 199, 200},
+		{"BB 2", 2, 3, 1, 2, 199, 198},
+		{"RAISE to 8", 7, 10, 8, 2, 192, 198}, // added = 8 - 1 (SB already committed)
+		{"CALL", 6, 16, 8, 8, 192, 192},
+		{"BET 10", 10, 26, 10, 0, 182, 192}, // new street: commitments reset, then bet 10
+		{"FOLD", 0, 26, 10, 0, 182, 192},
+	}
+	if len(acts) != len(want) {
+		t.Fatalf("got %d actions, want %d", len(acts), len(want))
+	}
+	for i, w := range want {
+		a := acts[i]
+		if a.Label != w.label {
+			t.Errorf("action %d: label %q, want %q", i, a.Label, w.label)
+		}
+		if a.ChipsAdded != w.added {
+			t.Errorf("action %d (%s): chipsAdded %d, want %d", i, w.label, a.ChipsAdded, w.added)
+		}
+		if a.State.Pot != w.pot {
+			t.Errorf("action %d (%s): pot %d, want %d", i, w.label, a.State.Pot, w.pot)
+		}
+		if a.State.Seats[0].StreetCommitted != w.s0commit || a.State.Seats[1].StreetCommitted != w.s1commit {
+			t.Errorf("action %d (%s): committed {%d,%d}, want {%d,%d}", i, w.label,
+				a.State.Seats[0].StreetCommitted, a.State.Seats[1].StreetCommitted, w.s0commit, w.s1commit)
+		}
+		if a.State.Seats[0].Stack != w.s0stack || a.State.Seats[1].Stack != w.s1stack {
+			t.Errorf("action %d (%s): stacks {%d,%d}, want {%d,%d}", i, w.label,
+				a.State.Seats[0].Stack, a.State.Seats[1].Stack, w.s0stack, w.s1stack)
+		}
+	}
+	if !acts[5].State.Seats[1].Folded {
+		t.Error("seat 1 should be folded after the fold action")
+	}
+}
+
+func writeFixtureTwoSeat(t *testing.T, dir, manifest, hands string) {
+	t.Helper()
+	mustWrite(t, filepath.Join(dir, "manifest.json"), manifest)
+	mustWrite(t, filepath.Join(dir, "hands.jsonl"), hands)
+	// a minimal one-line trace per seat so loadAgentArtifacts finds something; content irrelevant here.
+	stub := `{"type":"session","version":3}` + "\n"
+	mustWrite(t, filepath.Join(dir, "agents", "a", "pi-session.jsonl"), stub)
+	mustWrite(t, filepath.Join(dir, "agents", "b", "pi-session.jsonl"), stub)
+}
+
 func TestBuildModelMismatchToleratesSlack(t *testing.T) {
 	dir := t.TempDir()
 	// Append a third decision with no corresponding action: 3 decisions vs 2 actions.

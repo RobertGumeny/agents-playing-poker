@@ -62,6 +62,26 @@ type ActionView struct {
 	// Overlay is nil for blinds and any action whose trace decision could not be
 	// aligned; the renderer simply shows no thinking panel in those cases.
 	Overlay *DecisionOverlay `json:"overlay,omitempty"`
+
+	// Running-state fields (reconstructed in gather, see computeStates).
+	ChipsAdded int         `json:"chipsAdded"`      // chips this action put in the pot (0 for check/fold)
+	Label      string      `json:"label"`           // poker-site read: "CALL", "BET 3", "RAISE to 8", "FOLD"...
+	State      *TableState `json:"state,omitempty"` // table snapshot AFTER this action
+}
+
+// TableState is the reconstructed table after an action: the running pot and each
+// seat's stack, current-street commitment, fold status, and last action label —
+// everything the renderer needs to draw a live frame without replaying the log.
+type TableState struct {
+	Pot   int               `json:"pot"`
+	Seats map[int]SeatState `json:"seats"`
+}
+
+type SeatState struct {
+	Stack           int    `json:"stack"`
+	StreetCommitted int    `json:"streetCommitted"`
+	Folded          bool   `json:"folded"`
+	LastAction      string `json:"lastAction"`
 }
 
 // DecisionOverlay carries the two orthogonal per-decision signals plus their
