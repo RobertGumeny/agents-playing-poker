@@ -1,3 +1,5 @@
+// Decision-session wiring for the wiki agent: builds the Pi session factory that registers the
+// read-only page-reading tools and the link-following decision prompt.
 import { AuthStorage, createAgentSession, DefaultResourceLoader, ModelRegistry, SessionManager, SettingsManager, } from "@earendil-works/pi-coding-agent";
 import { parseFakeDecisions, parsePiThinkingLevel, parsePositiveInteger, PiDecisionEngine, resolveModel, ScriptedDecisionEngine, } from "@agent-poker/pi-agent-shared";
 import { createReadTools } from "./tools.js";

@@ -1,7 +1,9 @@
+// Durable AKG memory policy: injects the opponent graph's root index before each decision,
+// and on hand end hands the completed hand to the model-driven post-hand graph update.
 import { formatCompletedHand } from "@agent-poker/pi-agent-shared";
 import { ensureRootNode, openStore, readRootBody, ROOT_ID, ROOT_TYPE } from "./graph.js";
 import { runDurableUpdate } from "./update.js";
-const INDEX_HEADER = `Your opponent summary (node ${ROOT_TYPE}/${ROOT_ID}) follows — use it directly. Only if you need more than it covers, call akg_list_nodes / akg_get_node / akg_get_nodes to drill into connected nodes:`;
+const INDEX_HEADER = `Your opponent summary (node ${ROOT_TYPE}/${ROOT_ID}) follows — use it directly. Call akg_list_nodes / akg_get_node / akg_get_nodes to drill into connected nodes only if you need more than it covers:`;
 const NO_READS_SECTION = `Your opponent summary (${ROOT_TYPE}/${ROOT_ID}): no reads yet. akg_list_nodes, akg_get_node, and akg_get_nodes become useful once nodes exist.`;
 export class AkgDurableMemoryPolicy {
     store = null;
@@ -10,6 +12,7 @@ export class AkgDurableMemoryPolicy {
     get memoryDir() {
         return this.serverMemoryDir;
     }
+    // Before each decision, inject the opponent index node's body as a system prompt section. This keeps it front and center for the model, and encourages the model to use the AKG tools to explore it further if needed — instead of trying to keep the whole graph in its head for every single hand.
     async beforeDecision(context) {
         this.serverMemoryDir = context.state.session?.memoryDir;
         const store = await this.getStore(this.serverMemoryDir);
@@ -24,6 +27,7 @@ export class AkgDurableMemoryPolicy {
         }
         return { sections: [INDEX_HEADER, body] };
     }
+    // After each hand, run a durable update that hands off the completed hand data, which the agent can process and use to update their opponent profile. This keeps the graph up to date with the latest tendencies for the opponent, without needing to wait for the (potentially slow) graph update to complete during the critical decision-making phase of the next hand.
     async afterHandEnd(context) {
         const memoryDir = context.state.session?.memoryDir ?? this.serverMemoryDir;
         this.serverMemoryDir = memoryDir;

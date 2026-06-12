@@ -1,3 +1,5 @@
+// AKG tool definitions for the durable agent: read-only graph queries used at decision time,
+// plus the write tools registered only for the post-hand update session.
 import { Type } from "typebox";
 import { defineTool } from "@earendil-works/pi-coding-agent";
 // Generic graph readers, shared by the decision session and the update session. The agent

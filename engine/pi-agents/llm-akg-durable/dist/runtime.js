@@ -1,3 +1,5 @@
+// Decision-session wiring for the durable agent: builds the Pi session factory that registers
+// the read-only AKG query tools and the active-retrieval decision prompt.
 import { AuthStorage, createAgentSession, DefaultResourceLoader, getAgentDir, ModelRegistry, SessionManager, SettingsManager, } from "@earendil-works/pi-coding-agent";
 import { PiDecisionEngine, ScriptedDecisionEngine, parseFakeDecisions, parsePiThinkingLevel, parsePositiveInteger, resolveModel, } from "@agent-poker/pi-agent-shared";
 import { createReadTools } from "./tools.js";
