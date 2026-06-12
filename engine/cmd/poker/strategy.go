@@ -49,7 +49,9 @@ func runStrategyList(args []string, stdout io.Writer) error {
 			if _, err := os.Stat(scriptPath); err == nil {
 				built = "yes"
 			} else {
-				built = "no"
+				// Not yet compiled, but a match/experiment builds it on first
+				// use, so it is not a broken state — same as go-agents.
+				built = "auto"
 			}
 		} else if e.Type == "go-agent" {
 			built = "auto"

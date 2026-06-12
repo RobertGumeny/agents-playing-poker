@@ -75,6 +75,17 @@ Experiment definitions live in [`research/experiments/`](research/experiments/).
 poker experiment go <experiment-name>
 ```
 
+> **Start small.** The headline brackets run LLM agents over many hands and cost
+> real money and hours — the full `phase2-wiki-vs-akg` is 4 seed-mirrored
+> sessions of 150 hands each. Validate your setup (key, build, model access) on a
+> cheap variant first:
+>
+> ```bash
+> poker experiment go phase2-wiki-vs-akg-smoke
+> ```
+>
+> Then graduate to the full bracket once a smoke run completes cleanly.
+
 Run `poker experiment ls` to see the names available in your checkout. `poker experiment go` does the full operator loop:
 
 1. Loads `research/experiments/<id>/<id>.json`.
