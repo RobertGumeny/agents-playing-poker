@@ -15,6 +15,9 @@ research/archive/
 # Commit experiment definitions (<id>.json) and lightweight reports/ only.
 research/experiments/*/sessions/
 
+# Unclaimed session outputs from `poker demo` / `poker match run`.
+research/sessions/
+
 # Transient Pi session-export scratch (written, appended into the canonical log,
 # then rm'd; a surviving file is only crash debris).
 *-export-*.jsonl
