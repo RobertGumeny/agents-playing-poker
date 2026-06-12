@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-06-12
+
 ### Added
 - Added the core heads-up no-limit Hold'em engine, including deterministic dealing, betting-round progression, legal-action generation, blind rotation, pot accounting, hand evaluation, and showdown resolution.
 - Added a Go wire-protocol implementation with typed envelopes, validated JSONL helpers, and broad malformed-payload coverage.
@@ -30,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `poker replay`, which renders a finished session as a self-contained HTML poker-table replay: a felt-layout reconstruction of each hand's table state (stacks, pot, community cards, betting actions) with per-decision agent thinking text, a memory-engagement indicator, and a per-decision context-size series.
 - Added one-step onboarding: the TypeScript LLM agents now build automatically the first time a match or experiment needs them, and `make setup` pre-builds the CLI and agents together. A fresh checkout needs only Go for `poker demo` and additionally Node and a model-provider API key (Anthropic by default; any Pi-supported provider works via `--model`) for the LLM agents, all documented in the README.
 - Added broad test coverage across the rules engine, wire protocol, orchestration layer, demo flow, benchmark reporting, and LLM agent seams.
+- Added an MIT license for the public release.
 
 ### Changed
 - Switched the build to depend on the published `akg-go` SDK (`v0.2.0`) instead of a local filesystem path, so a fresh clone builds without a sibling checkout.
@@ -41,3 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restructured the experiment-definition schema to a two-group (`groups[]`, `seat0`/`seat1`) format and updated the analysis tooling to match.
 - Stated a shared memory-maintenance discipline across the wiki and AKG agent specs so the strategies differ only in memory substrate, not in how diligently they record.
 - Lifted completed-hand formatting into a shared module reused across the prose-memory agents, and bounded the `llm-akg-durable` per-hand update cost.
+
+[Unreleased]: https://github.com/RobertGumeny/agents-playing-poker/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/RobertGumeny/agents-playing-poker/releases/tag/v0.1.0
